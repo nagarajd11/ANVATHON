@@ -64,7 +64,97 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
       {/* Side-by-side comparison cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
         
-        {/* Left: Nominal Price Trap (The Price Mirage) */}
+                {/* Left: HarvestRoute Smart Pick (The True Harvest Winner - Most Profitable) */}
+        <div
+          className="rounded-2xl p-6 border-2 border-emerald-500/50 bg-emerald-950/20 shadow-[0_12px_32px_-8px_rgba(16,185,129,0.25)] relative hover-lift hover:border-emerald-400"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500 text-pine shadow-xs font-mono">
+              <Trophy className="w-3.5 h-3.5 text-pine" />
+              {t.smartPickBadge}
+            </span>
+            <span className="text-xs text-emerald-300 font-medium flex items-center gap-1 font-mono">
+              <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+              {bestNetMarket.district}
+            </span>
+          </div>
+
+          <div className="mb-4">
+            <h3 className="text-xl font-bold text-white mb-1 tracking-tight text-crisp">
+              {bestNetMarket.marketName}
+            </h3>
+            <div className="flex items-baseline gap-2">
+              <span className="text-xs text-white/50">{t.headlinePrice}:</span>
+              <span className="text-2xl sm:text-3xl font-bold text-emerald-400 font-mono tabular-nums">
+                ₹{bestNetMarket.modalPrice.toLocaleString()}<span className="text-xs font-normal text-white/50">/qtl</span>
+              </span>
+              {bestNetMarket.freshnessDiscountPct > 0 && (
+                <span className="text-xs font-bold text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-md">
+                  -{bestNetMarket.freshnessDiscountPct}% Age Cut
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Transit & Deductions Ledger */}
+          <div className="bg-black/25 rounded-xl p-4 space-y-2 text-xs border border-emerald-500/20 mb-4 backdrop-blur-sm">
+            <div className="flex justify-between items-center text-white/90">
+              <span className="flex items-center gap-1.5 text-white/50">
+                <MapPin className="w-3.5 h-3.5 text-emerald-400/80" />
+                {t.travelDistance} & {t.transitTime}
+              </span>
+              <span className="font-mono tabular-nums text-emerald-300 font-semibold">
+                {bestNetMarket.roadDistanceKm} km ({bestNetMarket.transitHours} hrs)
+              </span>
+            </div>
+            
+            <div className="flex justify-between items-center text-white/90">
+              <span className="text-white/50">{t.grossTotal} ({quantityQuintals} qtl × ₹{bestNetMarket.modalPrice})</span>
+              <span className="font-mono tabular-nums font-semibold">₹{bestNetMarket.grossRevenue.toLocaleString()}</span>
+            </div>
+
+            <div className="flex justify-between items-center text-emerald-300">
+              <span className="flex items-center gap-1 text-white/50">
+                <Truck className="w-3.5 h-3.5 text-emerald-400" />
+                {t.transportDeduction}
+              </span>
+              <span className="font-mono tabular-nums font-semibold text-emerald-300">-₹{bestNetMarket.costs.transportCost.toLocaleString()}</span>
+            </div>
+
+            <div className="flex justify-between items-center text-emerald-300">
+              <span className="flex items-center gap-1 text-white/50">
+                <Flame className="w-3.5 h-3.5 text-emerald-400" />
+                {t.spoilageDeduction} ({bestNetMarket.costs.spoilagePct}%)
+              </span>
+              <span className="font-mono tabular-nums font-semibold text-emerald-300">-₹{bestNetMarket.costs.spoilageLoss.toLocaleString()}</span>
+            </div>
+
+            <div className="flex justify-between items-center text-white/70">
+              <span className="text-white/50">{t.feesDeduction}</span>
+              <span className="font-mono tabular-nums font-medium">-₹{bestNetMarket.costs.marketFees.toLocaleString()}</span>
+            </div>
+          </div>
+
+          {/* Take Home Cash */}
+          <div className="border-t border-emerald-500/30 pt-3 flex items-center justify-between">
+            <span className="text-xs font-medium text-emerald-300/80">{t.netProfit}:</span>
+            <span className="text-3xl sm:text-4xl font-bold text-emerald-400 font-mono tabular-nums text-crisp">
+              ₹{bestNetMarket.netReturnInr.toLocaleString()}
+            </span>
+          </div>
+
+          {/* Direct CTA to Focus / Open Slip */}
+          <button
+            onClick={() => onFocusMarket && onFocusMarket(bestNetMarket)}
+            className="btn-shimmer btn-primary w-full mt-3.5 py-2.5 text-xs"
+          >
+            <span>Lock Winner & Print Settlement Pass</span>
+            <ArrowRight className="w-3.5 h-3.5 text-pine" />
+          </button>
+
+        </div>
+
+        {/* Right: Nominal Price Trap (The Price Mirage) */}
         <div
           className={`rounded-2xl p-6 border transition-all hover-lift ${
             isSame 
@@ -156,97 +246,6 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
           )}
 
         </div>
-
-        {/* Right: HarvestRoute Smart Pick (The True Harvest Winner) */}
-        <div
-          className="rounded-2xl p-6 border-2 border-emerald-500/50 bg-emerald-950/20 shadow-[0_12px_32px_-8px_rgba(16,185,129,0.25)] relative hover-lift hover:border-emerald-400"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500 text-pine shadow-xs font-mono">
-              <Trophy className="w-3.5 h-3.5 text-pine" />
-              {t.smartPickBadge}
-            </span>
-            <span className="text-xs text-emerald-300 font-medium flex items-center gap-1 font-mono">
-              <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-              {bestNetMarket.district}
-            </span>
-          </div>
-
-          <div className="mb-4">
-            <h3 className="text-xl font-bold text-white mb-1 tracking-tight text-crisp">
-              {bestNetMarket.marketName}
-            </h3>
-            <div className="flex items-baseline gap-2">
-              <span className="text-xs text-white/50">{t.headlinePrice}:</span>
-              <span className="text-2xl sm:text-3xl font-bold text-emerald-400 font-mono tabular-nums">
-                ₹{bestNetMarket.modalPrice.toLocaleString()}<span className="text-xs font-normal text-white/50">/qtl</span>
-              </span>
-              {bestNetMarket.freshnessDiscountPct > 0 && (
-                <span className="text-xs font-bold text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-md">
-                  -{bestNetMarket.freshnessDiscountPct}% Age Cut
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Transit & Deductions Ledger */}
-          <div className="bg-black/25 rounded-xl p-4 space-y-2 text-xs border border-emerald-500/20 mb-4 backdrop-blur-sm">
-            <div className="flex justify-between items-center text-white/90">
-              <span className="flex items-center gap-1.5 text-white/50">
-                <MapPin className="w-3.5 h-3.5 text-emerald-400/80" />
-                {t.travelDistance} & {t.transitTime}
-              </span>
-              <span className="font-mono tabular-nums text-emerald-300 font-semibold">
-                {bestNetMarket.roadDistanceKm} km ({bestNetMarket.transitHours} hrs)
-              </span>
-            </div>
-            
-            <div className="flex justify-between items-center text-white/90">
-              <span className="text-white/50">{t.grossTotal} ({quantityQuintals} qtl × ₹{bestNetMarket.modalPrice})</span>
-              <span className="font-mono tabular-nums font-semibold">₹{bestNetMarket.grossRevenue.toLocaleString()}</span>
-            </div>
-
-            <div className="flex justify-between items-center text-emerald-300">
-              <span className="flex items-center gap-1 text-white/50">
-                <Truck className="w-3.5 h-3.5 text-emerald-400" />
-                {t.transportDeduction}
-              </span>
-              <span className="font-mono tabular-nums font-semibold text-emerald-300">-₹{bestNetMarket.costs.transportCost.toLocaleString()}</span>
-            </div>
-
-            <div className="flex justify-between items-center text-emerald-300">
-              <span className="flex items-center gap-1 text-white/50">
-                <Flame className="w-3.5 h-3.5 text-emerald-400" />
-                {t.spoilageDeduction} ({bestNetMarket.costs.spoilagePct}%)
-              </span>
-              <span className="font-mono tabular-nums font-semibold text-emerald-300">-₹{bestNetMarket.costs.spoilageLoss.toLocaleString()}</span>
-            </div>
-
-            <div className="flex justify-between items-center text-white/70">
-              <span className="text-white/50">{t.feesDeduction}</span>
-              <span className="font-mono tabular-nums font-medium">-₹{bestNetMarket.costs.marketFees.toLocaleString()}</span>
-            </div>
-          </div>
-
-          {/* Take Home Cash */}
-          <div className="border-t border-emerald-500/30 pt-3 flex items-center justify-between">
-            <span className="text-xs font-medium text-emerald-300/80">{t.netProfit}:</span>
-            <span className="text-3xl sm:text-4xl font-bold text-emerald-400 font-mono tabular-nums text-crisp">
-              ₹{bestNetMarket.netReturnInr.toLocaleString()}
-            </span>
-          </div>
-
-          {/* Direct CTA to Focus / Open Slip */}
-          <button
-            onClick={() => onFocusMarket && onFocusMarket(bestNetMarket)}
-            className="btn-shimmer btn-primary w-full mt-3.5 py-2.5 text-xs"
-          >
-            <span>Lock Winner & Print Settlement Pass</span>
-            <ArrowRight className="w-3.5 h-3.5 text-pine" />
-          </button>
-
-        </div>
-
       </div>
 
       {/* Plain Language Farmer Decision Advisory */}

@@ -332,9 +332,11 @@ app.post('/api/pools/calculate-savings', async (req, res) => {
   }
 });
 
-// 9. Serve Frontend Static Production Build
+// 9. Serve Frontend Static Production Build and Public Assets
 const distPath = path.resolve(__dirname, '../frontend/dist');
+const publicPath = path.resolve(__dirname, '../frontend/public');
 app.use(express.static(distPath));
+app.use(express.static(publicPath));
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
