@@ -68,8 +68,8 @@ export default function FarmerDispatchSlip({
           <div className="flex justify-between items-start border-b-2 border-chlorophyll pb-4 mb-4">
             <div>
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-chlorophyll text-emerald-300 flex items-center justify-center font-black">
-                  <Sprout className="w-5 h-5" />
+                <div className="w-10 h-10 rounded-xl overflow-hidden border border-chlorophyll/30 flex-shrink-0 shadow-sm">
+                  <img src="/logo.jpg" alt="Logo" className="w-full h-full object-cover object-center" />
                 </div>
                 <div>
                   <h1 className="text-xl font-black text-chlorophyll tracking-tight font-sans">HARVESTROUTE</h1>

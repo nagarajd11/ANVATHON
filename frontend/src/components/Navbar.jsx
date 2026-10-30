@@ -23,8 +23,13 @@ export default function Navbar({
         
         {/* Brand Logo & Editorial Title */}
         <div className="flex items-center gap-3.5 group cursor-pointer">
-          <div className="w-9 h-9 rounded-xl bg-emerald-500 text-pine flex items-center justify-center font-bold shadow-md shadow-emerald-950/30 border border-white/30 transition-transform duration-300 group-hover:scale-105">
-            <Sprout className="w-5 h-5 text-pine" />
+          <div className="relative w-10 h-10 rounded-xl overflow-hidden ring-2 ring-emerald-400/50 shadow-lg shadow-black/40 border border-white/30 transition-transform duration-300 group-hover:scale-105 bg-emerald-950 flex-shrink-0">
+            <img 
+              src="/logo.jpg" 
+              alt="HarvestRoute Logo" 
+              className="w-full h-full object-cover object-center filter saturate-110" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent pointer-events-none" />
           </div>
           <div>
             <div className="flex items-center gap-2">
