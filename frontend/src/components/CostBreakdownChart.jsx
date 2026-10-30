@@ -70,7 +70,7 @@ export default function CostBreakdownChart({ analysis, lang }) {
             <span className="p-1 rounded-md bg-emerald-500/20 text-emerald-300">
               <BarChart3 className="w-4 h-4 text-emerald-300" />
             </span>
-            <span className="text-[11px] font-semibold tracking-wider text-emerald-300/90 font-mono">
+            <span className="text-xs font-semibold tracking-wider text-emerald-300 font-mono">
               Earnings Breakdown
             </span>
           </div>
@@ -93,16 +93,16 @@ export default function CostBreakdownChart({ analysis, lang }) {
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
             <XAxis 
               dataKey="name" 
-              tick={{ fontSize: 11, fill: '#e2e8f0', fontWeight: 500 }}
+              tick={{ fontSize: 12, fill: '#e2e8f0', fontWeight: 500 }}
               interval={0}
             />
             <YAxis 
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
+              tick={{ fontSize: 12, fill: '#94a3b8' }}
               tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
             />
             <Tooltip content={<CustomTooltip />} />
             <Legend 
-              wrapperStyle={{ paddingTop: '12px', fontSize: '11px', fontFamily: '"Plus Jakarta Sans", sans-serif', color: '#ffffff' }} 
+              wrapperStyle={{ paddingTop: '12px', fontSize: '12px', fontFamily: '"Plus Jakarta Sans", sans-serif', color: '#ffffff' }} 
             />
             <Bar dataKey="Cash in Pocket" stackId="a" fill="#10b981" radius={[0, 0, 4, 4]} />
             <Bar dataKey="Freight & Fuel" stackId="a" fill="#d97706" />
@@ -116,7 +116,7 @@ export default function CostBreakdownChart({ analysis, lang }) {
         <div>
           <span className="font-bold text-emerald-300">Green = What stays in your pocket</span> • Warm Amber = Sunk travel and decay costs
         </div>
-        <div className="text-[11px] text-white/50 font-mono">
+        <div className="text-xs text-white/50 font-mono">
           Top 6 Mandis Compared
         </div>
       </div>

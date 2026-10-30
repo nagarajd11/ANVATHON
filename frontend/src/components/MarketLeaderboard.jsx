@@ -38,7 +38,7 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
             <span className="p-1 rounded-md bg-emerald-500/20 text-emerald-300">
               <Trophy className="w-4 h-4 text-emerald-300" />
             </span>
-            <span className="text-[11px] font-semibold tracking-wider text-emerald-300/90 font-mono">
+            <span className="text-xs font-semibold tracking-wider text-emerald-300 font-mono">
               Net Returns Ranked
             </span>
           </div>
@@ -59,7 +59,7 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
         <LayoutGroup id="market-rankings-group">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/10 text-[11px] font-semibold text-white/60 uppercase tracking-wider bg-white/[0.02]">
+              <tr className="border-b border-white/10 text-xs font-semibold text-white/70 uppercase tracking-wider bg-white/[0.02]">
                 <th className="py-2.5 px-3 sm:px-4 font-mono">{t.rank}</th>
                 <th className="py-2.5 px-3 sm:px-4">{t.market}</th>
                 <th className="py-2.5 px-2 sm:px-3 font-mono">{t.distance}</th>
@@ -114,12 +114,12 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
                           <div className="font-bold text-white flex items-center gap-2">
                             <span className="text-sm font-sans tracking-tight">{mkt.marketName}</span>
                             {isFirst && (
-                              <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500 text-pine shadow-xs">
+                              <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500 text-pine shadow-xs">
                                 Best Choice
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-white/60 mt-0.5">
+                          <div className="text-xs text-white/70 mt-0.5">
                             {mkt.district} District
                             {mkt.capacityInfo.hasGlutRisk && (
                               <span className="ml-1.5 text-amber-300 font-medium inline-flex items-center gap-0.5">
@@ -134,14 +134,14 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
                       {/* Distance & Transit Hours */}
                       <td className="py-3 px-2 sm:px-3 text-white/80 whitespace-nowrap font-mono tabular-nums">
                         <div className="font-medium">{mkt.roadDistanceKm} km</div>
-                        <div className="text-[10px] text-white/50">{mkt.transitHours} hrs drive</div>
+                        <div className="text-xs text-white/50">{mkt.transitHours} hrs drive</div>
                       </td>
 
                       {/* Mandi Headline Price */}
                       <td className="py-3 px-2 sm:px-3 whitespace-nowrap font-mono tabular-nums text-white font-medium">
-                        <div>₹{mkt.modalPrice.toLocaleString()}<span className="text-[10px] text-white/50">/q</span></div>
+                        <div>₹{mkt.modalPrice.toLocaleString()}<span className="text-xs text-white/50">/q</span></div>
                         {mkt.freshnessDiscountPct > 0 && (
-                          <div className="text-[10px] font-bold text-amber-300 flex items-center gap-1 mt-0.5">
+                          <div className="text-xs font-bold text-amber-300 flex items-center gap-1 mt-0.5">
                             <span className="bg-amber-950/60 border border-amber-500/30 px-1.5 py-0.5 rounded">-{mkt.freshnessDiscountPct}% Age Cut</span>
                             <span className="line-through text-white/40 font-normal">₹{mkt.baselineModalPrice}</span>
                           </div>
@@ -161,7 +161,7 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
                       {/* Spoilage */}
                       <td className="py-3 px-2 sm:px-3 text-right text-amber-300 font-mono tabular-nums whitespace-nowrap font-medium">
                         -₹{mkt.costs.spoilageLoss.toLocaleString()}
-                        <div className="text-[10px] text-amber-300/70">({mkt.costs.spoilagePct}%)</div>
+                        <div className="text-xs text-amber-300/70">({mkt.costs.spoilagePct}%)</div>
                       </td>
 
                       {/* Mandi Fees */}
@@ -174,7 +174,7 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
                         <div className="text-sm sm:text-base font-bold text-emerald-300 font-mono tabular-nums text-crisp">
                           ₹{mkt.netReturnInr.toLocaleString()}
                         </div>
-                        <div className="text-[10px] font-mono tabular-nums text-emerald-400/80">
+                        <div className="text-xs font-mono tabular-nums text-emerald-400/80">
                           ₹{mkt.netReturnPerQuintal}/q
                         </div>
                       </td>
@@ -209,7 +209,7 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
                                     Projected Mandi Settlement Statement
                                   </span>
                                 </div>
-                                <div className="text-[11px] text-white/60 font-sans">
+                                <div className="text-xs text-white/70 font-sans">
                                   Yard: {mkt.marketName} • {mkt.district}
                                 </div>
                               </div>
@@ -253,7 +253,7 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
 
                               {/* Action Link to Dispatch Slip */}
                               <div className="mt-4 pt-3 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-3">
-                                <span className="text-[11px] text-white/50 font-sans">
+                                <span className="text-xs text-white/50 font-sans">
                                   Mandi Capacity: {mkt.capacityInfo.capacityUtilPct}% • Gate Hours: 05:30 AM - 01:00 PM
                                 </span>
                                 <button

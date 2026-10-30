@@ -29,7 +29,7 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5 mb-6">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-mono">
+            <span className="px-3 py-1 rounded-full text-xs font-semibold tracking-normal bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-mono">
               The Trade-off Comparison
             </span>
             <span className="text-white/60 text-xs font-mono tabular-nums">
@@ -50,7 +50,7 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
               <TrendingUp className="w-5 h-5 text-pine" />
             </div>
             <div>
-              <div className="text-[10px] uppercase font-bold tracking-wider text-emerald-300 font-mono">
+              <div className="text-xs uppercase font-semibold tracking-wider text-emerald-300 font-mono">
                 {t.extraCashBadge}
               </div>
               <div className="text-xl sm:text-2xl font-bold text-white font-mono tabular-nums">
@@ -73,7 +73,7 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
           }`}
         >
           <div className="flex items-center justify-between mb-4">
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider font-mono ${
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider font-mono ${
               isSame 
                 ? 'bg-white/10 text-white/80' 
                 : 'bg-amber-500/20 text-amber-200 border border-amber-400/30'
@@ -97,7 +97,7 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
                 ₹{highestPriceMarket.modalPrice.toLocaleString()}<span className="text-xs font-normal text-white/50">/qtl</span>
               </span>
               {highestPriceMarket.freshnessDiscountPct > 0 && (
-                <span className="text-[10px] font-bold text-rose-300 bg-rose-950/60 border border-rose-500/30 px-2 py-0.5 rounded-md">
+                <span className="text-xs font-bold text-rose-300 bg-rose-950/60 border border-rose-500/30 px-2 py-0.5 rounded-md">
                   -{highestPriceMarket.freshnessDiscountPct}% Age Cut
                 </span>
               )}
@@ -150,7 +150,7 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
           </div>
 
           {!isSame && rupeeDifference > 0 && (
-            <div className="mt-3.5 py-2 px-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-[11px] text-amber-200 text-center font-mono">
+            <div className="mt-3.5 py-2 px-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-xs text-amber-200 text-center font-mono">
               <span>⚠️ Leaves you with ₹{rupeeDifference.toLocaleString()} less in-hand cash</span>
             </div>
           )}
@@ -162,7 +162,7 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
           className="rounded-2xl p-6 border-2 border-emerald-500/50 bg-emerald-950/20 shadow-[0_12px_32px_-8px_rgba(16,185,129,0.25)] relative hover-lift hover:border-emerald-400"
         >
           <div className="flex items-center justify-between mb-4">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-500 text-pine shadow-xs font-mono">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500 text-pine shadow-xs font-mono">
               <Trophy className="w-3.5 h-3.5 text-pine" />
               {t.smartPickBadge}
             </span>
@@ -182,7 +182,7 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
                 ₹{bestNetMarket.modalPrice.toLocaleString()}<span className="text-xs font-normal text-white/50">/qtl</span>
               </span>
               {bestNetMarket.freshnessDiscountPct > 0 && (
-                <span className="text-[10px] font-bold text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-md">
+                <span className="text-xs font-bold text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-md">
                   -{bestNetMarket.freshnessDiscountPct}% Age Cut
                 </span>
               )}
@@ -239,7 +239,7 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
           {/* Direct CTA to Focus / Open Slip */}
           <button
             onClick={() => onFocusMarket && onFocusMarket(bestNetMarket)}
-            className="btn-shimmer w-full mt-3.5 py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-pine font-bold text-xs flex items-center justify-center gap-2 border border-emerald-300 shadow-md transition-all cursor-pointer"
+            className="btn-shimmer btn-primary w-full mt-3.5 py-2.5 text-xs"
           >
             <span>Lock Winner & Print Settlement Pass</span>
             <ArrowRight className="w-3.5 h-3.5 text-pine" />

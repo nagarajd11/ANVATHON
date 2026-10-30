@@ -64,7 +64,7 @@ export default function FarmerInputForm({
               <span className="p-1 rounded-md bg-emerald-500/20 text-emerald-300">
                 <Wheat className="w-4 h-4 text-emerald-300" />
               </span>
-              <span className="text-[11px] font-semibold tracking-wider text-emerald-300/90 font-mono">
+              <span className="text-xs font-semibold tracking-wider text-emerald-300 font-mono">
                 {t.datasetBadge}
               </span>
             </div>
@@ -98,8 +98,8 @@ export default function FarmerInputForm({
               ))}
             </select>
             {currentCropObj && (
-              <div className="mt-1.5 flex items-center gap-1 text-[11px] text-white/60">
-                <span className={`px-2 py-0.5 rounded-md font-medium text-[10px] ${
+              <div className="mt-1.5 flex items-center gap-1 text-xs text-white/70">
+                <span className={`px-2 py-0.5 rounded-md font-medium text-xs ${
                   currentCropObj.perishability_tier === 'HIGH' ? 'bg-amber-500/20 text-amber-200 border border-amber-400/30' :
                   currentCropObj.perishability_tier === 'MEDIUM' ? 'bg-amber-500/15 text-amber-200 border border-amber-400/20' :
                   'bg-emerald-500/20 text-emerald-200 border border-emerald-400/30'
@@ -137,7 +137,7 @@ export default function FarmerInputForm({
                   key={val}
                   type="button"
                   onClick={() => setQuantity(val)}
-                  className={`text-[11px] font-mono font-medium tabular-nums px-2 py-0.5 rounded-md border transition-all cursor-pointer hover-glow-pill ${
+                  className={`text-xs font-mono font-medium tabular-nums px-2 py-0.5 rounded-md border transition-all cursor-pointer hover-glow-pill ${
                     quantity === val 
                       ? 'bg-emerald-500 text-pine font-bold border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.4)]' 
                       : 'bg-white/5 text-white/75 hover:bg-white/15 hover:text-white border-white/15'
@@ -203,12 +203,12 @@ export default function FarmerInputForm({
               ))}
             </select>
             {currentVehicleObj.isReefer ? (
-              <p className="mt-1 text-[11px] text-emerald-300 flex items-center gap-1">
+              <p className="mt-1 text-xs text-emerald-300 flex items-center gap-1">
                 <Snowflake className="w-3 h-3 text-emerald-300" />
                 <span>Refrigerated transport eliminates up to 85% of transit spoilage</span>
               </p>
             ) : tripsNeeded > 1 ? (
-              <p className="mt-1 text-[11px] text-amber-300 flex items-center gap-1">
+              <p className="mt-1 text-xs text-amber-300 flex items-center gap-1">
                 <AlertTriangle className="w-3 h-3 text-amber-300" />
                 <span>Requires {tripsNeeded} trips with this vehicle (capacity: {currentVehicleObj.capacity}q)</span>
               </p>
@@ -227,7 +227,7 @@ export default function FarmerInputForm({
         <button
           onClick={onCalculate}
           disabled={isLoading}
-          className="btn-shimmer w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-pine font-bold text-xs sm:text-sm tracking-wide shadow-lg shadow-emerald-950/40 border border-emerald-300/60 cursor-pointer disabled:opacity-50"
+          className="btn-shimmer btn-primary w-full sm:w-auto px-7 py-3 text-sm disabled:opacity-50"
         >
           {isLoading ? (
             <span className="font-mono">{t.calculating}</span>

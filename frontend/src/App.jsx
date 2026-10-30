@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from './components/Navbar';
 import BackgroundVideo from './components/BackgroundVideo';
+import FluidRippleCanvas from './components/FluidRippleCanvas';
 import FarmerInputForm from './components/FarmerInputForm';
 import TheTwistCard from './components/TheTwistCard';
 import MarketMap from './components/MarketMap';
@@ -49,6 +50,27 @@ export default function App() {
   const [isDispatchSlipOpen, setIsDispatchSlipOpen] = useState(false);
   const [marketForSlip, setMarketForSlip] = useState(null);
   const [isSavedModalOpen, setIsSavedModalOpen] = useState(false);
+
+  // WebGL Interactive Fluid Wave Ripple FX State
+  const [isFluidFxEnabled, setIsFluidFxEnabled] = useState(() => {
+    try {
+      const saved = localStorage.getItem('harvestroute_fluid_fx');
+      return saved !== null ? JSON.parse(saved) : true;
+    } catch {
+      return true;
+    }
+  });
+
+  const handleToggleFluidFx = () => {
+    setIsFluidFxEnabled((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('harvestroute_fluid_fx', JSON.stringify(next));
+      } catch {}
+      showToast(next ? '🌊 Fluid Water Ripples Active' : 'Static Background Active');
+      return next;
+    });
+  };
 
   // 1. Initial Load of Reference Data
   useEffect(() => {
@@ -153,6 +175,9 @@ export default function App() {
       {/* Scroll-Locked Background Video Layer */}
       <BackgroundVideo />
 
+      {/* Interactive Real-Time WebGL Water Ripple & Fluid Wave */}
+      <FluidRippleCanvas enabled={isFluidFxEnabled} />
+
       {/* Main Foreground Interface */}
       <div className="relative z-10 flex flex-col min-h-screen">
         
@@ -168,9 +193,11 @@ export default function App() {
         <Navbar
           lang={lang}
           setLang={setLang}
+          isFluidFxEnabled={isFluidFxEnabled}
+          onToggleFluidFx={handleToggleFluidFx}
           onSelectTab={(tab) => {
-            setActiveTab(tab);
-            const el = document.getElementById('details-section');
+            const id = tab === 'logistics' ? 'pooling-section' : tab === 'map' ? 'map-section' : 'rankings-section';
+            const el = document.getElementById(id);
             if (el) el.scrollIntoView({ behavior: 'smooth' });
           }}
         />
@@ -181,14 +208,14 @@ export default function App() {
             
             <div className="relative z-10 max-w-4xl">
               <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-mono">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-mono">
                   <Sprout className="w-3.5 h-3.5 text-emerald-300" />
                   {t.domainBadge}
                 </span>
-                <span className="px-3 py-1 rounded-full text-[10px] font-mono text-white/80 bg-white/5 border border-white/10">
+                <span className="px-3 py-1 rounded-full text-xs font-mono text-white/70 bg-white/5 border border-white/10">
                   {t.datasetBadge}
                 </span>
-                <span className="px-3 py-1 rounded-full text-[10px] font-mono text-emerald-300/80 bg-emerald-500/10 border border-emerald-400/20">
+                <span className="px-3 py-1 rounded-full text-xs font-mono text-emerald-300 bg-emerald-500/10 border border-emerald-400/20">
                   {t.noLoginBadge}
                 </span>
               </div>
@@ -277,117 +304,108 @@ export default function App() {
             />
           )}
 
-          {/* GROUP 3: Detailed Intelligence Tabs (Rankings, Map, Logistics) */}
-          <section id="details-section" className="mb-8">
-            
-            {/* Elegant Tab Switcher Bar */}
-            <div className="flex items-center justify-between flex-wrap gap-3 mb-6 border-b border-white/10 pb-4">
+          {/* Quick Jump Navigation Bar */}
+          {analysis && (
+            <div className="flex items-center justify-between flex-wrap gap-3 mb-8 py-3 px-5 glass-floating rounded-2xl border border-white/15">
               <div className="flex items-center gap-2">
                 <span className="text-xs uppercase font-mono font-bold tracking-wider text-white/50">
-                  Explore Details:
+                  Quick Jump:
                 </span>
-                <div className="flex items-center bg-black/30 backdrop-blur-md p-1 rounded-2xl border border-white/15">
-                  
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <button
-                    onClick={() => setActiveTab('rankings')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                      activeTab === 'rankings'
-                        ? 'bg-emerald-500 text-pine font-bold shadow-md'
-                        : 'text-white/70 hover:text-white hover:bg-white/10'
-                    }`}
+                    type="button"
+                    onClick={() => document.getElementById('map-section')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="btn-secondary !py-1.5 !px-3 text-xs"
                   >
-                    <BarChart3 className="w-4 h-4" />
+                    <Map className="w-3.5 h-3.5 text-emerald-300" />
+                    <span>Route Map</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('rankings-section')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="btn-secondary !py-1.5 !px-3 text-xs"
+                  >
+                    <BarChart3 className="w-3.5 h-3.5 text-emerald-300" />
                     <span>Mandi Rankings & Bill</span>
                   </button>
 
                   <button
-                    onClick={() => setActiveTab('map')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                      activeTab === 'map'
-                        ? 'bg-emerald-500 text-pine font-bold shadow-md'
-                        : 'text-white/70 hover:text-white hover:bg-white/10'
-                    }`}
+                    type="button"
+                    onClick={() => document.getElementById('pooling-section')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="btn-secondary !py-1.5 !px-3 text-xs"
                   >
-                    <Map className="w-4 h-4" />
-                    <span>Route Map & Distances</span>
+                    <Truck className="w-3.5 h-3.5 text-emerald-300" />
+                    <span>Truck Sharing & Transporters</span>
                   </button>
-
-                  <button
-                    onClick={() => setActiveTab('logistics')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                      activeTab === 'logistics'
-                        ? 'bg-emerald-500 text-pine font-bold shadow-md'
-                        : 'text-white/70 hover:text-white hover:bg-white/10'
-                    }`}
-                  >
-                    <Truck className="w-4 h-4" />
-                    <span>Trucks & Transporters</span>
-                  </button>
-
                 </div>
               </div>
-
               <div className="text-xs text-white/50 font-mono hidden sm:block">
-                {activeTab === 'rankings' ? 'Itemized deduction statements for top 10 mandis' :
-                 activeTab === 'map' ? 'Interactive Leaflet GIS route map' :
-                 'Find shared trucks or book verified carriers'}
+                All 62 Karnataka Mandis Active
               </div>
             </div>
+          )}
 
-            {/* Tab 1: Mandi Rankings & Settlement Slips + Visual Chart */}
-            {activeTab === 'rankings' && analysis && (
-              <div className="space-y-6">
-                <MarketLeaderboard
-                  analysis={analysis}
-                  lang={lang}
-                  onSelectMarketForSlip={(mkt) => {
-                    setMarketForSlip(mkt);
-                    setIsDispatchSlipOpen(true);
-                  }}
-                />
-
-                <CostBreakdownChart
-                  analysis={analysis}
-                  lang={lang}
-                />
-              </div>
-            )}
-
-            {/* Tab 2: Interactive Route Map with Mouse Scroll Zoom */}
-            {activeTab === 'map' && analysis && (
+          {/* 3. Interactive Route & Logistics Map (Directly Visible on Page) */}
+          {analysis && (
+            <section id="map-section" className="mb-8 scroll-mt-20">
               <MarketMap
                 analysis={analysis}
                 lang={lang}
               />
-            )}
+            </section>
+          )}
 
-            {/* Tab 3: Logistics (Truck Sharing & Transporter Directory) */}
-            {activeTab === 'logistics' && (
-              <div className="space-y-6">
-                <CropPoolingHub
-                  lang={lang}
-                  origins={origins}
-                  crops={crops}
-                  vehicleCatalog={vehicleCatalog}
-                  currentDistrict={originDistrict}
-                  currentCrop={selectedCrop}
-                  currentQuantity={quantity}
-                  onShowToast={showToast}
-                />
+          {/* 4. Ranked Market Ledger & Itemized Deduction Bills */}
+          {analysis && (
+            <section id="rankings-section" className="mb-8 scroll-mt-20">
+              <MarketLeaderboard
+                analysis={analysis}
+                lang={lang}
+                onSelectMarketForSlip={(mkt) => {
+                  setMarketForSlip(mkt);
+                  setIsDispatchSlipOpen(true);
+                }}
+              />
+            </section>
+          )}
 
-                <TransporterDirectory
-                  dealers={dealers}
-                  lang={lang}
-                  currentVehicleType={vehicleType}
-                  onSelectVehicle={(vType) => {
-                    setVehicleType(vType);
-                    executeAnalysis({ vehicleType: vType });
-                    showToast(`Vehicle updated to ${vType}. Analysis recalculated!`);
-                  }}
-                />
-              </div>
-            )}
+          {/* 5. Visual Net Return vs Gross Mirage Breakdown */}
+          {analysis && (
+            <section id="breakdown-section" className="mb-8 scroll-mt-20">
+              <CostBreakdownChart
+                analysis={analysis}
+                lang={lang}
+              />
+            </section>
+          )}
 
+          {/* 6. Farmer Crop Pooling & Group Freight Sharing */}
+          <section id="pooling-section" className="mb-8 scroll-mt-20">
+            <CropPoolingHub
+              lang={lang}
+              origins={origins}
+              crops={crops}
+              vehicleCatalog={vehicleCatalog}
+              currentDistrict={originDistrict}
+              currentCrop={selectedCrop}
+              currentQuantity={quantity}
+              onShowToast={showToast}
+            />
+          </section>
+
+          {/* 7. Verified Regional Transporters Directory */}
+          <section id="transporters-section" className="mb-8 scroll-mt-20">
+            <TransporterDirectory
+              dealers={dealers}
+              lang={lang}
+              currentVehicleType={vehicleType}
+              onSelectVehicle={(vType) => {
+                setVehicleType(vType);
+                executeAnalysis({ vehicleType: vType });
+                showToast(`Vehicle updated to ${vType}. Analysis recalculated!`);
+              }}
+            />
           </section>
 
         </main>
@@ -418,7 +436,7 @@ export default function App() {
               <span>Karnataka APMC Agricultural Marketing Network</span>
             </div>
 
-            <div className="text-white/50 text-[11px] font-sans">
+            <div className="text-white/50 text-xs font-sans">
               Helping farmers take home more cash on every harvest.
             </div>
           </div>

@@ -28,7 +28,7 @@ export default function SensitivityLab({
               <span className="p-1 rounded-md bg-emerald-500/20 text-emerald-300">
                 <Sliders className="w-4 h-4 text-emerald-300" />
               </span>
-              <span className="text-[11px] font-semibold tracking-wider text-emerald-300/90 font-mono">
+              <span className="text-xs font-semibold tracking-wider text-emerald-300 font-mono">
                 Live Assumptions
               </span>
             </div>
@@ -42,7 +42,7 @@ export default function SensitivityLab({
 
           <button
             onClick={onReset}
-            className="btn-shimmer group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-emerald-500 hover:text-pine text-white/80 hover:text-pine text-xs font-semibold border border-white/15 hover:border-emerald-300 transition-all cursor-pointer shadow-xs"
+            className="btn-secondary !py-1.5 !px-3 text-xs"
             title="Reset to default assumptions"
           >
             <RotateCcw className="w-3.5 h-3.5 text-emerald-300 group-hover:text-pine group-hover:-rotate-90 transition-transform duration-300" />
@@ -73,7 +73,7 @@ export default function SensitivityLab({
               onChange={(e) => setFuelRateMultiplier(parseFloat(e.target.value))}
               className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer"
             />
-            <div className="flex justify-between text-[10px] text-white/50 mt-1.5 font-mono">
+            <div className="flex justify-between text-xs text-white/50 mt-1.5 font-mono">
               <span>Standard (1.0x)</span>
               <span>Spike (2.0x)</span>
             </div>
@@ -99,7 +99,7 @@ export default function SensitivityLab({
               onChange={(e) => setSpoilageMultiplier(parseFloat(e.target.value))}
               className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer"
             />
-            <div className="flex justify-between text-[10px] text-white/50 mt-1.5 font-mono">
+            <div className="flex justify-between text-xs text-white/50 mt-1.5 font-mono">
               <span>Normal (1.0x)</span>
               <span>Heatwave (2.5x)</span>
             </div>
@@ -125,7 +125,7 @@ export default function SensitivityLab({
               onChange={(e) => setCessRateOverride(parseFloat(e.target.value))}
               className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer"
             />
-            <div className="flex justify-between text-[10px] text-white/50 mt-1.5 font-mono">
+            <div className="flex justify-between text-xs text-white/50 mt-1.5 font-mono">
               <span>0.5% (Low)</span>
               <span>3.5% (Max)</span>
             </div>
@@ -151,7 +151,7 @@ export default function SensitivityLab({
               onChange={(e) => setSpeedKmph(parseFloat(e.target.value))}
               className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer"
             />
-            <div className="flex justify-between text-[10px] text-white/50 mt-1.5 font-mono">
+            <div className="flex justify-between text-xs text-white/50 mt-1.5 font-mono">
               <span>Ghat / Rough (20)</span>
               <span>Highway (65)</span>
             </div>
@@ -160,7 +160,7 @@ export default function SensitivityLab({
         </div>
       </div>
 
-      <div className="mt-5 pt-3 border-t border-white/10 text-[11px] text-white/60 font-sans flex items-center justify-between">
+      <div className="mt-5 pt-3 border-t border-white/10 text-xs text-white/70 font-sans flex items-center justify-between">
         <span>Rankings update live as sliders move</span>
         <span className="font-mono text-emerald-300">Live Simulation</span>
       </div>

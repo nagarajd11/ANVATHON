@@ -86,13 +86,13 @@ export default function SavedAnalysesModal({
                     <span className="font-semibold text-white/60 font-mono">
                       ({item.quantity_quintals} qtl)
                     </span>
-                    <span className="text-[10px] text-white/50 flex items-center gap-0.5">
+                    <span className="text-xs text-white/50 flex items-center gap-0.5">
                       <MapPin className="w-3 h-3 text-emerald-400" />
                       {item.origin_district}
                     </span>
                   </div>
 
-                  <div className="text-[11px] text-white/70 flex items-center gap-2 font-mono">
+                  <div className="text-xs text-white/70 flex items-center gap-2 font-mono">
                     <span className="font-bold text-emerald-300">
                       Best: {item.recommended_market?.market_name} (₹{item.recommended_market?.net_return_inr?.toLocaleString()})
                     </span>

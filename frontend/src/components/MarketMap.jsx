@@ -23,7 +23,7 @@ function MapActionControls({ bounds }) {
     <div className="leaflet-top leaflet-right" style={{ pointerEvents: 'auto', zIndex: 1000, margin: '14px' }}>
       <button
         onClick={() => map.fitBounds(bounds, { padding: [40, 40], animate: true })}
-        className="btn-shimmer flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-pine/90 text-emerald-300 text-[11px] font-bold border border-emerald-400/40 shadow-lg backdrop-blur-md cursor-pointer hover:bg-emerald-500 hover:text-pine transition-all"
+        className="btn-subtle shadow-md"
         title="Reset zoom to view all routes and mandis"
       >
         <RotateCcw className="w-3.5 h-3.5" />
@@ -95,8 +95,15 @@ export default function MarketMap({ analysis, lang }) {
   const originLat = originCoordinates.lat;
   const originLon = originCoordinates.lon;
 
-  // Take top 8 markets for map visualization to prevent cluttering
-  const topMarkets = rankedMarkets.slice(0, 8);
+  // Take top 10 candidate markets and ensure both optimal winner and price trap are always mapped
+  const candidates = rankedMarkets ? [...rankedMarkets.slice(0, 10)] : [];
+  if (highestPriceMarket && !candidates.some(m => m.marketId === highestPriceMarket.marketId)) {
+    candidates.push(highestPriceMarket);
+  }
+  if (bestNetMarket && !candidates.some(m => m.marketId === bestNetMarket.marketId)) {
+    candidates.push(bestNetMarket);
+  }
+  const topMarkets = candidates;
 
   // Compute bounds
   const bounds = [
@@ -105,7 +112,7 @@ export default function MarketMap({ analysis, lang }) {
   ];
 
   return (
-    <div className="glass-card rounded-3xl p-6 sm:p-8 mb-8 hover-lift">
+    <div id="map-section" className="glass-card rounded-3xl p-6 sm:p-8 mb-8 hover-lift">
       
       {/* Header & Legend */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-5 mb-5">
@@ -114,7 +121,7 @@ export default function MarketMap({ analysis, lang }) {
             <span className="p-1 rounded-md bg-emerald-500/20 text-emerald-300">
               <Navigation className="w-4 h-4 text-emerald-300" />
             </span>
-            <span className="text-[11px] font-semibold tracking-wider text-emerald-300/90 font-mono">
+            <span className="text-xs font-semibold tracking-wider text-emerald-300 font-mono">
               Live Mandi Network
             </span>
           </div>
@@ -144,7 +151,7 @@ export default function MarketMap({ analysis, lang }) {
             <span className="w-3 h-3 rounded-full bg-[#064e3b] border border-emerald-400 inline-block" />
             <span className="font-sans">{t.otherLegend}</span>
           </div>
-          <div className="flex items-center gap-1.5 bg-emerald-500/20 px-3 py-1.5 rounded-xl border border-emerald-400/40 text-emerald-300 text-[11px] font-mono">
+          <div className="flex items-center gap-1.5 bg-emerald-500/20 px-3 py-1.5 rounded-xl border border-emerald-400/40 text-emerald-300 text-xs font-mono">
             <MousePointer className="w-3 h-3 text-emerald-300" />
             <span>Mouse Scroll Zoom: ON</span>
           </div>
@@ -177,7 +184,7 @@ export default function MarketMap({ analysis, lang }) {
           >
             <Popup>
               <div className="p-1 text-slate-900 font-sans">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 block">
+                <span className="text-xs font-bold uppercase tracking-widest text-emerald-700 block">
                   Departure Hub
                 </span>
                 <strong className="text-sm font-bold block">{originDistrict} District</strong>
@@ -219,7 +226,7 @@ export default function MarketMap({ analysis, lang }) {
                   <Popup>
                     <div className="p-2 min-w-[210px] text-slate-900 font-sans">
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-[10px] font-bold font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        <span className="text-xs font-bold font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
                           Rank #{idx + 1}
                         </span>
                         <span className="text-xs font-mono tabular-nums text-slate-600 font-semibold">

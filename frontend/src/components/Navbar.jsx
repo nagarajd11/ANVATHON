@@ -3,13 +3,16 @@ import {
   Sprout, 
   Languages, 
   Users,
-  Sparkles
+  Sparkles,
+  Droplets
 } from 'lucide-react';
 import { TRANSLATIONS } from '../translations';
 
 export default function Navbar({ 
   lang, 
   setLang,
+  isFluidFxEnabled = true,
+  onToggleFluidFx,
   onSelectTab
 }) {
   const t = TRANSLATIONS[lang];
@@ -28,27 +31,47 @@ export default function Navbar({
               <h1 className="text-xl sm:text-2xl font-display font-extrabold text-white tracking-tight leading-none text-crisp">
                 {t.appTitle}
               </h1>
-              <span className="text-[9px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 hidden sm:inline-block">
+              <span className="text-xs font-mono font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 hidden sm:inline-block">
                 APMC Network
               </span>
             </div>
-            <p className="text-[11px] text-white/70 font-sans hidden md:block mt-0.5">
+            <p className="text-xs text-white/70 font-sans hidden md:block mt-0.5">
               {t.appSubtitle}
             </p>
           </div>
         </div>
 
-        {/* Right Actions: Shared Trucks Link & Language Switcher */}
-        <div className="flex items-center gap-3">
+        {/* Right Actions: Shared Trucks Link, Fluid FX Toggle & Language Switcher */}
+        <div className="flex items-center gap-2.5">
           
+          {/* WebGL Fluid FX Ripple Toggle */}
+          <button
+            type="button"
+            onClick={onToggleFluidFx}
+            className={`btn-secondary !py-1.5 !px-3 font-sans text-xs transition-all ${
+              isFluidFxEnabled 
+                ? 'border-emerald-400/50 bg-emerald-500/15 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.25)]' 
+                : 'text-white/60 hover:text-white'
+            }`}
+            title={isFluidFxEnabled ? 'Fluid Wave FX Active (Click to pause)' : 'Fluid Wave FX Paused (Click to activate)'}
+            aria-pressed={isFluidFxEnabled}
+          >
+            <Droplets className={`w-3.5 h-3.5 transition-transform duration-300 ${isFluidFxEnabled ? 'text-emerald-300 scale-110' : 'text-white/50'}`} />
+            <span className="hidden sm:inline">Fluid FX:</span>
+            <span className={`font-mono text-xs font-bold ${isFluidFxEnabled ? 'text-emerald-300' : 'text-white/50'}`}>
+              {isFluidFxEnabled ? 'ON' : 'OFF'}
+            </span>
+          </button>
+
           {/* Quick Link to Truck Sharing */}
           <button
+            type="button"
             onClick={() => onSelectTab && onSelectTab('logistics')}
-            className="btn-shimmer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-emerald-500 hover:text-pine text-white text-xs font-semibold border border-white/20 backdrop-blur-md transition-all shadow-xs cursor-pointer"
+            className="btn-secondary !py-1.5 !px-3 font-sans text-xs hidden md:inline-flex"
             title={t.poolNavBtn}
           >
             <Users className="w-3.5 h-3.5 text-emerald-300" />
-            <span className="font-sans">{t.poolNavBtn}</span>
+            <span>{t.poolNavBtn}</span>
           </button>
 
           {/* Language Switcher */}

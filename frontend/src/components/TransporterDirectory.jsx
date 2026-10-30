@@ -31,7 +31,7 @@ export default function TransporterDirectory({
             <span className="p-1 rounded-md bg-emerald-500/20 text-emerald-300">
               <Truck className="w-4 h-4 text-emerald-300" />
             </span>
-            <span className="text-[11px] font-semibold tracking-wider text-emerald-300/90 font-mono">
+            <span className="text-xs font-semibold tracking-wider text-emerald-300 font-mono">
               Verified Transport Network
             </span>
           </div>
@@ -96,7 +96,7 @@ export default function TransporterDirectory({
 
             {/* Vehicle Fleet */}
             <div className="space-y-2.5 mt-3">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-300 block font-mono">
+              <span className="text-xs font-bold uppercase tracking-widest text-emerald-300 block font-mono">
                 Available Fleet Units:
               </span>
               {dealer.vehicles.map((vh) => {
@@ -117,12 +117,12 @@ export default function TransporterDirectory({
                         <div className="flex items-center gap-1.5 font-bold font-sans">
                           <span>{vh.vehicle_name}</span>
                           {vh.is_refrigerated && (
-                            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 flex items-center gap-0.5 font-mono">
+                            <span className="text-xs font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 flex items-center gap-0.5 font-mono">
                               <Snowflake className="w-2.5 h-2.5" /> Reefer
                             </span>
                           )}
                         </div>
-                        <div className="text-[11px] text-white/60 font-mono tabular-nums mt-0.5">
+                        <div className="text-xs text-white/60 font-mono tabular-nums mt-0.5">
                           Cap: {vh.capacity_quintals} qtl • Base: ₹{vh.base_fare_inr} + ₹{vh.rate_per_km_inr}/km
                         </div>
                       </div>
@@ -131,7 +131,7 @@ export default function TransporterDirectory({
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => onSelectVehicle(vh.vehicle_type)}
-                        className={`btn-shimmer px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                        className={`btn-shimmer px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                           isSelected
                             ? 'bg-emerald-500 text-pine border border-emerald-300 shadow-xs'
                             : 'bg-white/10 text-white hover:bg-white/20 border border-white/15'
@@ -142,7 +142,7 @@ export default function TransporterDirectory({
 
                       <button
                         onClick={() => setBookedModalDealer({ dealer, vehicle: vh })}
-                        className="btn-shimmer px-2.5 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-400/30 hover:bg-emerald-500 hover:text-pine text-[11px] font-bold cursor-pointer"
+                        className="btn-shimmer px-2.5 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-400/30 hover:bg-emerald-500 hover:text-pine text-xs font-bold cursor-pointer"
                         title="Instant Booking Confirmation"
                       >
                         Book

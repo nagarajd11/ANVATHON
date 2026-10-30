@@ -121,7 +121,7 @@ export default function CropPoolingHub({
         <div className="relative z-10">
           
           <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-mono">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-mono">
               <Users className="w-3.5 h-3.5" />
               Share a Truck • Split Fuel
             </span>
@@ -263,12 +263,12 @@ export default function CropPoolingHub({
                 <div>
                   {/* Top Status Badge */}
                   <div className="flex items-center justify-between gap-3 mb-4">
-                    <span className="px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-emerald-500 text-pine shadow-xs flex items-center gap-1.5">
+                    <span className="px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-emerald-500 text-pine shadow-xs flex items-center gap-1.5">
                       <Phone className="w-3 h-3 fill-pine" />
                       <span>{t.emptyBadgeNotice}</span>
                     </span>
 
-                    <span className="text-[10px] font-mono tabular-nums text-white/50">
+                    <span className="text-xs font-mono tabular-nums text-white/50">
                       ID: {truck.pool_id}
                     </span>
                   </div>
@@ -284,22 +284,22 @@ export default function CropPoolingHub({
 
                     <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-white/10 text-xs">
                       <div>
-                        <span className="text-white/50 text-[11px]">Vehicle:</span>
+                        <span className="text-white/50 text-xs">Vehicle:</span>
                         <div className="font-bold text-white">{truck.vehicle_name}</div>
                       </div>
                       <div>
-                        <span className="text-white/50 text-[11px]">Trip Freight:</span>
+                        <span className="text-white/50 text-xs">Trip Freight:</span>
                         <div className="font-bold text-emerald-300 font-mono tabular-nums">₹{truck.total_freight_inr}</div>
                       </div>
                       <div>
-                        <span className="text-white/50 text-[11px]">Departure Time:</span>
+                        <span className="text-white/50 text-xs">Departure Time:</span>
                         <div className="font-bold text-white flex items-center gap-1 font-mono">
                           <Clock className="w-3 h-3 text-white/50" />
                           <span>{truck.dispatch_time}</span>
                         </div>
                       </div>
                       <div>
-                        <span className="text-white/50 text-[11px]">Date:</span>
+                        <span className="text-white/50 text-xs">Date:</span>
                         <div className="font-bold text-white">{truck.dispatch_date}</div>
                       </div>
                     </div>
@@ -309,19 +309,19 @@ export default function CropPoolingHub({
                   <div className="bg-emerald-500/15 rounded-xl p-4 border border-emerald-400/20 mb-4 backdrop-blur-md">
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-300">
+                        <span className="text-xs font-bold uppercase tracking-widest text-emerald-300">
                           Truck Host Farmer
                         </span>
                         <div className="text-sm font-bold text-white mt-0.5">
                           {truck.creator_farmer_name}
                         </div>
-                        <div className="text-[11px] text-white/70">
+                        <div className="text-xs text-white/70">
                           {truck.origin_village || truck.origin_district}
                         </div>
                       </div>
 
                       <div className="text-right">
-                        <span className="text-[9px] font-bold text-white/50">Mobile</span>
+                        <span className="text-xs font-bold text-white/50">Mobile</span>
                         <div className="text-sm font-bold text-emerald-300 font-mono tabular-nums">
                           {truck.creator_phone}
                         </div>
@@ -376,7 +376,7 @@ export default function CropPoolingHub({
                   <h3 className="font-bold text-base text-white font-sans">
                     {t.createPoolBtn}
                   </h3>
-                  <p className="text-[11px] text-white/60">
+                  <p className="text-xs text-white/60">
                     Farmers will call your phone directly to confirm space.
                   </p>
                 </div>

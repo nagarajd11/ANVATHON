@@ -73,7 +73,7 @@ export default function FarmerDispatchSlip({
                 </div>
                 <div>
                   <h1 className="text-xl font-black text-chlorophyll tracking-tight font-sans">HARVESTROUTE</h1>
-                  <p className="text-[9px] text-chlorophyll/60 uppercase tracking-widest font-mono font-bold">
+                  <p className="text-xs text-chlorophyll/60 uppercase tracking-widest font-mono font-bold">
                     Official Mandi Dispatch Manifest & Gate Pass
                   </p>
                 </div>
@@ -81,56 +81,56 @@ export default function FarmerDispatchSlip({
             </div>
             <div className="text-right">
               <span className="font-mono font-bold text-sm text-chlorophyll block">{dispatchId}</span>
-              <span className="text-[10px] text-chlorophyll/50">{currentDate}</span>
+              <span className="text-xs text-chlorophyll/50">{currentDate}</span>
             </div>
           </div>
 
           {/* Consignment Metadata */}
           <div className="grid grid-cols-2 gap-4 bg-[#fbfbfa] p-4 rounded-2xl border border-chlorophyll/15 mb-4">
             <div>
-              <span className="text-[10px] font-bold uppercase text-chlorophyll/50 block font-sans">Origin Farm Location</span>
+              <span className="text-xs font-bold uppercase text-chlorophyll/50 block font-sans">Origin Farm Location</span>
               <div className="font-bold text-sm text-chlorophyll font-sans">{analysis.originDistrict} District, Karnataka</div>
-              <div className="text-[11px] text-chlorophyll/60 font-sans">Route Departure Node</div>
+              <div className="text-xs text-chlorophyll/60 font-sans">Route Departure Node</div>
             </div>
             <div>
-              <span className="text-[10px] font-bold uppercase text-chlorophyll/50 block font-sans">Destination APMC Yard</span>
+              <span className="text-xs font-bold uppercase text-chlorophyll/50 block font-sans">Destination APMC Yard</span>
               <div className="font-bold text-sm text-emerald-900 font-sans">{targetMarket.marketName}</div>
-              <div className="text-[11px] text-chlorophyll/60 font-sans">{targetMarket.district} District</div>
+              <div className="text-xs text-chlorophyll/60 font-sans">{targetMarket.district} District</div>
             </div>
           </div>
 
           {/* Crop & Transit Specs */}
           <div className="grid grid-cols-3 gap-3 mb-4">
             <div className="p-3 border border-chlorophyll/15 rounded-xl bg-white">
-              <span className="text-[10px] text-chlorophyll/50 uppercase font-bold block font-sans">Crop Spec</span>
+              <span className="text-xs text-chlorophyll/50 uppercase font-bold block font-sans">Crop Spec</span>
               <span className="font-bold text-chlorophyll text-sm font-sans">{analysis.cropName}</span>
-              <span className="text-[10px] text-chlorophyll/60 block tabular-nums">{targetMarket.costs.spoilagePct}% Spoilage Tol.</span>
+              <span className="text-xs text-chlorophyll/60 block tabular-nums">{targetMarket.costs.spoilagePct}% Spoilage Tol.</span>
             </div>
             <div className="p-3 border border-chlorophyll/15 rounded-xl bg-white">
-              <span className="text-[10px] text-chlorophyll/50 uppercase font-bold block font-sans">Lot Quantity</span>
+              <span className="text-xs text-chlorophyll/50 uppercase font-bold block font-sans">Lot Quantity</span>
               <span className="font-bold text-chlorophyll text-sm font-sans tabular-nums">{analysis.quantityQuintals} Quintals</span>
-              <span className="text-[10px] text-chlorophyll/60 block tabular-nums">({analysis.quantityQuintals * 100} kg net)</span>
+              <span className="text-xs text-chlorophyll/60 block tabular-nums">({analysis.quantityQuintals * 100} kg net)</span>
             </div>
             <div className="p-3 border border-chlorophyll/15 rounded-xl bg-white">
-              <span className="text-[10px] text-chlorophyll/50 uppercase font-bold block font-sans">Transit Estimate</span>
+              <span className="text-xs text-chlorophyll/50 uppercase font-bold block font-sans">Transit Estimate</span>
               <span className="font-bold text-chlorophyll text-sm tabular-nums">{targetMarket.roadDistanceKm} km</span>
-              <span className="text-[10px] text-chlorophyll/60 block tabular-nums">~{targetMarket.transitHours} hours transit</span>
+              <span className="text-xs text-chlorophyll/60 block tabular-nums">~{targetMarket.transitHours} hours transit</span>
             </div>
           </div>
 
           {/* Vehicle & Carrier info */}
           <div className="p-3.5 border border-chlorophyll/15 rounded-xl mb-4 bg-[#fbfbfa]">
             <div className="flex justify-between items-center mb-1">
-              <span className="text-[10px] font-bold uppercase text-chlorophyll/60 flex items-center gap-1 font-sans">
+              <span className="text-xs font-bold uppercase text-chlorophyll/60 flex items-center gap-1 font-sans">
                 <Truck className="w-3.5 h-3.5 text-emerald-700" />
                 Assigned Logistics Carrier:
               </span>
-              <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md font-sans">
+              <span className="text-xs font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md font-sans">
                 Verified Mandi Transport
               </span>
             </div>
             <div className="font-bold text-chlorophyll text-sm font-sans">{targetMarket.vehicleUsed.name}</div>
-            <div className="text-[11px] text-chlorophyll/60 flex justify-between mt-1 tabular-nums">
+            <div className="text-xs text-chlorophyll/60 flex justify-between mt-1 tabular-nums">
               <span>Agreed Freight Quote: ₹{targetMarket.costs.transportCost.toLocaleString()}</span>
               <span>Trips Required: {targetMarket.vehicleUsed.tripsRequired}</span>
             </div>
@@ -168,7 +168,7 @@ export default function FarmerDispatchSlip({
           </div>
 
           {/* Signatures */}
-          <div className="grid grid-cols-3 gap-4 pt-6 mt-6 border-t border-chlorophyll/20 text-center text-[10px] text-chlorophyll/50 font-sans">
+          <div className="grid grid-cols-3 gap-4 pt-6 mt-6 border-t border-chlorophyll/20 text-center text-xs text-chlorophyll/50 font-sans">
             <div>
               <div className="h-10 border-b border-dashed border-chlorophyll/30 mb-1.5" />
               <span>Farmer Lot Owner</span>
@@ -184,7 +184,7 @@ export default function FarmerDispatchSlip({
           </div>
 
           {/* Footer notice */}
-          <div className="mt-5 text-[9px] text-chlorophyll/40 text-center font-sans">
+          <div className="mt-5 text-xs text-chlorophyll/40 text-center font-sans">
             Generated via HarvestRoute Mandi Optimization Platform. Data cross-referenced with Karnataka APMC daily benchmarks.
           </div>
 
