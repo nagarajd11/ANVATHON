@@ -98,7 +98,15 @@ export const TRANSLATIONS = {
     departure: "Departure",
     totalFreight: "Vehicle Freight",
     soloAlertBadge: "Small Harvest Tip",
-    soloAlertText: "Got a smaller lot? Share a truck with a neighbor to save up to 75% on transport!"
+    soloAlertText: "Got a smaller lot? Share a truck with a neighbor to save up to 75% on transport!",
+
+    // Voice Assistant
+    voiceMicBtn: "Voice Command",
+    listeningState: "Listening... Speak district, crop, quantity, vehicle, or 'calculate'",
+    voiceHint: "e.g., 'Davanagere tomato 20 quintals Bolero calculate' or 'Show route map'",
+    speakTwist: "Listen to Decision Audio",
+    speakMandi: "Listen to Mandi Return",
+    listeningActive: "Listening now..."
   },
 
   kn: {
@@ -200,7 +208,15 @@ export const TRANSLATIONS = {
     departure: "ಹೊರಡುವ ಸಮಯ",
     totalFreight: "ವಾಹನ ಬಾಡಿಗೆ",
     soloAlertBadge: "ಸಣ್ಣ ಇಳುವರಿಯ ಸಲಹೆ",
-    soloAlertText: "ನಿಮ್ಮಲ್ಲಿ ಕಡಿಮೆ ಬೆಳೆ ಇದ್ದರೆ, ಪಕ್ಕದ ರೈತರೊಂದಿಗೆ ವಾಹನ ಹಂಚಿಕೊಂಡು ಸಾರಿಗೆ ವೆಚ್ಚದಲ್ಲಿ 75% ವರೆಗೆ ಉಳಿಸಿ!"
+    soloAlertText: "ನಿಮ್ಮಲ್ಲಿ ಕಡಿಮೆ ಬೆಳೆ ಇದ್ದರೆ, ಪಕ್ಕದ ರೈತರೊಂದಿಗೆ ವಾಹನ ಹಂಚಿಕೊಂಡು ಸಾರಿಗೆ ವೆಚ್ಚದಲ್ಲಿ 75% ವರೆಗೆ ಉಳಿಸಿ!",
+
+    // Voice Assistant
+    voiceMicBtn: "ಧ್ವನಿ ಆದೇಶ",
+    listeningState: "ಆಲಿಸುತ್ತಿದೆ... ಜಿಲ್ಲೆ, ಬೆಳೆ, ಪ್ರಮಾಣ, ವಾಹನ ಅಥವಾ 'ಲೆಕ್ಕ ಮಾಡಿ' ಎಂದು ಹೇಳಿ",
+    voiceHint: "ಉದಾ: 'ದಾವಣಗೆರೆ ಟೊಮೇಟೊ 20 ಕ್ವಿಂಟಾಲ್ ಬೊಲೆರೊ ಲೆಕ್ಕ ಮಾಡಿ' ಅಥವಾ 'ನಕ್ಷೆ ತೋರಿಸು'",
+    speakTwist: "ಸಲಹೆಯ ಆಡಿಯೋ ಆಲಿಸಿ",
+    speakMandi: "ಮಂಡಿ ವಿವರ ಆಲಿಸಿ",
+    listeningActive: "ಧ್ವನಿ ಆಲಿಸಲಾಗುತ್ತಿದೆ..."
   },
 
   hi: {
@@ -302,6 +318,14 @@ export const TRANSLATIONS = {
     departure: "रवानगी समय",
     totalFreight: "गाड़ी का कुल भाड़ा",
     soloAlertBadge: "कम फसल वाले किसान के लिए सलाह",
-    soloAlertText: "कम फसल होने पर अकेले पूरा भाड़ा देने के बजाय, पड़ोसी किसान के साथ गाड़ी साझा करके 75% तक भाड़ा बचाएं!"
+    soloAlertText: "कम फसल होने पर अकेले पूरा भाड़ा देने के बजाय, पड़ोसी किसान के साथ गाड़ी साझा करके 75% तक भाड़ा बचाएं!",
+
+    // Voice Assistant
+    voiceMicBtn: "बोलकर सेट करें",
+    listeningState: "सुन रहे हैं... जिला, फसल, मात्रा, गाड़ी या 'हिसाब करो' बोलें",
+    voiceHint: "जैसे: 'दावणगेरे टमाटर 20 क्विंटल बोलेरो हिसाब करो' या 'नक्शा दिखाओ'",
+    speakTwist: "सिफारिश का ऑडियो सुनें",
+    speakMandi: "मंडी का ब्यौरा सुनें",
+    listeningActive: "आवाज सुन रहे हैं..."
   }
 };

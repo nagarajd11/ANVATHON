@@ -9,9 +9,14 @@ import {
   AlertTriangle,
   ArrowRight, 
   Sparkles,
-  Users
+  Users,
+  Mic,
+  MicOff,
+  Volume2
 } from 'lucide-react';
 import { TRANSLATIONS } from '../translations';
+import { useVoiceAssistant } from '../hooks/useVoiceAssistant';
+import { parseVoiceCommand, generateVoiceFeedback } from '../utils/voiceCommandParser';
 
 export default function FarmerInputForm({
   lang,
@@ -29,7 +34,10 @@ export default function FarmerInputForm({
   vehicleType,
   setVehicleType,
   onCalculate,
-  isLoading
+  isLoading,
+  onShowToast,
+  isListening: externalIsListening,
+  onToggleVoiceCommand: externalToggleVoiceCommand
 }) {
   const t = TRANSLATIONS[lang];
 
@@ -53,12 +61,85 @@ export default function FarmerInputForm({
     return orig.district;
   };
 
+  const internalVoice = useVoiceAssistant(lang);
+  const isListening = externalIsListening !== undefined ? externalIsListening : internalVoice.isListening;
+  const stopListening = externalToggleVoiceCommand || internalVoice.stopListening;
+
+  const handleToggleVoiceCommand = () => {
+    if (externalToggleVoiceCommand) {
+      externalToggleVoiceCommand();
+      return;
+    }
+
+    if (internalVoice.isListening) {
+      internalVoice.stopListening();
+      return;
+    }
+
+    internalVoice.startListening({
+      onStart: () => {
+        if (onShowToast) onShowToast(t.listeningState);
+      },
+      onResult: (primaryTranscript, event, alternatives) => {
+        const parsed = parseVoiceCommand(alternatives && alternatives.length ? alternatives : primaryTranscript);
+        if (!parsed) return;
+
+        const summary = [];
+        if (parsed.matchedOrigin) {
+          setOriginDistrict(parsed.matchedOrigin);
+          summary.push(parsed.matchedOrigin);
+        }
+        if (parsed.matchedCrop) {
+          setSelectedCrop(parsed.matchedCrop);
+          summary.push(parsed.matchedCrop);
+        }
+        if (parsed.matchedQuantity) {
+          setQuantity(parsed.matchedQuantity);
+          summary.push(`${parsed.matchedQuantity} qtl`);
+        }
+        if (parsed.matchedVehicle) {
+          setVehicleType(parsed.matchedVehicle);
+          summary.push(parsed.matchedVehicle);
+        }
+        if (parsed.matchedFreshness) {
+          setFreshness(parsed.matchedFreshness);
+          summary.push(`${parsed.matchedFreshness}h`);
+        }
+        if (parsed.triggerCalculate) {
+          onCalculate();
+          summary.push('Calculate');
+        }
+
+        const speech = generateVoiceFeedback(parsed, lang, {
+          originDistrict: parsed.matchedOrigin || originDistrict,
+          selectedCrop: parsed.matchedCrop || selectedCrop,
+          quantity: parsed.matchedQuantity !== null ? parsed.matchedQuantity : quantity,
+          vehicleType: parsed.matchedVehicle || vehicleType
+        });
+
+        if (speech) {
+          internalVoice.speak(speech, 'voice-confirm');
+        }
+
+        if (onShowToast) {
+          onShowToast(`🎙️ "${parsed.rawText || primaryTranscript}" → ${summary.join(', ')}`);
+        }
+      },
+      onError: (err) => {
+        console.warn('Voice recognition error:', err);
+        if (onShowToast) {
+          onShowToast(err.message || 'Microphone error. Please allow microphone access in your browser.');
+        }
+      }
+    });
+  };
+
   return (
     <div className="glass-card rounded-3xl p-6 sm:p-7 hover-lift h-full flex flex-col justify-between">
       
       <div>
         {/* Header with human, respectful tone */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 mb-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 mb-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="p-1 rounded-md bg-emerald-500/20 text-emerald-300">
@@ -75,7 +156,59 @@ export default function FarmerInputForm({
               {t.lotDetailsSubtitle}
             </p>
           </div>
+
+          {/* Voice Command Microphone Button */}
+          <button
+            type="button"
+            onClick={handleToggleVoiceCommand}
+            className={`btn-secondary !py-2 !px-3.5 flex items-center gap-2 transition-all self-start sm:self-center cursor-pointer ${
+              isListening 
+                ? 'bg-rose-500/25 border-rose-400 text-rose-300 shadow-[0_0_20px_rgba(244,63,94,0.4)] animate-pulse' 
+                : 'hover:border-emerald-400/50 hover:text-emerald-300'
+            }`}
+            title={isListening ? 'Click to cancel voice input' : t.voiceMicBtn}
+            aria-pressed={isListening}
+          >
+            {isListening ? (
+              <>
+                <MicOff className="w-4 h-4 text-rose-300 animate-bounce" />
+                <span className="text-xs font-bold text-rose-200 font-sans">
+                  {t.listeningActive}
+                </span>
+                <span className="flex gap-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping" />
+                </span>
+              </>
+            ) : (
+              <>
+                <Mic className="w-4 h-4 text-emerald-300" />
+                <span className="text-xs font-semibold text-white/90 font-sans">
+                  {t.voiceMicBtn}
+                </span>
+              </>
+            )}
+          </button>
         </div>
+
+        {/* Live Listening Feedback Banner */}
+        {isListening && (
+          <div className="mb-4 p-3.5 rounded-2xl bg-emerald-950/50 border border-emerald-400/40 backdrop-blur-md flex items-center justify-between gap-3 text-xs animate-fadeIn">
+            <div className="flex items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
+              <div>
+                <div className="font-bold text-emerald-300 font-sans">{t.listeningState}</div>
+                <div className="text-[11px] text-white/60 font-mono mt-0.5">{t.voiceHint}</div>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleToggleVoiceCommand}
+              className="text-xs text-white/60 hover:text-white px-2.5 py-1 rounded-lg bg-white/10 border border-white/15 cursor-pointer shrink-0"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
 
         {/* Form Inputs Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

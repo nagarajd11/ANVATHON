@@ -10,9 +10,12 @@ import {
   Receipt,
   ArrowRight, 
   Sparkles,
-  Scale
+  Scale,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { TRANSLATIONS } from '../translations';
+import { useVoiceAssistant } from '../hooks/useVoiceAssistant';
 
 export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSlip }) {
   if (!analysis) return null;
@@ -26,6 +29,27 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
 
   const toggleExpand = (id) => {
     setExpandedId(expandedId === id ? null : id);
+  };
+
+  const { speak, stop, activeSpeechId } = useVoiceAssistant(lang);
+
+  const handleSpeakMandi = (mkt) => {
+    const speechId = `mkt-${mkt.marketId}`;
+    if (activeSpeechId === speechId) {
+      stop();
+      return;
+    }
+
+    let speechText = '';
+    if (lang === 'kn') {
+      speechText = `${mkt.marketName} ಮಂಡಿ. ಪ್ರಕಟಿತ ದರ ${mkt.modalPrice} ರೂಪಾಯಿ. ಸಾರಿಗೆ ವೆಚ್ಚ ಮೈನಸ್ ${mkt.costs.transportCost} ರೂಪಾಯಿ. ಹಾಳಾಗುವಿಕೆ ನಷ್ಟ ಮೈನಸ್ ${mkt.costs.spoilageLoss} ರೂಪಾಯಿ. ಕೈಗೆ ಸಿಗುವ ಒಟ್ಟು ನಿವ್ವಳ ಹಣ ${mkt.netReturnInr} ರೂಪಾಯಿಗಳು.`;
+    } else if (lang === 'hi') {
+      speechText = `${mkt.marketName} मंडी। विज्ञापित भाव ${mkt.modalPrice} रुपये। गाड़ी भाड़ा माइनस ${mkt.costs.transportCost} रुपये। फसल खराबी माइनस ${mkt.costs.spoilageLoss} रुपये। जेब में आने वाला कुल शुद्ध मुनाफा ${mkt.netReturnInr} रुपये।`;
+    } else {
+      speechText = `${mkt.marketName} APMC. Listed rate ₹${mkt.modalPrice} per quintal. Transport cost minus ₹${mkt.costs.transportCost.toLocaleString()}. Spoilage loss minus ₹${mkt.costs.spoilageLoss.toLocaleString()}. Final in-hand return: ₹${mkt.netReturnInr.toLocaleString()}.`;
+    }
+
+    speak(speechText, speechId);
   };
 
   return (

@@ -9,9 +9,12 @@ import {
   CheckCircle2, 
   HelpCircle,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { TRANSLATIONS } from '../translations';
+import { useVoiceAssistant } from '../hooks/useVoiceAssistant';
 
 export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
   if (!analysis || !analysis.twist) return null;
@@ -21,6 +24,39 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
   const { bestNetMarket, highestPriceMarket, isSame, rupeeDifference } = twist;
 
   const explanationText = twist.explanation[lang] || twist.explanation.en;
+
+  const { speak, stop, activeSpeechId } = useVoiceAssistant(lang);
+
+  const handleSpeakTwist = () => {
+    const speechId = 'twist-audio';
+    if (activeSpeechId === speechId) {
+      stop();
+      return;
+    }
+
+    let speechText = '';
+    if (lang === 'kn') {
+      if (isSame) {
+        speechText = `ಉತ್ತಮ ಮಂಡಿ: ${bestNetMarket.marketName}. ನಿವ್ವಳ ಲಾಭ ${bestNetMarket.netReturnInr} ರೂಪಾಯಿಗಳು.`;
+      } else {
+        speechText = `ಪ್ರಕಟಿತ ದರದ ಭ್ರಮೆ: ${highestPriceMarket.marketName} ಮಂಡಿಯಲ್ಲಿ ದರ ಕ್ವಿಂಟಾಲ್‌ಗೆ ${highestPriceMarket.modalPrice} ರೂಪಾಯಿ ಇದೆ. ಆದರೆ ಲಾರಿ ಬಾಡಿಗೆ ${highestPriceMarket.costs.transportCost} ರೂಪಾಯಿ ಮತ್ತು ಹಾಳಾಗುವಿಕೆಯ ನಂತರ, ${bestNetMarket.marketName} ಮಂಡಿ ನಿಮಗೆ ${rupeeDifference} ರೂಪಾಯಿ ಹೆಚ್ಚು ನೈಜ ಲಾಭ ಕೊಡುತ್ತದೆ. ಆದ್ದರಿಂದ ${bestNetMarket.marketName} ಮಂಡಿಯೇ ನಿಮ್ಮ ಅತ್ಯುತ್ತಮ ಆಯ್ಕೆ.`;
+      }
+    } else if (lang === 'hi') {
+      if (isSame) {
+        speechText = `सर्वोत्तम मंडी: ${bestNetMarket.marketName}। शुद्ध मुनाफा ${bestNetMarket.netReturnInr} रुपये।`;
+      } else {
+        speechText = `विज्ञापित भाव का भ्रम: ${highestPriceMarket.marketName} मंडी में भाव ${highestPriceMarket.modalPrice} रुपये प्रति क्विंटल है। लेकिन गाड़ी भाड़ा और रास्ते की फसल खराबी काटकर, ${bestNetMarket.marketName} मंडी में आपको ${rupeeDifference} रुपये अधिक शुद्ध बचत होगी। इसलिए ${bestNetMarket.marketName} मंडी सबसे फायदेमंद है।`;
+      }
+    } else {
+      if (isSame) {
+        speechText = `Optimal choice: ${bestNetMarket.marketName} with net in-hand earnings of ₹${bestNetMarket.netReturnInr.toLocaleString()}.`;
+      } else {
+        speechText = `Headline price alert: ${highestPriceMarket.marketName} lists the highest price of ₹${highestPriceMarket.modalPrice} per quintal. But after deducting transport cost of ₹${highestPriceMarket.costs.transportCost.toLocaleString()} and road spoilage, ${bestNetMarket.marketName} leaves you with ₹${rupeeDifference.toLocaleString()} more take-home cash in your pocket. Choose ${bestNetMarket.marketName} for best take-home returns.`;
+      }
+    }
+
+    speak(speechText, speechId);
+  };
 
   return (
     <div className="glass-card rounded-3xl p-6 sm:p-8 mb-8 hover-lift">
@@ -44,7 +80,42 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
           </p>
         </div>
 
-        {!isSame && rupeeDifference > 0 && (
+                <div className="flex items-center flex-wrap gap-3">
+          {/* Glowing Speaker Audio Button */}
+          <button
+            type="button"
+            onClick={handleSpeakTwist}
+            className={`btn-secondary !py-2.5 !px-3.5 flex items-center gap-2 transition-all cursor-pointer ${
+              activeSpeechId === 'twist-audio' 
+                ? 'bg-emerald-500 text-pine border-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.5)] font-bold' 
+                : 'hover:border-emerald-400/50 hover:text-emerald-300'
+            }`}
+            title={activeSpeechId === 'twist-audio' ? 'Stop Audio' : t.speakTwist}
+            aria-pressed={activeSpeechId === 'twist-audio'}
+          >
+            {activeSpeechId === 'twist-audio' ? (
+              <>
+                <VolumeX className="w-4 h-4 text-pine animate-pulse" />
+                <span className="text-xs font-bold text-pine font-sans flex items-center gap-1.5">
+                  <span>Playing...</span>
+                  <span className="flex gap-0.5">
+                    <span className="w-1 h-3 bg-pine animate-bounce" />
+                    <span className="w-1 h-4 bg-pine animate-bounce delay-100" />
+                    <span className="w-1 h-2 bg-pine animate-bounce delay-200" />
+                  </span>
+                </span>
+              </>
+            ) : (
+              <>
+                <Volume2 className="w-4 h-4 text-emerald-300" />
+                <span className="text-xs font-semibold text-white/90 font-sans">
+                  {t.speakTwist}
+                </span>
+              </>
+            )}
+          </button>
+
+          {!isSame && rupeeDifference > 0 && (
           <div className="bg-emerald-500/20 border border-emerald-400/40 rounded-2xl px-5 py-3 flex items-center gap-3.5 backdrop-blur-md shadow-[0_8px_25px_-5px_rgba(16,185,129,0.35)] hover-glow-pill cursor-pointer">
             <div className="w-10 h-10 rounded-xl bg-emerald-500 text-pine flex items-center justify-center font-bold shadow-xs">
               <TrendingUp className="w-5 h-5 text-pine" />
@@ -59,6 +130,7 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
             </div>
           </div>
         )}
+        </div>
       </div>
 
       {/* Side-by-side comparison cards */}

@@ -13,11 +13,21 @@ import TransporterDirectory from './components/TransporterDirectory';
 import FarmerDispatchSlip from './components/FarmerDispatchSlip';
 import SavedAnalysesModal from './components/SavedAnalysesModal';
 import { TRANSLATIONS } from './translations';
+import { voiceAssistant } from './utils/voiceAssistant';
+import { useVoiceAssistant } from './hooks/useVoiceAssistant';
+import { parseVoiceCommand, generateVoiceFeedback } from './utils/voiceCommandParser';
 import { CheckCircle, Sparkles, Sprout, BarChart3, Map, Truck, ShieldCheck } from 'lucide-react';
 
 export default function App() {
   const [lang, setLang] = useState('en');
   const t = TRANSLATIONS[lang];
+
+  const handleSetLang = (newLang) => {
+    voiceAssistant.stop();
+    setLang(newLang);
+    const speechLocales = { en: 'English (en-IN)', kn: 'ಕನ್ನಡ (kn-IN)', hi: 'हिन्दी (hi-IN)' };
+    showToast(`🌐 Speech Locale: ${speechLocales[newLang] || newLang}`);
+  };
 
   // Active view tab: 'rankings' | 'map' | 'logistics'
   const [activeTab, setActiveTab] = useState('rankings');
@@ -169,6 +179,136 @@ export default function App() {
     showToast(`Loaded scenario: ${saved.crop_name} (${saved.quantity_quintals} qtl) from ${saved.origin_district}`);
   };
 
+  
+  const { speak, stop: stopVoice, startListening, stopListening, isListening } = useVoiceAssistant(lang);
+
+  const handleToggleVoiceCommand = () => {
+    if (isListening) {
+      stopListening();
+      return;
+    }
+
+    startListening({
+      onStart: () => {
+        showToast(t.listeningActive || '🎙️ Listening... Speak origin, crop, quantity, vehicle');
+      },
+      onResult: (primaryTranscript, event, alternatives) => {
+        const parsed = parseVoiceCommand(alternatives && alternatives.length ? alternatives : primaryTranscript);
+        if (!parsed) return;
+
+        const updatedParams = {};
+        const feedbackChanges = [];
+
+        if (parsed.matchedOrigin) {
+          setOriginDistrict(parsed.matchedOrigin);
+          updatedParams.originDistrict = parsed.matchedOrigin;
+          feedbackChanges.push(parsed.matchedOrigin);
+        }
+
+        if (parsed.matchedCrop) {
+          setSelectedCrop(parsed.matchedCrop);
+          updatedParams.cropName = parsed.matchedCrop;
+          feedbackChanges.push(parsed.matchedCrop);
+        }
+
+        if (parsed.matchedQuantity !== null && parsed.matchedQuantity !== undefined) {
+          setQuantity(parsed.matchedQuantity);
+          updatedParams.quantity = parsed.matchedQuantity;
+          feedbackChanges.push(`${parsed.matchedQuantity} qtl`);
+        }
+
+        if (parsed.matchedVehicle) {
+          setVehicleType(parsed.matchedVehicle);
+          updatedParams.vehicleType = parsed.matchedVehicle;
+          feedbackChanges.push(parsed.matchedVehicle);
+        }
+
+        if (parsed.matchedFreshness !== null && parsed.matchedFreshness !== undefined) {
+          setFreshness(parsed.matchedFreshness);
+          updatedParams.freshness = parsed.matchedFreshness;
+          feedbackChanges.push(`${parsed.matchedFreshness}h`);
+        }
+
+        // Sensitivity adjustments
+        if (parsed.sensitivityUpdates.fuelRateMultiplier !== undefined) {
+          setFuelRateMultiplier(parsed.sensitivityUpdates.fuelRateMultiplier);
+          updatedParams.fuelRateMultiplier = parsed.sensitivityUpdates.fuelRateMultiplier;
+          feedbackChanges.push('Fuel Rate');
+        }
+
+        if (parsed.sensitivityUpdates.spoilageMultiplier !== undefined) {
+          setSpoilageMultiplier(parsed.sensitivityUpdates.spoilageMultiplier);
+          updatedParams.spoilageMultiplier = parsed.sensitivityUpdates.spoilageMultiplier;
+          feedbackChanges.push('Spoilage');
+        }
+
+        if (parsed.sensitivityUpdates.speedKmph !== undefined) {
+          setSpeedKmph(parsed.sensitivityUpdates.speedKmph);
+          updatedParams.speedKmph = parsed.sensitivityUpdates.speedKmph;
+          feedbackChanges.push('Speed');
+        }
+
+        if (parsed.sensitivityUpdates.resetSensitivity) {
+          handleResetSensitivity();
+          feedbackChanges.push('Reset Sliders');
+        }
+
+        // Action Navigation
+        if (parsed.triggerOpenMap) {
+          document.getElementById('map-section')?.scrollIntoView({ behavior: 'smooth' });
+          feedbackChanges.push('Open Map');
+        }
+
+        if (parsed.triggerOpenSlip) {
+          setMarketForSlip(analysis?.topOpportunity || null);
+          setIsDispatchSlipOpen(true);
+          feedbackChanges.push('Open Slip');
+        }
+
+        if (parsed.triggerOpenPooling) {
+          document.getElementById('pooling-section')?.scrollIntoView({ behavior: 'smooth' });
+          feedbackChanges.push('Truck Pooling');
+        }
+
+        if (parsed.triggerResetForm) {
+          setSelectedCrop('Tomato');
+          setQuantity(20);
+          setOriginDistrict('Davanagere');
+          setVehicleType('BOLERO_PICKUP');
+          setFreshness(6);
+          handleResetSensitivity();
+          feedbackChanges.push('Reset Form');
+        }
+
+        // Calculate Trigger
+        if (parsed.triggerCalculate) {
+          executeAnalysis(updatedParams);
+          feedbackChanges.push('Calculate');
+        }
+
+        // Spoken audio feedback
+        const speech = generateVoiceFeedback(parsed, lang, {
+          originDistrict: parsed.matchedOrigin || originDistrict,
+          selectedCrop: parsed.matchedCrop || selectedCrop,
+          quantity: parsed.matchedQuantity !== null ? parsed.matchedQuantity : quantity,
+          vehicleType: parsed.matchedVehicle || vehicleType
+        });
+
+        if (speech) {
+          speak(speech, 'voice-confirm');
+        }
+
+        const transcriptDisplay = parsed.rawText || primaryTranscript;
+        const summaryText = feedbackChanges.length > 0 ? feedbackChanges.join(', ') : 'Updated';
+        showToast(`🎙️ "${transcriptDisplay}" → ${summaryText}`);
+      },
+      onError: (err) => {
+        console.warn('Voice command recognition error:', err);
+        showToast(err.message || 'Microphone error. Please allow microphone permissions.');
+      }
+    });
+  };
+
   return (
     <div className="relative min-h-screen text-white font-sans selection:bg-emerald-500/30 selection:text-emerald-950">
       
@@ -192,9 +332,11 @@ export default function App() {
         {/* Top Navigation */}
         <Navbar
           lang={lang}
-          setLang={setLang}
+          setLang={handleSetLang}
           isFluidFxEnabled={isFluidFxEnabled}
           onToggleFluidFx={handleToggleFluidFx}
+          isListening={isListening}
+          onToggleVoiceCommand={handleToggleVoiceCommand}
           onSelectTab={(tab) => {
             const id = tab === 'logistics' ? 'pooling-section' : tab === 'map' ? 'map-section' : 'rankings-section';
             const el = document.getElementById(id);
@@ -271,6 +413,9 @@ export default function App() {
                 setVehicleType={setVehicleType}
                 onCalculate={() => executeAnalysis()}
                 isLoading={isLoading}
+                onShowToast={showToast}
+                isListening={isListening}
+                onToggleVoiceCommand={handleToggleVoiceCommand}
               />
             </div>
 

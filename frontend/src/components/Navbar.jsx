@@ -4,7 +4,9 @@ import {
   Languages, 
   Users,
   Sparkles,
-  Droplets
+  Droplets,
+  Mic,
+  MicOff
 } from 'lucide-react';
 import { TRANSLATIONS } from '../translations';
 
@@ -13,7 +15,9 @@ export default function Navbar({
   setLang,
   isFluidFxEnabled = true,
   onToggleFluidFx,
-  onSelectTab
+  onSelectTab,
+  isListening = false,
+  onToggleVoiceCommand
 }) {
   const t = TRANSLATIONS[lang];
 
@@ -62,6 +66,34 @@ export default function Navbar({
               {isFluidFxEnabled ? 'ON' : 'OFF'}
             </span>
           </button>
+
+          {/* Multilingual Voice Command Mic Button */}
+          {onToggleVoiceCommand && (
+            <button
+              type="button"
+              onClick={onToggleVoiceCommand}
+              className={`btn-secondary !py-1.5 !px-3 font-sans text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
+                isListening 
+                  ? 'border-rose-400 bg-rose-500/25 text-rose-300 shadow-[0_0_20px_rgba(244,63,94,0.4)] animate-pulse' 
+                  : 'text-white/80 hover:text-emerald-300 hover:border-emerald-400/50'
+              }`}
+              title={isListening ? 'Click to cancel voice input' : t.voiceMicBtn}
+              aria-pressed={isListening}
+            >
+              {isListening ? (
+                <>
+                  <MicOff className="w-3.5 h-3.5 text-rose-300 animate-bounce" />
+                  <span className="font-bold text-rose-200 hidden sm:inline">{t.listeningActive}</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-ping" />
+                </>
+              ) : (
+                <>
+                  <Mic className="w-3.5 h-3.5 text-emerald-300" />
+                  <span className="hidden sm:inline">{t.voiceMicBtn}</span>
+                </>
+              )}
+            </button>
+          )}
 
           {/* Quick Link to Truck Sharing */}
           <button
