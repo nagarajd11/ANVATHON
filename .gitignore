@@ -7,6 +7,10 @@ frontend/node_modules/
 /data/
 **/data/db/
 
+# Duplicate video storage (tracked via frontend/public/video.mp4)
+/video.mp4
+frontend/dist/video.mp4
+
 # Environment files
 .env
 .env.local

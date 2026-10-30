@@ -3,12 +3,13 @@ import {
   Truck, 
   Phone, 
   MessageCircle, 
-  CheckCircle, 
   Star, 
   Snowflake, 
   ShieldCheck,
-  CalendarCheck
+  CalendarCheck,
+  Check
 } from 'lucide-react';
+import SpotlightCard from './SpotlightCard';
 import { TRANSLATIONS } from '../translations';
 
 export default function TransporterDirectory({
@@ -21,74 +22,82 @@ export default function TransporterDirectory({
   const [bookedModalDealer, setBookedModalDealer] = useState(null);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 mb-8">
+    <div className="glass-card rounded-3xl p-6 sm:p-8 mb-8 border border-emerald-900/10 shadow-[0_16px_45px_-10px_rgba(4,47,46,0.22),inset_0_1px_1px_0_rgba(255,255,255,0.9)]">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4 mb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-chlorophyll/10 pb-5 mb-6">
         <div>
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-blue-100 text-blue-700 rounded-lg">
-              <Truck className="w-4 h-4" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900">{t.transporterTitle}</h3>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="p-1 rounded-md bg-emerald-500/10 text-emerald-800">
+              <Truck className="w-4 h-4 text-emerald-700" />
+            </span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-chlorophyll/60">
+              Verified Logistics Directory
+            </span>
           </div>
-          <p className="text-xs text-slate-500 mt-0.5">{t.transporterSub}</p>
+          <h3 className="text-2xl sm:text-3xl font-serif italic text-chlorophyll tracking-wide">
+            {t.transporterTitle}
+          </h3>
+          <p className="text-xs text-chlorophyll/70 mt-1 font-sans">
+            {t.transporterSub}
+          </p>
         </div>
-        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 self-start sm:self-auto">
-          Verified Karnataka Agri-Logistics
+        <span className="text-xs font-mono font-semibold px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-200 self-start sm:self-auto">
+          Karnataka APMC Transport Network
         </span>
       </div>
 
       {/* Transporter Dealer Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {dealers.map((dealer) => (
-          <div 
+          <SpotlightCard 
             key={dealer.dealer_id}
-            className="rounded-xl border border-slate-200 p-4 hover:shadow-md transition-shadow bg-slate-50/50"
+            spotlightColor="rgba(16, 185, 129, 0.12)"
+            className="rounded-2xl border border-chlorophyll/15 p-5 bg-white/90 shadow-2xs hover:shadow-md transition-all"
           >
             {/* Dealer Header */}
-            <div className="flex items-start justify-between mb-3">
+            <div className="flex items-start justify-between mb-4">
               <div>
                 <div className="flex items-center gap-1.5">
-                  <h4 className="font-bold text-sm text-slate-900">{dealer.dealer_name}</h4>
+                  <h4 className="font-bold text-base text-chlorophyll tracking-tight font-sans">{dealer.dealer_name}</h4>
                   {dealer.verified && (
                     <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" title="Verified Carrier" />
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
-                  <span>Base: {dealer.district_base}</span>
+                <div className="flex items-center gap-2 text-xs text-chlorophyll/60 mt-1 font-mono">
+                  <span>Hub: {dealer.district_base}</span>
                   <span>•</span>
-                  <span className="flex items-center gap-0.5 text-amber-600 font-bold">
-                    <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                  <span className="flex items-center gap-1 text-terracotta-700 font-bold tabular-nums">
+                    <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
                     {dealer.rating} ({dealer.trips_completed} trips)
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <a
                   href={`tel:${dealer.contact_phone}`}
-                  className="p-2 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 transition-colors"
-                  title="Call Dealer"
+                  className="p-2.5 rounded-xl bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition-colors border border-emerald-200/60"
+                  title="Call Transporter"
                 >
-                  <Phone className="w-3.5 h-3.5" />
+                  <Phone className="w-4 h-4" />
                 </a>
                 <a
-                  href={`https://wa.me/${dealer.whatsapp_number.replace(/[^0-9]/g, '')}`}
+                  href={`https://wa.me/${dealer.whatsapp_number ? dealer.whatsapp_number.replace(/[^0-9]/g, '') : ''}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="p-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+                  className="p-2.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-xs"
                   title="WhatsApp"
                 >
-                  <MessageCircle className="w-3.5 h-3.5" />
+                  <MessageCircle className="w-4 h-4" />
                 </a>
               </div>
             </div>
 
             {/* Vehicle Fleet */}
-            <div className="space-y-2 mt-3">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-                Available Fleet Options:
+            <div className="space-y-2.5 mt-3">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-chlorophyll/50 block font-mono">
+                Available Fleet Units:
               </span>
               {dealer.vehicles.map((vh) => {
                 const isSelected = currentVehicleType === vh.vehicle_type;
@@ -96,25 +105,25 @@ export default function TransporterDirectory({
                 return (
                   <div
                     key={vh.vehicle_id}
-                    className={`flex items-center justify-between p-2.5 rounded-lg border text-xs transition-all ${
+                    className={`flex items-center justify-between p-3 rounded-xl border text-xs transition-all ${
                       isSelected 
-                        ? 'bg-agri-50 border-agri-300 text-agri-900 font-semibold' 
-                        : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
+                        ? 'bg-emerald-50/80 border-emerald-400 text-emerald-950 font-semibold shadow-xs' 
+                        : 'bg-[#fbfbfa] border-chlorophyll/10 hover:border-chlorophyll/20 text-chlorophyll'
                     }`}
                   >
-                    <div className="flex items-center gap-2">
-                      <Truck className={`w-4 h-4 ${vh.is_refrigerated ? 'text-cyan-600' : 'text-slate-500'}`} />
+                    <div className="flex items-center gap-2.5">
+                      <Truck className={`w-4 h-4 shrink-0 ${vh.is_refrigerated ? 'text-emerald-700' : 'text-chlorophyll/50'}`} />
                       <div>
-                        <div className="flex items-center gap-1 font-bold">
+                        <div className="flex items-center gap-1.5 font-bold font-sans">
                           <span>{vh.vehicle_name}</span>
                           {vh.is_refrigerated && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-cyan-100 text-cyan-800 border border-cyan-200 flex items-center gap-0.5">
+                            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-0.5 font-mono">
                               <Snowflake className="w-2.5 h-2.5" /> Reefer
                             </span>
                           )}
                         </div>
-                        <div className="text-[11px] text-slate-500">
-                          Capacity: {vh.capacity_quintals} qtl • Base: ₹{vh.base_fare_inr} + ₹{vh.rate_per_km_inr}/km
+                        <div className="text-[11px] text-chlorophyll/60 font-mono tabular-nums mt-0.5">
+                          Cap: {vh.capacity_quintals} qtl • Base: ₹{vh.base_fare_inr} + ₹{vh.rate_per_km_inr}/km
                         </div>
                       </div>
                     </div>
@@ -122,10 +131,10 @@ export default function TransporterDirectory({
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => onSelectVehicle(vh.vehicle_type)}
-                        className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                        className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-agri-600 text-white'
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                            ? 'bg-chlorophyll text-emerald-300 shadow-xs'
+                            : 'bg-white text-chlorophyll hover:bg-black/5 border border-chlorophyll/15'
                         }`}
                       >
                         {isSelected ? 'Active' : 'Select'}
@@ -133,7 +142,7 @@ export default function TransporterDirectory({
 
                       <button
                         onClick={() => setBookedModalDealer({ dealer, vehicle: vh })}
-                        className="px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 text-[11px] font-bold cursor-pointer"
+                        className="px-2.5 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 text-[11px] font-bold cursor-pointer"
                         title="Instant Booking Confirmation"
                       >
                         Book
@@ -144,58 +153,58 @@ export default function TransporterDirectory({
               })}
             </div>
 
-          </div>
+          </SpotlightCard>
         ))}
       </div>
 
       {/* Booking Confirmation Modal */}
       {bookedModalDealer && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-            <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-4">
+        <div className="fixed inset-0 z-50 bg-pine/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-chlorophyll/15">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto mb-4">
               <CalendarCheck className="w-6 h-6" />
             </div>
 
-            <h3 className="text-lg font-bold text-slate-900 text-center mb-1">
-              Vehicle Booking Request
+            <h3 className="text-xl font-bold text-chlorophyll text-center mb-1 font-serif italic">
+              Vehicle Booking Dispatch
             </h3>
-            <p className="text-xs text-slate-500 text-center mb-4">
+            <p className="text-xs text-chlorophyll/60 text-center mb-5 font-sans">
               Direct linkage with {bookedModalDealer.dealer.dealer_name}
             </p>
 
-            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-2 mb-4">
+            <div className="bg-[#fbfbfa] p-4 rounded-2xl border border-chlorophyll/10 text-xs space-y-2 mb-5 font-mono">
               <div className="flex justify-between">
-                <span className="text-slate-500">Vehicle:</span>
-                <span className="font-bold text-slate-800">{bookedModalDealer.vehicle.vehicle_name}</span>
+                <span className="text-chlorophyll/60 font-sans">Vehicle:</span>
+                <span className="font-bold text-chlorophyll">{bookedModalDealer.vehicle.vehicle_name}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Freight Rate:</span>
-                <span className="font-bold text-slate-800">
+              <div className="flex justify-between tabular-nums">
+                <span className="text-chlorophyll/60 font-sans">Freight Rate:</span>
+                <span className="font-bold text-chlorophyll">
                   ₹{bookedModalDealer.vehicle.base_fare_inr} Base + ₹{bookedModalDealer.vehicle.rate_per_km_inr}/km
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-slate-500">Carrier Phone:</span>
-                <span className="font-bold text-emerald-700">{bookedModalDealer.dealer.contact_phone}</span>
+              <div className="flex justify-between tabular-nums">
+                <span className="text-chlorophyll/60 font-sans">Carrier Phone:</span>
+                <span className="font-bold text-emerald-800">{bookedModalDealer.dealer.contact_phone}</span>
               </div>
             </div>
 
-            <p className="text-xs text-slate-600 mb-5 text-center">
+            <p className="text-xs text-chlorophyll/70 mb-6 text-center font-sans">
               A dispatch notification has been scheduled. Would you like to call the driver now to confirm gate pickup?
             </p>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 font-sans">
               <button
                 onClick={() => setBookedModalDealer(null)}
-                className="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                className="flex-1 py-3 rounded-xl border border-chlorophyll/20 text-xs font-bold text-chlorophyll/70 hover:bg-black/5 transition-colors cursor-pointer"
               >
                 Close
               </button>
               <a
                 href={`tel:${bookedModalDealer.dealer.contact_phone}`}
-                className="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20"
+                className="flex-1 py-3 rounded-xl bg-chlorophyll hover:bg-[#0c3829] text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/20 border border-emerald-500/40"
               >
-                <Phone className="w-3.5 h-3.5" />
+                <Phone className="w-3.5 h-3.5 fill-emerald-300" />
                 Call Driver
               </a>
             </div>
@@ -206,4 +215,3 @@ export default function TransporterDirectory({
     </div>
   );
 }
-

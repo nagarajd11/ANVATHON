@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from './components/Navbar';
+import BackgroundVideo from './components/BackgroundVideo';
 import FarmerInputForm from './components/FarmerInputForm';
 import TheTwistCard from './components/TheTwistCard';
 import MarketMap from './components/MarketMap';
@@ -11,7 +12,7 @@ import TransporterDirectory from './components/TransporterDirectory';
 import FarmerDispatchSlip from './components/FarmerDispatchSlip';
 import SavedAnalysesModal from './components/SavedAnalysesModal';
 import { TRANSLATIONS } from './translations';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Sparkles, Sprout, ArrowDown } from 'lucide-react';
 
 export default function App() {
   const [lang, setLang] = useState('en');
@@ -144,176 +145,208 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-agri-200">
+    <div className="relative min-h-screen text-chlorophyll font-sans selection:bg-emerald-500/30 selection:text-emerald-950">
       
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed top-24 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-2.5 text-xs animate-bounce">
-          <CheckCircle className="w-4 h-4 text-emerald-400" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
+      {/* Scroll-Locked Background Video Layer */}
+      <BackgroundVideo />
 
-      {/* Top Navigation */}
-      <Navbar
-        lang={lang}
-        setLang={setLang}
-      />
-
-      {/* Hero Strip Banner */}
-      <div className="bg-gradient-to-r from-agri-900 via-agri-800 to-emerald-900 text-white py-6 px-4 sm:px-6 lg:px-8 border-b border-agri-700">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-emerald-300 text-xs font-bold uppercase tracking-wider">
-              Agricultural Marketing & Supply Chain
-            </span>
-          </div>
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-            {t.appTitle}: {t.appSubtitle}
-          </h2>
-          <p className="text-xs sm:text-sm text-agri-100 max-w-2xl mt-1 leading-relaxed">
-            Never load the truck for the wrong mandi again. HarvestRoute recalculates true in-hand cash after deducting real freight, transit spoilage on perishable lots, and APMC yard charges.
-          </p>
-        </div>
-      </div>
-
-      {/* Main Container */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+      {/* Main Foreground Interface */}
+      <div className="relative z-10 flex flex-col min-h-screen">
         
-        {/* 1. Farmer Lot Configuration Input */}
-        <FarmerInputForm
-          lang={lang}
-          crops={crops}
-          origins={origins}
-          vehicleCatalog={vehicleCatalog}
-          selectedCrop={selectedCrop}
-          setSelectedCrop={setSelectedCrop}
-          quantity={quantity}
-          setQuantity={setQuantity}
-          freshness={freshness}
-          setFreshness={setFreshness}
-          originDistrict={originDistrict}
-          setOriginDistrict={setOriginDistrict}
-          vehicleType={vehicleType}
-          setVehicleType={setVehicleType}
-          onCalculate={() => executeAnalysis()}
-          isLoading={isLoading}
-        />
-
-        {/* 2. The Twist: Side-by-side Showcase */}
-        {analysis && (
-          <TheTwistCard
-            analysis={analysis}
-            lang={lang}
-            onFocusMarket={(mkt) => {
-              setMarketForSlip(mkt);
-              setIsDispatchSlipOpen(true);
-            }}
-          />
+        {/* Toast Notification */}
+        {toastMessage && (
+          <div className="fixed top-20 right-6 z-50 glass-dark-card text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-white/20 flex items-center gap-3 text-xs animate-bounce font-mono">
+            <CheckCircle className="w-4 h-4 text-emerald-400" />
+            <span className="font-sans">{toastMessage}</span>
+          </div>
         )}
 
-        {/* 3. Interactive Route & Logistics Map */}
-        {analysis && (
-          <MarketMap
-            analysis={analysis}
-            lang={lang}
-          />
-        )}
-
-        {/* 4. Ranked APMC Leaderboard Table */}
-        {analysis && (
-          <MarketLeaderboard
-            analysis={analysis}
-            lang={lang}
-            onSelectMarketForSlip={(mkt) => {
-              setMarketForSlip(mkt);
-              setIsDispatchSlipOpen(true);
-            }}
-          />
-        )}
-
-        {/* 5. 'What-If' Dynamic Sensitivity Lab (Live Sliders) */}
-        <SensitivityLab
+        {/* Top Navigation */}
+        <Navbar
           lang={lang}
-          fuelRateMultiplier={fuelRateMultiplier}
-          setFuelRateMultiplier={setFuelRateMultiplier}
-          spoilageMultiplier={spoilageMultiplier}
-          setSpoilageMultiplier={setSpoilageMultiplier}
-          cessRateOverride={cessRateOverride}
-          setCessRateOverride={setCessRateOverride}
-          speedKmph={speedKmph}
-          setSpeedKmph={setSpeedKmph}
-          onReset={handleResetSensitivity}
+          setLang={setLang}
         />
 
-        {/* 6. Visual Deductions Waterfall Chart */}
-        {analysis && (
-          <CostBreakdownChart
-            analysis={analysis}
-            lang={lang}
-          />
-        )}
+        {/* Vision-OS Botanical Hero Header */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 w-full mb-8 pt-2">
+          <div className="glass-floating rounded-3xl p-8 sm:p-12 text-white border border-white/30 shadow-[0_20px_50px_-12px_rgba(4,47,46,0.35),inset_0_1px_1px_0_rgba(255,255,255,0.7)] backdrop-blur-2xl relative overflow-hidden">
+            
+            {/* Ambient emerald light bloom */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
 
-        {/* 7. Truck Sharing & Direct Phone Collaboration */}
-        <CropPoolingHub
-          lang={lang}
-          origins={origins}
-          crops={crops}
-          vehicleCatalog={vehicleCatalog}
-          currentDistrict={originDistrict}
-          currentCrop={selectedCrop}
-          currentQuantity={quantity}
-          onShowToast={showToast}
-        />
+            <div className="relative z-10 max-w-4xl">
+              <div className="flex flex-wrap items-center gap-2.5 mb-4">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 backdrop-blur-md">
+                  <Sprout className="w-3.5 h-3.5 text-emerald-300" />
+                  Domain 3: Agriculture & Rural Development
+                </span>
+                <span className="px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-white/10 text-white/80 border border-white/15 backdrop-blur-md">
+                  87,420 Agmarknet APMC Records
+                </span>
+              </div>
 
-        {/* 8. Local Karnataka Transporter & Vehicle Directory */}
-        <TransporterDirectory
-          dealers={dealers}
-          lang={lang}
-          currentVehicleType={vehicleType}
-          onSelectVehicle={(vType) => {
-            setVehicleType(vType);
-            executeAnalysis({ vehicleType: vType });
-            showToast(`Vehicle updated to ${vType}. Analysis recalculated!`);
-          }}
-        />
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-serif italic tracking-wide text-white font-normal leading-[1.15]">
+                Find the Market That Pays the Most After Costs.
+              </h2>
 
-      </main>
+              <p className="text-sm sm:text-base text-white/85 mt-4 leading-relaxed font-sans max-w-2xl font-normal">
+                Never load the truck for the wrong mandi again. HarvestRoute recalculates real in-hand cash after deducting road freight, non-linear transit decay on perishable crops, and statutory yard cess.
+              </p>
 
-      {/* Modals */}
-      <FarmerDispatchSlip
-        isOpen={isDispatchSlipOpen}
-        onClose={() => setIsDispatchSlipOpen(false)}
-        analysis={analysis}
-        marketOverride={marketForSlip}
-      />
-
-      <SavedAnalysesModal
-        isOpen={isSavedModalOpen}
-        onClose={() => setIsSavedModalOpen(false)}
-        onLoadScenario={handleLoadSavedScenario}
-      />
-
-      {/* Footer */}
-      <footer className="bg-slate-900 text-slate-400 py-8 border-t border-slate-800 text-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-emerald-600 text-white flex items-center justify-center font-bold">
-              HR
+              <div className="flex flex-wrap items-center gap-4 mt-6 pt-6 border-t border-white/15 text-xs text-white/70 font-mono">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>62 Karnataka Mandis Monitored</span>
+                </div>
+                <span>•</span>
+                <div>
+                  <span>Haversine 1.28x Road Tortuosity</span>
+                </div>
+                <span>•</span>
+                <div>
+                  <span>Non-Linear Spoilage Decay Curves</span>
+                </div>
+              </div>
             </div>
-            <span className="font-bold text-slate-300">HarvestRoute Agricultural Intelligence</span>
-            <span>•</span>
-            <span>Built with MongoDB & Real APMC Dataset</span>
           </div>
+        </section>
 
-          <div className="flex items-center gap-4 text-slate-500">
-            <span>Domain 3: Agriculture and Rural Development</span>
-            <span>•</span>
-            <span>Karnataka APMC Mandi Network</span>
+        {/* Main Content Ledger */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 pb-16 flex-1 w-full">
+          
+          {/* 1. Farmer Lot Configuration Input */}
+          <FarmerInputForm
+            lang={lang}
+            crops={crops}
+            origins={origins}
+            vehicleCatalog={vehicleCatalog}
+            selectedCrop={selectedCrop}
+            setSelectedCrop={setSelectedCrop}
+            quantity={quantity}
+            setQuantity={setQuantity}
+            freshness={freshness}
+            setFreshness={setFreshness}
+            originDistrict={originDistrict}
+            setOriginDistrict={setOriginDistrict}
+            vehicleType={vehicleType}
+            setVehicleType={setVehicleType}
+            onCalculate={() => executeAnalysis()}
+            isLoading={isLoading}
+          />
+
+          {/* 2. The Twist: Side-by-side Showcase */}
+          {analysis && (
+            <TheTwistCard
+              analysis={analysis}
+              lang={lang}
+              onFocusMarket={(mkt) => {
+                setMarketForSlip(mkt);
+                setIsDispatchSlipOpen(true);
+              }}
+            />
+          )}
+
+          {/* 3. Interactive Route & Logistics Map */}
+          {analysis && (
+            <MarketMap
+              analysis={analysis}
+              lang={lang}
+            />
+          )}
+
+          {/* 4. Ranked APMC Leaderboard Table with Gliding Springs */}
+          {analysis && (
+            <MarketLeaderboard
+              analysis={analysis}
+              lang={lang}
+              onSelectMarketForSlip={(mkt) => {
+                setMarketForSlip(mkt);
+                setIsDispatchSlipOpen(true);
+              }}
+            />
+          )}
+
+          {/* 5. 'What-If' Dynamic Sensitivity Lab (Live Sliders) */}
+          <SensitivityLab
+            lang={lang}
+            fuelRateMultiplier={fuelRateMultiplier}
+            setFuelRateMultiplier={setFuelRateMultiplier}
+            spoilageMultiplier={spoilageMultiplier}
+            setSpoilageMultiplier={setSpoilageMultiplier}
+            cessRateOverride={cessRateOverride}
+            setCessRateOverride={setCessRateOverride}
+            speedKmph={speedKmph}
+            setSpeedKmph={setSpeedKmph}
+            onReset={handleResetSensitivity}
+          />
+
+          {/* 6. Visual Deductions Waterfall Chart */}
+          {analysis && (
+            <CostBreakdownChart
+              analysis={analysis}
+              lang={lang}
+            />
+          )}
+
+          {/* 7. Truck Sharing & Direct Phone Collaboration */}
+          <CropPoolingHub
+            lang={lang}
+            origins={origins}
+            crops={crops}
+            vehicleCatalog={vehicleCatalog}
+            currentDistrict={originDistrict}
+            currentCrop={selectedCrop}
+            currentQuantity={quantity}
+            onShowToast={showToast}
+          />
+
+          {/* 8. Local Karnataka Transporter & Vehicle Directory */}
+          <TransporterDirectory
+            dealers={dealers}
+            lang={lang}
+            currentVehicleType={vehicleType}
+            onSelectVehicle={(vType) => {
+              setVehicleType(vType);
+              executeAnalysis({ vehicleType: vType });
+              showToast(`Vehicle updated to ${vType}. Analysis recalculated!`);
+            }}
+          />
+
+        </main>
+
+        {/* Modals */}
+        <FarmerDispatchSlip
+          isOpen={isDispatchSlipOpen}
+          onClose={() => setIsDispatchSlipOpen(false)}
+          analysis={analysis}
+          marketOverride={marketForSlip}
+        />
+
+        <SavedAnalysesModal
+          isOpen={isSavedModalOpen}
+          onClose={() => setIsSavedModalOpen(false)}
+          onLoadScenario={handleLoadSavedScenario}
+        />
+
+        {/* Editorial Footer */}
+        <footer className="glass-floating border-t border-white/20 text-white/70 py-8 text-xs backdrop-blur-2xl">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono">
+            <div className="flex items-center gap-2.5">
+              <div className="w-6 h-6 rounded-lg bg-emerald-500 text-pine flex items-center justify-center font-bold font-sans text-xs">
+                HR
+              </div>
+              <span className="font-bold text-white font-sans">HarvestRoute Agricultural Intelligence</span>
+              <span>•</span>
+              <span>Domain 3 / Karnataka APMC Network</span>
+            </div>
+
+            <div className="text-white/50 text-[11px]">
+              Crafted with botanical glass & mathematical rigor.
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
 
+      </div>
     </div>
   );
 }
