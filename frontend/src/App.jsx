@@ -11,14 +11,13 @@ import TransporterDirectory from './components/TransporterDirectory';
 import FarmerDispatchSlip from './components/FarmerDispatchSlip';
 import SavedAnalysesModal from './components/SavedAnalysesModal';
 import { TRANSLATIONS } from './translations';
-import { Bookmark, CheckCircle, Share2, Printer, Sparkles, Layers } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 
 export default function App() {
   const [lang, setLang] = useState('en');
   const t = TRANSLATIONS[lang];
 
   // System & Reference data
-  const [dbStatus, setDbStatus] = useState(null);
   const [crops, setCrops] = useState([]);
   const [origins, setOrigins] = useState([]);
   const [vehicleCatalog, setVehicleCatalog] = useState({});
@@ -26,7 +25,7 @@ export default function App() {
 
   // Farmer Form State
   const [selectedCrop, setSelectedCrop] = useState('Tomato');
-  const [quantity, setQuantity] = useState(8); // 8 quintals typical smallholder batch
+  const [quantity, setQuantity] = useState(8);
   const [freshness, setFreshness] = useState(6);
   const [originDistrict, setOriginDistrict] = useState('Chamarajanagar');
   const [vehicleType, setVehicleType] = useState('BOLERO_PICKUP');
@@ -51,14 +50,12 @@ export default function App() {
   useEffect(() => {
     async function initData() {
       try {
-        const [statusRes, cropsRes, originsRes, transRes] = await Promise.all([
-          fetch('/api/status').then(r => r.json()),
+        const [cropsRes, originsRes, transRes] = await Promise.all([
           fetch('/api/crops').then(r => r.json()),
           fetch('/api/origins').then(r => r.json()),
           fetch('/api/transporters').then(r => r.json())
         ]);
 
-        setDbStatus(statusRes);
         setCrops(cropsRes);
         setOrigins(originsRes);
         if (transRes.vehicleCatalog) setVehicleCatalog(transRes.vehicleCatalog);
@@ -127,58 +124,6 @@ export default function App() {
     setSpeedKmph(40);
   };
 
-  // Save Scenario to MongoDB
-  const handleSaveScenario = async () => {
-    if (!analysis) return;
-    try {
-      const payload = {
-        crop_name: analysis.cropName,
-        quantity_quintals: analysis.quantityQuintals,
-        freshness_hours: freshness,
-        origin_district: analysis.originDistrict,
-        origin_lat: analysis.originCoordinates.lat,
-        origin_lon: analysis.originCoordinates.lon,
-        vehicle_type: analysis.vehicleType,
-        vehicle_name: analysis.bestNetMarket.vehicleUsed.name,
-        recommended_market: {
-          market_name: analysis.bestNetMarket.marketName,
-          district: analysis.bestNetMarket.district,
-          net_return_inr: analysis.bestNetMarket.netReturnInr,
-          modal_price_inr: analysis.bestNetMarket.modalPrice,
-          distance_km: analysis.bestNetMarket.roadDistanceKm,
-          transit_hours: analysis.bestNetMarket.transitHours,
-          transport_cost_inr: analysis.bestNetMarket.costs.transportCost,
-          spoilage_loss_inr: analysis.bestNetMarket.costs.spoilageLoss,
-          market_fees_inr: analysis.bestNetMarket.costs.marketFees
-        },
-        nominal_highest_market: {
-          market_name: analysis.highestPriceMarket.marketName,
-          district: analysis.highestPriceMarket.district,
-          net_return_inr: analysis.highestPriceMarket.netReturnInr,
-          modal_price_inr: analysis.highestPriceMarket.modalPrice,
-          distance_km: analysis.highestPriceMarket.roadDistanceKm,
-          transport_cost_inr: analysis.highestPriceMarket.costs.transportCost,
-          spoilage_loss_inr: analysis.highestPriceMarket.costs.spoilageLoss,
-          market_fees_inr: analysis.highestPriceMarket.costs.marketFees
-        },
-        price_trap_delta_inr: analysis.twist.rupeeDifference,
-        explanation: analysis.twist.explanation.en
-      };
-
-      const res = await fetch('/api/save-analysis', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (res.ok) {
-        showToast('Scenario successfully saved to MongoDB database!');
-      }
-    } catch (e) {
-      console.error('Save failed:', e);
-    }
-  };
-
   const showToast = (msg) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
@@ -213,60 +158,22 @@ export default function App() {
       <Navbar
         lang={lang}
         setLang={setLang}
-        dbStatus={dbStatus}
-        hasAnalysis={!!analysis}
-        onOpenDispatch={() => {
-          setMarketForSlip(analysis?.bestNetMarket || null);
-          setIsDispatchSlipOpen(true);
-        }}
-        onOpenSaved={() => setIsSavedModalOpen(true)}
       />
 
       {/* Hero Strip Banner */}
       <div className="bg-gradient-to-r from-agri-900 via-agri-800 to-emerald-900 text-white py-6 px-4 sm:px-6 lg:px-8 border-b border-agri-700">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                Award-Winning Solution • Domain 3
-              </span>
-              <span className="text-agri-200 text-xs font-semibold">
-                Agricultural Marketing & Supply Chain
-              </span>
-            </div>
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-              {t.appTitle}: {t.appSubtitle}
-            </h2>
-            <p className="text-xs sm:text-sm text-agri-100 max-w-2xl mt-1 leading-relaxed">
-              Never load the truck for the wrong mandi again. HarvestRoute recalculates true in-hand cash after deducting real freight, transit spoilage on perishable lots, and APMC yard charges.
-            </p>
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-emerald-300 text-xs font-bold uppercase tracking-wider">
+              Agricultural Marketing & Supply Chain
+            </span>
           </div>
-
-          {/* Quick Action Buttons */}
-          <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
-            {analysis && (
-              <>
-                <button
-                  onClick={handleSaveScenario}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 backdrop-blur-xs transition-colors cursor-pointer"
-                >
-                  <Bookmark className="w-3.5 h-3.5 text-amber-300" />
-                  <span>{t.saveScenarioBtn}</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    setMarketForSlip(analysis.bestNetMarket);
-                    setIsDispatchSlipOpen(true);
-                  }}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-black shadow-md shadow-emerald-500/20 transition-all cursor-pointer"
-                >
-                  <Printer className="w-3.5 h-3.5" />
-                  <span>{t.dispatchSlipBtn}</span>
-                </button>
-              </>
-            )}
-          </div>
+          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+            {t.appTitle}: {t.appSubtitle}
+          </h2>
+          <p className="text-xs sm:text-sm text-agri-100 max-w-2xl mt-1 leading-relaxed">
+            Never load the truck for the wrong mandi again. HarvestRoute recalculates true in-hand cash after deducting real freight, transit spoilage on perishable lots, and APMC yard charges.
+          </p>
         </div>
       </div>
 
@@ -347,7 +254,7 @@ export default function App() {
           />
         )}
 
-        {/* 7. NEW FEATURE: Farmer Crop Pooling & Group Freight Sharing */}
+        {/* 7. Truck Sharing & Direct Phone Collaboration */}
         <CropPoolingHub
           lang={lang}
           origins={origins}
