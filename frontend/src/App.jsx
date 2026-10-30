@@ -6,6 +6,7 @@ import MarketMap from './components/MarketMap';
 import MarketLeaderboard from './components/MarketLeaderboard';
 import SensitivityLab from './components/SensitivityLab';
 import CostBreakdownChart from './components/CostBreakdownChart';
+import CropPoolingHub from './components/CropPoolingHub';
 import TransporterDirectory from './components/TransporterDirectory';
 import FarmerDispatchSlip from './components/FarmerDispatchSlip';
 import SavedAnalysesModal from './components/SavedAnalysesModal';
@@ -25,7 +26,7 @@ export default function App() {
 
   // Farmer Form State
   const [selectedCrop, setSelectedCrop] = useState('Tomato');
-  const [quantity, setQuantity] = useState(20); // 20 quintals as in background story
+  const [quantity, setQuantity] = useState(8); // 8 quintals typical smallholder batch
   const [freshness, setFreshness] = useState(6);
   const [originDistrict, setOriginDistrict] = useState('Chamarajanagar');
   const [vehicleType, setVehicleType] = useState('BOLERO_PICKUP');
@@ -346,7 +347,19 @@ export default function App() {
           />
         )}
 
-        {/* 7. Local Karnataka Transporter & Vehicle Directory */}
+        {/* 7. NEW FEATURE: Farmer Crop Pooling & Group Freight Sharing */}
+        <CropPoolingHub
+          lang={lang}
+          origins={origins}
+          crops={crops}
+          vehicleCatalog={vehicleCatalog}
+          currentDistrict={originDistrict}
+          currentCrop={selectedCrop}
+          currentQuantity={quantity}
+          onShowToast={showToast}
+        />
+
+        {/* 8. Local Karnataka Transporter & Vehicle Directory */}
         <TransporterDirectory
           dealers={dealers}
           lang={lang}
@@ -397,4 +410,3 @@ export default function App() {
     </div>
   );
 }
-

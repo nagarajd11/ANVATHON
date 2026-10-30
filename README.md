@@ -43,7 +43,18 @@ The farmer **loses ₹12,655 in cold, hard cash** because the highest listed pri
   * **Low/Negligible Perishable (Paddy, Ragi, Maize, Cotton, Pulses, Coffee, Spices)**: 0.01% per hour.
 * Accounts for harvest freshness window (Harvested today vs 1-2 days ago).
 
-### 4. 🚛 Vehicle Fleet & Transporter Directory
+### 4. 👥 NEW FEATURE: Farmer Crop Pooling & Group Freight Sharing (ರೈತರ ಸಂಯುಕ್ತ ಸಾಗಣೆ)
+* **Solves the Small-Lot Transport Penalty**: Smallholder farmers with 4–10 quintals frequently pay for an entire vehicle alone (₹2,500–₹3,500 freight), suffering astronomical costs of ₹400–₹600/qtl that destroy profitability.
+* **Collaborative Pooling Board**:
+  * Farmers can post a pool request or browse and join existing vehicles departing from their district/village to the same APMC.
+  * Real-time visual capacity bar displaying occupied vs. available space (quintals).
+* **Proportional Weight-Based Expense Split**:
+  * Freight is distributed transparently based on each farmer's load weight (quintals).
+  * Delivers up to **75% freight savings** per farmer!
+* **In-Person Cash Settlement Slip**:
+  * Generates a printable, WhatsApp-shareable manifest detailing each farmer's share in rupees to settle cash in person directly with the vehicle driver or host upon loading or arrival at the APMC gate.
+
+### 5. 🚛 Vehicle Fleet & Transporter Directory
 * Real-world transport vehicle classes:
   * **Auto / Piaggio Ape** (≤ 8 qtl, ₹18/km)
   * **Tata Ace (Chota Hathi)** (≤ 15 qtl, ₹24/km)
@@ -52,13 +63,13 @@ The farmer **loses ₹12,655 in cold, hard cash** because the highest listed pri
   * **Cold-Chain Reefer Van** (≤ 35 qtl, ₹46/km — *eliminates 85% of transit spoilage!*)
 * Directory of verified local Karnataka transporters with direct phone call and WhatsApp linkage.
 
-### 5. 🗺️ Interactive GIS Route Map (Leaflet)
+### 6. 🗺️ Interactive GIS Route Map (Leaflet)
 * Visualizes the farmer's origin with a tractor icon.
 * Color-coded market beacons (🟢 Recommended Net Winner, 🔴 Nominal Price Trap, 🔵 Other Mandis).
 * Driving route polylines with road distance (km) and travel duration (hrs).
 * Interactive popups with instant financial scorecards.
 
-### 6. 🎛️ Real-Time "What-If" Sensitivity Simulator
+### 7. 🎛️ Real-Time "What-If" Sensitivity Simulator
 * Live slider controls to adjust:
   * **Fuel / Freight Rate Modifier** (0.7x to 2.0x)
   * **Spoilage / Weather Severity** (Summer heatwave vs Winter cool)
@@ -66,11 +77,11 @@ The farmer **loses ₹12,655 in cold, hard cash** because the highest listed pri
   * **Truck Transit Speed / Road Delay** (20 km/h to 65 km/h)
 * Instantaneous recalculation of rankings and cost breakdown chart without page refresh.
 
-### 7. 📄 Printable Farmer Dispatch Slip & Mandi Gate Pass
+### 8. 📄 Printable Farmer Dispatch Slip & Mandi Gate Pass
 * 1-click printable manifest for the farmer to hand over to the truck driver, complete with GPS route distance, agreed transporter charges, gate pass details, and itemized deduction ledger.
 
-### 8. 🍃 Zero-Login MongoDB Integration
-* Built with MongoDB (Mongoose) storing crops, markets, prices, transporter fleets, and saved simulations.
+### 9. 🍃 Zero-Login MongoDB Integration
+* Built with MongoDB (Mongoose) storing crops, markets, prices, transporter fleets, pool requests, and saved simulations.
 * Zero-friction guest experience: farmers can use the platform immediately without sign-up, save routes, and retrieve past simulations.
 * Built-in high-speed pre-indexed JSON cache ensures resilient, lightning-fast execution in any environment.
 
@@ -88,93 +99,26 @@ $$\text{Transport Cost} = (\text{Base Fare}_v + \text{Distance} \times \text{Rat
 
 $$\text{Spoilage Loss} = \text{Gross Revenue} \times \left( \text{Base Decay}(\text{crop}) \times \text{Transit Hours} \times \text{Freshness Factor} \times (1 - \text{Reefer Discount}) \right)$$
 
-$$\text{Market Fees} = (\text{Gross Revenue} \times \text{Cess Rate}) + (Q \times \text{Hamali Rate}) + \text{Weighbridge Fee}$$
+$$\text{Pooled Share}(\text{Farmer}_i) = \text{Total Vehicle Freight} \times \left( \frac{Q_i}{\sum Q_k} \right)$$
 
-$$\mathbf{\text{Net In-Hand Cash}} = \text{Gross Revenue} - \text{Transport Cost} - \text{Spoilage Loss} - \text{Market Fees}$$
-
----
-
-## 📂 Project Architecture
-
-```
-Anvathon/
-├── harvestroute_karnataka_market_crop.csv   # 87,420 row APMC pricing dataset
-├── IMPLEMENTATION_PLAN.md                  # Comprehensive architectural plan
-├── package.json                            # Root npm run scripts
-│
-├── backend/                                # Node.js + Express API
-│   ├── models/
-│   │   ├── Crop.js                         # Crop schema & decay parameters
-│   │   ├── Market.js                       # 62 APMC mandis & GPS coordinates
-│   │   ├── MarketPrice.js                  # Pricing & capacity records
-│   │   ├── Transporter.js                  # Local transporter fleet directory
-│   │   └── SavedAnalysis.js                # No-login saved scenarios
-│   ├── services/
-│   │   ├── geoService.js                   # Haversine distance & road tortuosity
-│   │   ├── calculationEngine.js            # Net return & The Twist engine
-│   │   └── dbService.js                    # MongoDB connection & cache fallback
-│   ├── scripts/
-│   │   └── seedData.js                     # Dataset parser & seeder
-│   ├── data/
-│   │   └── seedDataCache.json              # Pre-indexed high-speed cache
-│   └── server.js                           # Express full-stack web server
-│
-└── frontend/                               # React + Vite + Tailwind CSS
-    ├── src/
-    │   ├── components/
-    │   │   ├── Navbar.jsx                  # Header, trilingual switcher, DB badge
-    │   │   ├── FarmerInputForm.jsx         # Lot picker (Crop, Qty, Freshness, District)
-    │   │   ├── TheTwistCard.jsx            # Mandi Trap vs Smart Pick hero card
-    │   │   ├── MarketMap.jsx               # Leaflet GIS route map & markers
-    │   │   ├── MarketLeaderboard.jsx       # Ranked APMC table with equation breakdown
-    │   │   ├── SensitivityLab.jsx          # Live What-If sliders (Fuel, Decay, Cess)
-    │   │   ├── CostBreakdownChart.jsx      # Recharts waterfall of deductions
-    │   │   ├── TransporterDirectory.jsx    # Transporter fleet cards & booking modal
-    │   │   ├── FarmerDispatchSlip.jsx      # Printable driver manifest & invoice
-    │   │   └── SavedAnalysesModal.jsx      # No-login saved scenario retrieval
-    │   ├── translations.js                 # EN / ಕನ್ನಡ / हिन्दी dictionaries
-    │   ├── App.jsx                         # Main orchestrator
-    │   └── index.css                       # Tailwind & print styling
-    └── dist/                               # Production bundled assets
-```
+$$\text{Net In-Hand Return} = \text{Gross} - \text{Transport Cost} - \text{Spoilage Loss} - \text{APMC Cess} - \text{Hamali Charges}$$
 
 ---
 
 ## 🚀 Quick Start Guide
 
-### 1. Requirements
-* Node.js v18+ (tested on Node.js v24)
-* MongoDB (optional: app automatically falls back to the pre-indexed JSON cache if MongoDB is offline, guaranteeing 100% uptime!)
+### 1. Prerequisites
+- Node.js (v18+ recommended)
+- Git
+- MongoDB (Optional: automatically falls back to High-Speed JSON Cache if MongoDB is offline)
 
-### 2. Run the Application
-Open PowerShell or your terminal in the `Anvathon` project directory:
-
+### 2. Run the Full-Stack Application
 ```bash
-# Start the full-stack server
+# 1. Start the backend server (runs on port 5000, serves frontend automatically)
 npm start
+
+# Or run frontend and backend independently in development mode:
+npm run dev:backend
+npm run dev:frontend
 ```
-
-Then open your browser at:
-👉 **`http://localhost:5000`**
-
-### 3. Re-seed Dataset (Optional)
-If you wish to parse the 87,420 rows fresh from the CSV:
-```bash
-npm run seed
-```
-
----
-
-## 💡 Typical Farmer Scenario Walkthrough
-
-1. **Lot Selection**: Farmer selects **Tomato**, **20 Quintals**, **Freshly Harvested (< 6 hrs)**, with origin in **Chamarajanagar District**.
-2. **Analysis Result**:
-   * **The Twist Appears**: Shows **Ranebennur APMC** listed at ₹2,944/qtl (Nominal Winner) vs **Nanjangud APMC** listed at ₹2,766/qtl (Smart Choice).
-   * **The Reality**: Travelling 425 km to Ranebennur burns ₹13,580 in transport and ruins ₹4,691 of tomatoes in the heat. Nanjangud is only 46 km away, costing just ₹2,118 in freight and ₹631 in spoilage.
-   * **The Verdict**: Choosing Nanjangud APMC puts **₹12,655 extra net cash in the farmer's pocket (+32.8%)**!
-3. **What-If Exploration**: The farmer drags the **Fuel Rate Modifier** up to 1.5x or changes the vehicle to a **Cold-Chain Reefer**, seeing instant recalculations across the map and leaderboard.
-4. **Logistics Booking**: The farmer reviews local transporters in the directory, contacts the driver, and prints the **Farmer Dispatch Slip** for the trip.
-
----
-
-*HarvestRoute — Empowering Indian farmers with transparent market intelligence.*
+Open your browser at `http://localhost:5000` to interact with HarvestRoute!

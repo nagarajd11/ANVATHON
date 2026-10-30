@@ -11,9 +11,14 @@ const {
   getDistrictCenters,
   saveAnalysisRecord,
   getSavedAnalysesList,
+  getPoolRequests,
+  getPoolById,
+  createPoolRequest,
+  joinPoolRequest,
   isDbConnected
 } = require('./services/dbService');
 const { runHarvestRouteAnalysis, VEHICLE_CATALOG } = require('./services/calculationEngine');
+const { getRoadDistance } = require('./services/geoService');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -30,10 +35,11 @@ app.get('/api/status', async (req, res) => {
   const markets = await getMarkets();
   const prices = await getPricesLookup();
   const transporters = await getTransporters();
+  const pools = await getPoolRequests();
 
   res.json({
     status: 'ONLINE',
-    service: 'HarvestRoute Market Intelligence Engine',
+    service: 'HarvestRoute Market Intelligence & Crop Pooling Engine',
     database: {
       type: 'MongoDB',
       connected: isDbConnected(),
@@ -43,7 +49,8 @@ app.get('/api/status', async (req, res) => {
       totalCrops: crops.length,
       totalMarkets: markets.length,
       totalPriceRecords: Object.keys(prices).length,
-      totalTransporterDealers: transporters.length
+      totalTransporterDealers: transporters.length,
+      activeCropPools: pools.filter(p => p.status === 'OPEN').length
     }
   });
 });
@@ -155,7 +162,161 @@ app.get('/api/saved-analyses', async (req, res) => {
   }
 });
 
-// 8. Serve Frontend Static Production Build
+// ==========================================
+// 8. CROP POOLING & IN-PERSON SPLITTING APIS
+// ==========================================
+
+// Get all pooling requests with optional filters
+app.get('/api/pools', async (req, res) => {
+  try {
+    const { district, status, crop } = req.query;
+    const pools = await getPoolRequests({ district, status, crop });
+    res.json(pools);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get single pool with settlement details
+app.get('/api/pools/:id', async (req, res) => {
+  try {
+    const pool = await getPoolById(req.params.id);
+    if (!pool) return res.status(404).json({ error: 'Pool request not found' });
+    res.json(pool);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Create new pool request
+app.post('/api/pools', async (req, res) => {
+  try {
+    const {
+      creator_farmer_name,
+      creator_phone,
+      origin_district,
+      origin_village,
+      destination_market,
+      crop_name,
+      quantity_quintals,
+      vehicle_type = 'BOLERO_PICKUP',
+      dispatch_date,
+      dispatch_time,
+      notes
+    } = req.body;
+
+    if (!creator_farmer_name || !creator_phone || !origin_district || !destination_market || !quantity_quintals) {
+      return res.status(400).json({ error: 'Please provide all required farmer lot fields.' });
+    }
+
+    const vehicle = VEHICLE_CATALOG[vehicle_type] || VEHICLE_CATALOG['BOLERO_PICKUP'];
+    const districtCenters = getDistrictCenters();
+    const markets = await getMarkets();
+
+    const originCenter = districtCenters[origin_district] || districtCenters['Davanagere'];
+    const targetMkt = markets.find(m => m.market_name.toLowerCase() === destination_market.toLowerCase()) 
+      || markets[0];
+
+    const distKm = getRoadDistance(originCenter.lat, originCenter.lon, targetMkt.latitude, targetMkt.longitude);
+    const tollSurcharge = distKm > 80 ? Math.round((distKm / 60) * 120) : 0;
+    const totalFreight = Math.round(vehicle.baseFare + (distKm * vehicle.ratePerKm) + tollSurcharge);
+
+    const poolRecord = await createPoolRequest({
+      creator_farmer_name,
+      creator_phone,
+      origin_district,
+      origin_village,
+      destination_market: targetMkt.market_name,
+      destination_district: targetMkt.district,
+      crop_name,
+      quantity_quintals: parseFloat(quantity_quintals),
+      vehicle_type,
+      vehicle_name: vehicle.name,
+      vehicle_capacity_quintals: vehicle.capacity,
+      trip_distance_km: distKm,
+      total_freight_inr: totalFreight,
+      dispatch_date,
+      dispatch_time,
+      notes
+    });
+
+    res.status(201).json({ success: true, pool: poolRecord });
+  } catch (err) {
+    console.error('Create pool error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Join an open pool
+app.post('/api/pools/:id/join', async (req, res) => {
+  try {
+    const { farmer_name, phone, village, crop_name, quantity_quintals } = req.body;
+    if (!farmer_name || !phone || !quantity_quintals) {
+      return res.status(400).json({ error: 'Please provide farmer name, contact number, and quantity.' });
+    }
+
+    const updated = await joinPoolRequest(req.params.id, {
+      farmer_name,
+      phone,
+      village,
+      crop_name: crop_name || 'Mixed Crop',
+      quantity_quintals: parseFloat(quantity_quintals)
+    });
+
+    res.json({ success: true, pool: updated });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Calculate Solo vs Pooled Savings Comparison
+app.post('/api/pools/calculate-savings', async (req, res) => {
+  try {
+    const { quantityQuintals = 6, distanceKm = 80 } = req.body;
+    const qty = parseFloat(quantityQuintals);
+    const dist = parseFloat(distanceKm);
+
+    // Solo scenario: Farmer must hire minimal vehicle (e.g. 3-wheeler or Chota Hathi)
+    let soloVehicle = VEHICLE_CATALOG['THREE_WHEELER'];
+    if (qty > 8) soloVehicle = VEHICLE_CATALOG['CHOTA_HATHI'];
+    if (qty > 15) soloVehicle = VEHICLE_CATALOG['BOLERO_PICKUP'];
+
+    const soloFreight = soloVehicle.baseFare + (dist * soloVehicle.ratePerKm);
+    const soloRatePerQtl = Math.round(soloFreight / qty);
+
+    // Pooled scenario: 25-qtl Bolero shared to full capacity (e.g. with 2-3 farmers)
+    const poolVehicle = VEHICLE_CATALOG['BOLERO_PICKUP'];
+    const pooledFullFreight = poolVehicle.baseFare + (dist * poolVehicle.ratePerKm);
+    const pooledRatePerQtl = Math.round(pooledFullFreight / poolVehicle.capacity);
+    const farmerPooledExpense = Math.round(qty * pooledRatePerQtl);
+
+    const cashSaved = Math.max(0, soloFreight - farmerPooledExpense);
+    const percentSaved = Math.round((cashSaved / soloFreight) * 100);
+
+    res.json({
+      lotQuantityQuintals: qty,
+      distanceKm: dist,
+      soloScenario: {
+        vehicleName: soloVehicle.name,
+        totalCostInr: Math.round(soloFreight),
+        costPerQuintalInr: soloRatePerQtl
+      },
+      pooledScenario: {
+        vehicleName: poolVehicle.name,
+        sharedCostInr: farmerPooledExpense,
+        costPerQuintalInr: pooledRatePerQtl
+      },
+      savings: {
+        cashSavedInr: cashSaved,
+        percentSaved: percentSaved
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 9. Serve Frontend Static Production Build
 const distPath = path.resolve(__dirname, '../frontend/dist');
 app.use(express.static(distPath));
 

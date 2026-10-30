@@ -7,8 +7,9 @@ import {
   Truck, 
   Snowflake, 
   AlertTriangle,
-  ArrowRight,
-  Sparkles
+  ArrowRight, 
+  Sparkles,
+  Users
 } from 'lucide-react';
 import { TRANSLATIONS } from '../translations';
 
@@ -83,7 +84,7 @@ export default function FarmerInputForm({
           <select
             value={selectedCrop}
             onChange={(e) => setSelectedCrop(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-agri-500 focus:bg-white transition-all cursor-pointer"
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-agri-500 focus:bg-white transition-all cursor-pointer"
           >
             {crops.map((crop) => (
               <option key={crop.crop_id || crop.crop_name} value={crop.crop_name}>
@@ -117,7 +118,7 @@ export default function FarmerInputForm({
               max="500"
               value={quantity}
               onChange={(e) => setQuantity(Math.max(1, parseFloat(e.target.value) || 1))}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-agri-500 focus:bg-white transition-all"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-agri-500 focus:bg-white transition-all"
             />
             <span className="absolute right-3 top-2.5 text-xs font-bold text-slate-400">
               qtl (100kg)
@@ -125,12 +126,12 @@ export default function FarmerInputForm({
           </div>
           {/* Quick preset chips */}
           <div className="mt-1.5 flex items-center gap-1">
-            {[10, 20, 35, 50].map((val) => (
+            {[5, 10, 20, 35, 50].map((val) => (
               <button
                 key={val}
                 type="button"
                 onClick={() => setQuantity(val)}
-                className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                className={`text-[10px] font-bold px-1.5 py-0.5 rounded border cursor-pointer ${
                   quantity === val 
                     ? 'bg-agri-600 text-white border-agri-600' 
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200'
@@ -151,7 +152,7 @@ export default function FarmerInputForm({
           <select
             value={freshness}
             onChange={(e) => setFreshness(parseFloat(e.target.value))}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-agri-500 focus:bg-white transition-all cursor-pointer"
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-agri-500 focus:bg-white transition-all cursor-pointer"
           >
             <option value="6">{t.freshnessJustHarvested}</option>
             <option value="24">{t.freshness1Day}</option>
@@ -171,7 +172,7 @@ export default function FarmerInputForm({
           <select
             value={originDistrict}
             onChange={(e) => setOriginDistrict(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-agri-500 focus:bg-white transition-all cursor-pointer"
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-agri-500 focus:bg-white transition-all cursor-pointer"
           >
             {origins.map((orig) => (
               <option key={orig.district} value={orig.district}>
@@ -193,7 +194,7 @@ export default function FarmerInputForm({
           <select
             value={vehicleType}
             onChange={(e) => setVehicleType(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-agri-500 focus:bg-white transition-all cursor-pointer"
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-agri-500 focus:bg-white transition-all cursor-pointer"
           >
             {Object.entries(vehicleCatalog).map(([key, vh]) => (
               <option key={key} value={key}>
@@ -220,6 +221,35 @@ export default function FarmerInputForm({
 
       </div>
 
+      {/* Small Lot Optimization Callout */}
+      {quantity <= 15 && (
+        <div className="mt-5 p-3.5 bg-gradient-to-r from-emerald-50 via-teal-50 to-slate-50 border border-emerald-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <span className="p-2 bg-emerald-100 text-emerald-800 rounded-lg shrink-0">
+              <Users className="w-4 h-4" />
+            </span>
+            <div>
+              <div className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+                <span>{t.soloAlertBadge} ({quantity} Quintals)</span>
+                <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.2 bg-emerald-200/60 text-emerald-800 rounded">
+                  Save up to 75%
+                </span>
+              </div>
+              <p className="text-[11px] text-emerald-800/80 mt-0.5">
+                {t.soloAlertText}
+              </p>
+            </div>
+          </div>
+          <a
+            href="#crop-pooling-section"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shrink-0 transition-colors shadow-2xs"
+          >
+            <span>{t.poolNavBtn}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </a>
+        </div>
+      )}
+
       {/* Action Button */}
       <div className="mt-6 flex justify-end">
         <button
@@ -241,4 +271,3 @@ export default function FarmerInputForm({
     </div>
   );
 }
-
