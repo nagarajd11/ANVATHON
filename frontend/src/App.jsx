@@ -1,0 +1,400 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import Navbar from './components/Navbar';
+import FarmerInputForm from './components/FarmerInputForm';
+import TheTwistCard from './components/TheTwistCard';
+import MarketMap from './components/MarketMap';
+import MarketLeaderboard from './components/MarketLeaderboard';
+import SensitivityLab from './components/SensitivityLab';
+import CostBreakdownChart from './components/CostBreakdownChart';
+import TransporterDirectory from './components/TransporterDirectory';
+import FarmerDispatchSlip from './components/FarmerDispatchSlip';
+import SavedAnalysesModal from './components/SavedAnalysesModal';
+import { TRANSLATIONS } from './translations';
+import { Bookmark, CheckCircle, Share2, Printer, Sparkles, Layers } from 'lucide-react';
+
+export default function App() {
+  const [lang, setLang] = useState('en');
+  const t = TRANSLATIONS[lang];
+
+  // System & Reference data
+  const [dbStatus, setDbStatus] = useState(null);
+  const [crops, setCrops] = useState([]);
+  const [origins, setOrigins] = useState([]);
+  const [vehicleCatalog, setVehicleCatalog] = useState({});
+  const [dealers, setDealers] = useState([]);
+
+  // Farmer Form State
+  const [selectedCrop, setSelectedCrop] = useState('Tomato');
+  const [quantity, setQuantity] = useState(20); // 20 quintals as in background story
+  const [freshness, setFreshness] = useState(6);
+  const [originDistrict, setOriginDistrict] = useState('Chamarajanagar');
+  const [vehicleType, setVehicleType] = useState('BOLERO_PICKUP');
+
+  // Sensitivity Sliders
+  const [fuelRateMultiplier, setFuelRateMultiplier] = useState(1.0);
+  const [spoilageMultiplier, setSpoilageMultiplier] = useState(1.0);
+  const [cessRateOverride, setCessRateOverride] = useState(0.015);
+  const [speedKmph, setSpeedKmph] = useState(40);
+
+  // Analysis Result
+  const [analysis, setAnalysis] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
+
+  // Modals
+  const [isDispatchSlipOpen, setIsDispatchSlipOpen] = useState(false);
+  const [marketForSlip, setMarketForSlip] = useState(null);
+  const [isSavedModalOpen, setIsSavedModalOpen] = useState(false);
+
+  // 1. Initial Load of Reference Data
+  useEffect(() => {
+    async function initData() {
+      try {
+        const [statusRes, cropsRes, originsRes, transRes] = await Promise.all([
+          fetch('/api/status').then(r => r.json()),
+          fetch('/api/crops').then(r => r.json()),
+          fetch('/api/origins').then(r => r.json()),
+          fetch('/api/transporters').then(r => r.json())
+        ]);
+
+        setDbStatus(statusRes);
+        setCrops(cropsRes);
+        setOrigins(originsRes);
+        if (transRes.vehicleCatalog) setVehicleCatalog(transRes.vehicleCatalog);
+        if (transRes.dealers) setDealers(transRes.dealers);
+      } catch (err) {
+        console.error('Failed to load initial metadata:', err);
+      }
+    }
+    initData();
+  }, []);
+
+  // 2. Perform Analysis Function
+  const executeAnalysis = useCallback(async (params = {}) => {
+    setIsLoading(true);
+    try {
+      const payload = {
+        cropName: params.cropName || selectedCrop,
+        quantityQuintals: params.quantity !== undefined ? params.quantity : quantity,
+        originDistrict: params.originDistrict || originDistrict,
+        vehicleType: params.vehicleType || vehicleType,
+        freshnessHours: params.freshness !== undefined ? params.freshness : freshness,
+        fuelRateMultiplier: params.fuelRateMultiplier !== undefined ? params.fuelRateMultiplier : fuelRateMultiplier,
+        spoilageMultiplier: params.spoilageMultiplier !== undefined ? params.spoilageMultiplier : spoilageMultiplier,
+        cessRateOverride: params.cessRateOverride !== undefined ? params.cessRateOverride : cessRateOverride,
+        speedKmph: params.speedKmph !== undefined ? params.speedKmph : speedKmph
+      };
+
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setAnalysis(data);
+      }
+    } catch (err) {
+      console.error('Analysis execution failed:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedCrop, quantity, originDistrict, vehicleType, freshness, fuelRateMultiplier, spoilageMultiplier, cessRateOverride, speedKmph]);
+
+  // Initial analysis once origins are loaded
+  useEffect(() => {
+    if (origins.length > 0) {
+      executeAnalysis();
+    }
+  }, [origins.length]);
+
+  // Sensitivity Sliders Debounced Live Recalculation
+  useEffect(() => {
+    if (!analysis) return;
+    const timer = setTimeout(() => {
+      executeAnalysis();
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [fuelRateMultiplier, spoilageMultiplier, cessRateOverride, speedKmph]);
+
+  // Reset Sensitivity
+  const handleResetSensitivity = () => {
+    setFuelRateMultiplier(1.0);
+    setSpoilageMultiplier(1.0);
+    setCessRateOverride(0.015);
+    setSpeedKmph(40);
+  };
+
+  // Save Scenario to MongoDB
+  const handleSaveScenario = async () => {
+    if (!analysis) return;
+    try {
+      const payload = {
+        crop_name: analysis.cropName,
+        quantity_quintals: analysis.quantityQuintals,
+        freshness_hours: freshness,
+        origin_district: analysis.originDistrict,
+        origin_lat: analysis.originCoordinates.lat,
+        origin_lon: analysis.originCoordinates.lon,
+        vehicle_type: analysis.vehicleType,
+        vehicle_name: analysis.bestNetMarket.vehicleUsed.name,
+        recommended_market: {
+          market_name: analysis.bestNetMarket.marketName,
+          district: analysis.bestNetMarket.district,
+          net_return_inr: analysis.bestNetMarket.netReturnInr,
+          modal_price_inr: analysis.bestNetMarket.modalPrice,
+          distance_km: analysis.bestNetMarket.roadDistanceKm,
+          transit_hours: analysis.bestNetMarket.transitHours,
+          transport_cost_inr: analysis.bestNetMarket.costs.transportCost,
+          spoilage_loss_inr: analysis.bestNetMarket.costs.spoilageLoss,
+          market_fees_inr: analysis.bestNetMarket.costs.marketFees
+        },
+        nominal_highest_market: {
+          market_name: analysis.highestPriceMarket.marketName,
+          district: analysis.highestPriceMarket.district,
+          net_return_inr: analysis.highestPriceMarket.netReturnInr,
+          modal_price_inr: analysis.highestPriceMarket.modalPrice,
+          distance_km: analysis.highestPriceMarket.roadDistanceKm,
+          transport_cost_inr: analysis.highestPriceMarket.costs.transportCost,
+          spoilage_loss_inr: analysis.highestPriceMarket.costs.spoilageLoss,
+          market_fees_inr: analysis.highestPriceMarket.costs.marketFees
+        },
+        price_trap_delta_inr: analysis.twist.rupeeDifference,
+        explanation: analysis.twist.explanation.en
+      };
+
+      const res = await fetch('/api/save-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        showToast('Scenario successfully saved to MongoDB database!');
+      }
+    } catch (e) {
+      console.error('Save failed:', e);
+    }
+  };
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleLoadSavedScenario = (saved) => {
+    setSelectedCrop(saved.crop_name);
+    setQuantity(saved.quantity_quintals);
+    setOriginDistrict(saved.origin_district);
+    if (saved.vehicle_type) setVehicleType(saved.vehicle_type);
+    executeAnalysis({
+      cropName: saved.crop_name,
+      quantity: saved.quantity_quintals,
+      originDistrict: saved.origin_district,
+      vehicleType: saved.vehicle_type
+    });
+    showToast(`Loaded scenario: ${saved.crop_name} (${saved.quantity_quintals} qtl) from ${saved.origin_district}`);
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-agri-200">
+      
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-24 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-2.5 text-xs animate-bounce">
+          <CheckCircle className="w-4 h-4 text-emerald-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Top Navigation */}
+      <Navbar
+        lang={lang}
+        setLang={setLang}
+        dbStatus={dbStatus}
+        hasAnalysis={!!analysis}
+        onOpenDispatch={() => {
+          setMarketForSlip(analysis?.bestNetMarket || null);
+          setIsDispatchSlipOpen(true);
+        }}
+        onOpenSaved={() => setIsSavedModalOpen(true)}
+      />
+
+      {/* Hero Strip Banner */}
+      <div className="bg-gradient-to-r from-agri-900 via-agri-800 to-emerald-900 text-white py-6 px-4 sm:px-6 lg:px-8 border-b border-agri-700">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                Award-Winning Solution • Domain 3
+              </span>
+              <span className="text-agri-200 text-xs font-semibold">
+                Agricultural Marketing & Supply Chain
+              </span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+              {t.appTitle}: {t.appSubtitle}
+            </h2>
+            <p className="text-xs sm:text-sm text-agri-100 max-w-2xl mt-1 leading-relaxed">
+              Never load the truck for the wrong mandi again. HarvestRoute recalculates true in-hand cash after deducting real freight, transit spoilage on perishable lots, and APMC yard charges.
+            </p>
+          </div>
+
+          {/* Quick Action Buttons */}
+          <div className="flex items-center gap-2 self-start md:self-auto shrink-0">
+            {analysis && (
+              <>
+                <button
+                  onClick={handleSaveScenario}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold border border-white/20 backdrop-blur-xs transition-colors cursor-pointer"
+                >
+                  <Bookmark className="w-3.5 h-3.5 text-amber-300" />
+                  <span>{t.saveScenarioBtn}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setMarketForSlip(analysis.bestNetMarket);
+                    setIsDispatchSlipOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-black shadow-md shadow-emerald-500/20 transition-all cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>{t.dispatchSlipBtn}</span>
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Container */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+        
+        {/* 1. Farmer Lot Configuration Input */}
+        <FarmerInputForm
+          lang={lang}
+          crops={crops}
+          origins={origins}
+          vehicleCatalog={vehicleCatalog}
+          selectedCrop={selectedCrop}
+          setSelectedCrop={setSelectedCrop}
+          quantity={quantity}
+          setQuantity={setQuantity}
+          freshness={freshness}
+          setFreshness={setFreshness}
+          originDistrict={originDistrict}
+          setOriginDistrict={setOriginDistrict}
+          vehicleType={vehicleType}
+          setVehicleType={setVehicleType}
+          onCalculate={() => executeAnalysis()}
+          isLoading={isLoading}
+        />
+
+        {/* 2. The Twist: Side-by-side Showcase */}
+        {analysis && (
+          <TheTwistCard
+            analysis={analysis}
+            lang={lang}
+            onFocusMarket={(mkt) => {
+              setMarketForSlip(mkt);
+              setIsDispatchSlipOpen(true);
+            }}
+          />
+        )}
+
+        {/* 3. Interactive Route & Logistics Map */}
+        {analysis && (
+          <MarketMap
+            analysis={analysis}
+            lang={lang}
+          />
+        )}
+
+        {/* 4. Ranked APMC Leaderboard Table */}
+        {analysis && (
+          <MarketLeaderboard
+            analysis={analysis}
+            lang={lang}
+            onSelectMarketForSlip={(mkt) => {
+              setMarketForSlip(mkt);
+              setIsDispatchSlipOpen(true);
+            }}
+          />
+        )}
+
+        {/* 5. 'What-If' Dynamic Sensitivity Lab (Live Sliders) */}
+        <SensitivityLab
+          lang={lang}
+          fuelRateMultiplier={fuelRateMultiplier}
+          setFuelRateMultiplier={setFuelRateMultiplier}
+          spoilageMultiplier={spoilageMultiplier}
+          setSpoilageMultiplier={setSpoilageMultiplier}
+          cessRateOverride={cessRateOverride}
+          setCessRateOverride={setCessRateOverride}
+          speedKmph={speedKmph}
+          setSpeedKmph={setSpeedKmph}
+          onReset={handleResetSensitivity}
+        />
+
+        {/* 6. Visual Deductions Waterfall Chart */}
+        {analysis && (
+          <CostBreakdownChart
+            analysis={analysis}
+            lang={lang}
+          />
+        )}
+
+        {/* 7. Local Karnataka Transporter & Vehicle Directory */}
+        <TransporterDirectory
+          dealers={dealers}
+          lang={lang}
+          currentVehicleType={vehicleType}
+          onSelectVehicle={(vType) => {
+            setVehicleType(vType);
+            executeAnalysis({ vehicleType: vType });
+            showToast(`Vehicle updated to ${vType}. Analysis recalculated!`);
+          }}
+        />
+
+      </main>
+
+      {/* Modals */}
+      <FarmerDispatchSlip
+        isOpen={isDispatchSlipOpen}
+        onClose={() => setIsDispatchSlipOpen(false)}
+        analysis={analysis}
+        marketOverride={marketForSlip}
+      />
+
+      <SavedAnalysesModal
+        isOpen={isSavedModalOpen}
+        onClose={() => setIsSavedModalOpen(false)}
+        onLoadScenario={handleLoadSavedScenario}
+      />
+
+      {/* Footer */}
+      <footer className="bg-slate-900 text-slate-400 py-8 border-t border-slate-800 text-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded bg-emerald-600 text-white flex items-center justify-center font-bold">
+              HR
+            </div>
+            <span className="font-bold text-slate-300">HarvestRoute Agricultural Intelligence</span>
+            <span>•</span>
+            <span>Built with MongoDB & Real APMC Dataset</span>
+          </div>
+
+          <div className="flex items-center gap-4 text-slate-500">
+            <span>Domain 3: Agriculture and Rural Development</span>
+            <span>•</span>
+            <span>Karnataka APMC Mandi Network</span>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+  );
+}
+

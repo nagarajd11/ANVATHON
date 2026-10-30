@@ -1,0 +1,24 @@
+{
+  "name": "harvestroute",
+  "version": "1.0.0",
+  "description": "HarvestRoute - Find the Market That Pays the Most After Costs (Domain 3: Agriculture and Rural Development)",
+  "scripts": {
+    "start": "cd backend && npm start",
+    "seed": "cd backend && npm run seed",
+    "build:frontend": "cd frontend && npm run build",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev"
+  },
+  "keywords": [
+    "agritech",
+    "apmc",
+    "karnataka",
+    "net-return",
+    "spoilage-optimization",
+    "mandi-trap",
+    "mongodb"
+  ],
+  "author": "HarvestRoute Team",
+  "license": "MIT"
+}
+
