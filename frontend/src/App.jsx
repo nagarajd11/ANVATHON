@@ -13,7 +13,7 @@ import TransporterDirectory from './components/TransporterDirectory';
 import FarmerDispatchSlip from './components/FarmerDispatchSlip';
 import SavedAnalysesModal from './components/SavedAnalysesModal';
 import { TRANSLATIONS } from './translations';
-import { CheckCircle, Sparkles, Sprout, BarChart3, Map, Truck, ShieldCheck } from 'lucide-react';
+import { CheckCircle, Sparkles, Sprout, BarChart3, Map, Truck, ShieldCheck, Sliders } from 'lucide-react';
 
 export default function App() {
   const [lang, setLang] = useState('en');
@@ -249,47 +249,26 @@ export default function App() {
         {/* Main Content Ledger */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 pb-16 flex-1 w-full">
           
-          {/* GROUP 1: Two-Column Control Center (Lot Setup & Route Assumptions) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8 items-stretch">
-            
-            {/* Left (7 cols): Farmer Lot Configuration */}
-            <div className="lg:col-span-7">
-              <FarmerInputForm
-                lang={lang}
-                crops={crops}
-                origins={origins}
-                vehicleCatalog={vehicleCatalog}
-                selectedCrop={selectedCrop}
-                setSelectedCrop={setSelectedCrop}
-                quantity={quantity}
-                setQuantity={setQuantity}
-                freshness={freshness}
-                setFreshness={setFreshness}
-                originDistrict={originDistrict}
-                setOriginDistrict={setOriginDistrict}
-                vehicleType={vehicleType}
-                setVehicleType={setVehicleType}
-                onCalculate={() => executeAnalysis()}
-                isLoading={isLoading}
-              />
-            </div>
-
-            {/* Right (5 cols): Live Route Assumptions & Sliders */}
-            <div className="lg:col-span-5">
-              <SensitivityLab
-                lang={lang}
-                fuelRateMultiplier={fuelRateMultiplier}
-                setFuelRateMultiplier={setFuelRateMultiplier}
-                spoilageMultiplier={spoilageMultiplier}
-                setSpoilageMultiplier={setSpoilageMultiplier}
-                cessRateOverride={cessRateOverride}
-                setCessRateOverride={setCessRateOverride}
-                speedKmph={speedKmph}
-                setSpeedKmph={setSpeedKmph}
-                onReset={handleResetSensitivity}
-              />
-            </div>
-
+          {/* Farmer Lot Configuration */}
+          <div className="mb-8">
+            <FarmerInputForm
+              lang={lang}
+              crops={crops}
+              origins={origins}
+              vehicleCatalog={vehicleCatalog}
+              selectedCrop={selectedCrop}
+              setSelectedCrop={setSelectedCrop}
+              quantity={quantity}
+              setQuantity={setQuantity}
+              freshness={freshness}
+              setFreshness={setFreshness}
+              originDistrict={originDistrict}
+              setOriginDistrict={setOriginDistrict}
+              vehicleType={vehicleType}
+              setVehicleType={setVehicleType}
+              onCalculate={() => executeAnalysis()}
+              isLoading={isLoading}
+            />
           </div>
 
           {/* GROUP 2: The Twist — Side-by-side Showcase (Core Decision) */}
@@ -319,6 +298,15 @@ export default function App() {
                   >
                     <Map className="w-3.5 h-3.5 text-emerald-300" />
                     <span>Route Map</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('sensitivity-section')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="btn-secondary !py-1.5 !px-3 text-xs"
+                  >
+                    <Sliders className="w-3.5 h-3.5 text-emerald-300" />
+                    <span>Cost Sliders</span>
                   </button>
 
                   <button
@@ -356,7 +344,23 @@ export default function App() {
             </section>
           )}
 
-          {/* 4. Ranked Market Ledger & Itemized Deduction Bills */}
+          {/* 4. Market Conditions & Cost Sliders */}
+          <section id="sensitivity-section" className="mb-8 scroll-mt-20">
+            <SensitivityLab
+              lang={lang}
+              fuelRateMultiplier={fuelRateMultiplier}
+              setFuelRateMultiplier={setFuelRateMultiplier}
+              spoilageMultiplier={spoilageMultiplier}
+              setSpoilageMultiplier={setSpoilageMultiplier}
+              cessRateOverride={cessRateOverride}
+              setCessRateOverride={setCessRateOverride}
+              speedKmph={speedKmph}
+              setSpeedKmph={setSpeedKmph}
+              onReset={handleResetSensitivity}
+            />
+          </section>
+
+          {/* 5. Ranked Market Ledger & Itemized Deduction Bills */}
           {analysis && (
             <section id="rankings-section" className="mb-8 scroll-mt-20">
               <MarketLeaderboard
