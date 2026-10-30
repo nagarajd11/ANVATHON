@@ -14,7 +14,6 @@ const {
   getPoolRequests,
   getPoolById,
   createPoolRequest,
-  joinPoolRequest,
   isDbConnected
 } = require('./services/dbService');
 const { runHarvestRouteAnalysis, VEHICLE_CATALOG } = require('./services/calculationEngine');
@@ -35,11 +34,11 @@ app.get('/api/status', async (req, res) => {
   const markets = await getMarkets();
   const prices = await getPricesLookup();
   const transporters = await getTransporters();
-  const pools = await getPoolRequests();
+  const emptyTrucks = await getPoolRequests();
 
   res.json({
     status: 'ONLINE',
-    service: 'HarvestRoute Market Intelligence & Crop Pooling Engine',
+    service: 'HarvestRoute Market Intelligence & Empty Truck Collaboration',
     database: {
       type: 'MongoDB',
       connected: isDbConnected(),
@@ -50,7 +49,7 @@ app.get('/api/status', async (req, res) => {
       totalMarkets: markets.length,
       totalPriceRecords: Object.keys(prices).length,
       totalTransporterDealers: transporters.length,
-      activeCropPools: pools.filter(p => p.status === 'OPEN').length
+      availableEmptyTrucks: emptyTrucks.length
     }
   });
 });
@@ -162,33 +161,33 @@ app.get('/api/saved-analyses', async (req, res) => {
   }
 });
 
-// ==========================================
-// 8. CROP POOLING & IN-PERSON SPLITTING APIS
-// ==========================================
+// ==============================================================
+// 8. EMPTY TRUCK COLLABORATION (DIRECT PHONE CONTACT ONLY)
+// ==============================================================
 
-// Get all pooling requests with optional filters
+// Get empty trucks only (empty capacity > 0)
 app.get('/api/pools', async (req, res) => {
   try {
-    const { district, status, crop } = req.query;
-    const pools = await getPoolRequests({ district, status, crop });
-    res.json(pools);
+    const { district, crop } = req.query;
+    const emptyTrucks = await getPoolRequests({ district, crop });
+    res.json(emptyTrucks);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Get single pool with settlement details
+// Get single empty truck details
 app.get('/api/pools/:id', async (req, res) => {
   try {
-    const pool = await getPoolById(req.params.id);
-    if (!pool) return res.status(404).json({ error: 'Pool request not found' });
-    res.json(pool);
+    const truck = await getPoolById(req.params.id);
+    if (!truck) return res.status(404).json({ error: 'Truck request not found' });
+    res.json(truck);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Create new pool request
+// Post a new empty truck collaboration request with phone number
 app.post('/api/pools', async (req, res) => {
   try {
     const {
@@ -206,7 +205,7 @@ app.post('/api/pools', async (req, res) => {
     } = req.body;
 
     if (!creator_farmer_name || !creator_phone || !origin_district || !destination_market || !quantity_quintals) {
-      return res.status(400).json({ error: 'Please provide all required farmer lot fields.' });
+      return res.status(400).json({ error: 'Please enter your name, contact phone, and route details.' });
     }
 
     const vehicle = VEHICLE_CATALOG[vehicle_type] || VEHICLE_CATALOG['BOLERO_PICKUP'];
@@ -228,7 +227,7 @@ app.post('/api/pools', async (req, res) => {
       origin_village,
       destination_market: targetMkt.market_name,
       destination_district: targetMkt.district,
-      crop_name,
+      crop_name: crop_name || 'Mixed Produce',
       quantity_quintals: parseFloat(quantity_quintals),
       vehicle_type,
       vehicle_name: vehicle.name,
@@ -242,30 +241,8 @@ app.post('/api/pools', async (req, res) => {
 
     res.status(201).json({ success: true, pool: poolRecord });
   } catch (err) {
-    console.error('Create pool error:', err);
+    console.error('Create empty truck request error:', err);
     res.status(500).json({ error: err.message });
-  }
-});
-
-// Join an open pool
-app.post('/api/pools/:id/join', async (req, res) => {
-  try {
-    const { farmer_name, phone, village, crop_name, quantity_quintals } = req.body;
-    if (!farmer_name || !phone || !quantity_quintals) {
-      return res.status(400).json({ error: 'Please provide farmer name, contact number, and quantity.' });
-    }
-
-    const updated = await joinPoolRequest(req.params.id, {
-      farmer_name,
-      phone,
-      village,
-      crop_name: crop_name || 'Mixed Crop',
-      quantity_quintals: parseFloat(quantity_quintals)
-    });
-
-    res.json({ success: true, pool: updated });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
   }
 });
 
@@ -284,7 +261,7 @@ app.post('/api/pools/calculate-savings', async (req, res) => {
     const soloFreight = soloVehicle.baseFare + (dist * soloVehicle.ratePerKm);
     const soloRatePerQtl = Math.round(soloFreight / qty);
 
-    // Pooled scenario: 25-qtl Bolero shared to full capacity (e.g. with 2-3 farmers)
+    // Pooled scenario: 25-qtl Bolero shared to full capacity with neighbors
     const poolVehicle = VEHICLE_CATALOG['BOLERO_PICKUP'];
     const pooledFullFreight = poolVehicle.baseFare + (dist * poolVehicle.ratePerKm);
     const pooledRatePerQtl = Math.round(pooledFullFreight / poolVehicle.capacity);

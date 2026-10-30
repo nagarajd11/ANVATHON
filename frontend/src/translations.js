@@ -84,24 +84,22 @@ export const TRANSLATIONS = {
     // Cost breakdown chart
     costBreakdownTitle: "Deduction Breakdown (Where Does The Money Go?)",
 
-    // Crop Pooling & Shared Transport
-    poolNavBtn: "Crop Pooling / Shared Transport",
-    poolHubTitle: "Farmer Crop Pooling & Group Freight Sharing",
-    poolHubSubtitle: "Combine small crop loads with neighboring farmers, share full vehicle freight proportionally, and settle expenses in cash in-person.",
-    createPoolBtn: "+ Post Pool Request",
-    joinPoolBtn: "Join This Truck",
-    settleSlipBtn: "In-Person Split Receipt",
-    filterDistrict: "Filter by District",
+    // Empty Truck & Phone Collaboration
+    poolNavBtn: "Empty Trucks (Call to Share)",
+    poolHubTitle: "Available Empty Trucks & Direct Phone Collaboration",
+    poolHubSubtitle: "Only trucks with verified empty space are shown. Call the host farmer directly on their phone to load your produce and split transport expenses in cash in-person.",
+    emptyBadgeNotice: "Only Trucks With Empty Capacity Displayed",
+    createPoolBtn: "+ Post Empty Truck Request",
+    callFarmerBtn: "Call Farmer Directly",
+    whatsappFarmerBtn: "WhatsApp",
+    filterDistrict: "Filter by Origin District",
     filterAll: "All Districts",
-    openTrucksOnly: "Open Trucks Only",
-    capacityFilled: "Capacity Filled",
-    remainingCapacity: "Remaining Space",
+    emptySpaceLabel: "Empty Space Available",
     departure: "Departure",
-    totalFreight: "Total Vehicle Freight",
-    yourShare: "Your Fair Share",
-    soloVsPoolComparison: "Solo vs. Pooled Freight Savings",
+    totalFreight: "Vehicle Trip Freight",
+    soloVsPoolComparison: "Solo vs. Shared Vehicle Cost Savings",
     soloAlertBadge: "Small Lot Alert",
-    soloAlertText: "You are transporting a small lot. Sharing vehicle space can save up to 75% on freight!"
+    soloAlertText: "You have a small harvest lot. Check the empty trucks below to call and share vehicle freight!"
   },
 
   kn: {
@@ -189,24 +187,22 @@ export const TRANSLATIONS = {
     // Cost breakdown chart
     costBreakdownTitle: "ಖರ್ಚಿನ ವಿವರ (ಹಣ ಎಲ್ಲಿ ಹೋಯಿತು?)",
 
-    // Crop Pooling & Shared Transport
-    poolNavBtn: "ರೈತರ ಸಂಯುಕ್ತ ಸಾಗಣೆ / ಹಂಚಿಕೆ",
-    poolHubTitle: "ರೈತರ ಬೆಳೆ ಪೂಲಿಂಗ್ ಮತ್ತು ಸಂಯುಕ್ತ ಸಾರಿಗೆ ಹಂಚಿಕೆ",
-    poolHubSubtitle: "ಕಡಿಮೆ ಬೆಳೆ ಇರುವಾಗ ಇಡೀ ವಾಹನದ ದುಬಾರಿ ಬಾಡಿಗೆ ಪಾವತಿಸುವ ಬದಲು, ನೆರೆಹೊರೆಯ ರೈತರೊಂದಿಗೆ ವಾಹನ ಹಂಚಿಕೊಂಡು ನೇರವಾಗಿ ವೆಚ್ಚ ಹಂಚಿಕೊಳ್ಳಿ.",
-    createPoolBtn: "+ ಹೊಸ ಸಾಗಣೆ ವಿನಂತಿ ಹಾಕಿ",
-    joinPoolBtn: "ಈ ವಾಹನಕ್ಕೆ ಸೇರಿಕೊಳ್ಳಿ",
-    settleSlipBtn: "ಮುಖಾಮುಖಿ ಪಾವತಿ ರಸೀದಿ",
+    // Empty Truck & Phone Collaboration
+    poolNavBtn: "ಖಾಲಿ ವಾಹನಗಳು (ಕರೆ ಮಾಡಿ ಹಂಚಿಕೊಳ್ಳಿ)",
+    poolHubTitle: "ಖಾಲಿ ಇರುವ ವಾಹನಗಳು ಮತ್ತು ರೈತರಿಗೆ ನೇರ ಕರೆ ಸೌಲಭ್ಯ",
+    poolHubSubtitle: "ಖಾಲಿ ಸ್ಥಳಾವಕಾಶವಿರುವ ವಾಹನಗಳನ್ನು ಮಾತ್ರ ಇಲ್ಲಿ ತೋರಿಸಲಾಗುತ್ತದೆ. ರೈತರಿಗೆ ನೇರವಾಗಿ ಫೋನ್ ಕರೆ ಮಾಡಿ ನಿಮ್ಮ ಬೆಳೆ ಸಾಗಿಸಲು ಮಾತನಾಡಿ, ವೆಚ್ಚವನ್ನು ಮುಖಾಮುಖಿ ಹಂಚಿಕೊಳ್ಳಿ.",
+    emptyBadgeNotice: "ಖಾಲಿ ಸ್ಥಳಾವಕಾಶವಿರುವ ವಾಹನಗಳು ಮಾತ್ರ ಲಭ್ಯ",
+    createPoolBtn: "+ ಖಾಲಿ ವಾಹನ ವಿನಂತಿ ಹಾಕಿ",
+    callFarmerBtn: "ನೇರ ಕರೆ ಮಾಡಿ",
+    whatsappFarmerBtn: "ವಾಟ್ಸಾಪ್",
     filterDistrict: "ಜಿಲ್ಲೆಯ ಮೂಲಕ ಫಿಲ್ಟರ್",
     filterAll: "ಎಲ್ಲ ಜಿಲ್ಲೆಗಳು",
-    openTrucksOnly: "ಸ್ಥಳಾವಕಾಶವಿರುವ ವಾಹನಗಳು",
-    capacityFilled: "ಭರ್ತಿಯಾದ ಸಾಮರ್ಥ್ಯ",
-    remainingCapacity: "ಉಳಿದ ಸ್ಥಳಾವಕಾಶ",
+    emptySpaceLabel: "ಖಾಲಿ ಇರುವ ಸ್ಥಳಾವಕಾಶ",
     departure: "ಹೊರಡುವ ಸಮಯ",
     totalFreight: "ಒಟ್ಟು ವಾಹನ ಬಾಡಿಗೆ",
-    yourShare: "ನಿಮ್ಮ ನ್ಯಾಯಯುತ ಪಾಲು",
-    soloVsPoolComparison: "ಏಕಾಂಗಿ vs ಸಂಯುಕ್ತ ಸಾಗಣೆಯ ಉಳಿತಾಯ",
+    soloVsPoolComparison: "ಏಕಾಂಗಿ vs ಹಂಚಿಕೆಯ ಸಾಗಣೆ ಉಳಿತಾಯ",
     soloAlertBadge: "ಕಡಿಮೆ ಇಳುವರಿ ಎಚ್ಚರಿಕೆ",
-    soloAlertText: "ನಿಮ್ಮಲ್ಲಿ ಕಡಿಮೆ ಕ್ವಿಂಟಾಲ್ ಬೆಳೆ ಇದೆ. ಇತರ ರೈತರೊಂದಿಗೆ ವಾಹನ ಹಂಚಿಕೊಂಡರೆ ಸಾಗಣೆ ವೆಚ್ಚದಲ್ಲಿ 75% ವರೆಗೆ ಉಳಿಸಬಹುದು!"
+    soloAlertText: "ನಿಮ್ಮಲ್ಲಿ ಕಡಿಮೆ ಬೆಳೆ ಇದೆ. ಕೆಳಗಿನ ಖಾಲಿ ವಾಹನಗಳ ರೈತರಿಗೆ ಕರೆ ಮಾಡಿ ಬಾಡಿಗೆ ಹಂಚಿಕೊಳ್ಳಿ!"
   },
 
   hi: {
@@ -294,23 +290,21 @@ export const TRANSLATIONS = {
     // Cost breakdown chart
     costBreakdownTitle: "कटौतियों का चार्ट (पैसा कहां खर्च हुआ?)",
 
-    // Crop Pooling & Shared Transport
-    poolNavBtn: "किसान साझा परिवहन / खर्च बंटवारा",
-    poolHubTitle: "किसान फसल पूलिंग और सामूहिक वाहन साझाकरण",
-    poolHubSubtitle: "कम फसल होने पर अकेले पूरे ट्रक का भारी भाड़ा देने के बजाय, पड़ोसी किसानों के साथ गाड़ी साझा करें और खर्च आपस में बांटें।",
-    createPoolBtn: "+ नया पूलिंग अनुरोध बनाएं",
-    joinPoolBtn: "इस गाड़ी में जुड़ें",
-    settleSlipBtn: "आपसी खर्च बंटवारा रसीद",
+    // Empty Truck & Phone Collaboration
+    poolNavBtn: "खाली ट्रक (सीधे कॉल करें)",
+    poolHubTitle: "उपलब्ध खाली वाहन और सीधा फोन कॉल संपर्क",
+    poolHubSubtitle: "केवल वही गाड़ियां दिखाई जाती हैं जिनमें जगह खाली है। किसान को सीधे फोन करें, अपनी फसल लोड करें और नकद भाड़ा आपस में बांटें।",
+    emptyBadgeNotice: "केवल खाली जगह वाले वाहन प्रदर्शित हैं",
+    createPoolBtn: "+ खाली गाड़ी का अनुरोध बनाएं",
+    callFarmerBtn: "सीधे कॉल करें",
+    whatsappFarmerBtn: "व्हाट्सएप",
     filterDistrict: "जिले के अनुसार देखें",
     filterAll: "सभी जिले",
-    openTrucksOnly: "खाली जगह वाले वाहन",
-    capacityFilled: "क्षमता भरी",
-    remainingCapacity: "शेष जगह",
+    emptySpaceLabel: "खाली जगह उपलब्ध",
     departure: "रवानगी का समय",
     totalFreight: "गाड़ी का कुल भाड़ा",
-    yourShare: "आपका उचित हिस्सा",
-    soloVsPoolComparison: "अकेले vs साझा परिवहन बचत",
+    soloVsPoolComparison: "अकेले vs साझा वाहन भाड़ा बचत",
     soloAlertBadge: "कम उपज सूचना",
-    soloAlertText: "आपकी फसल की मात्रा कम है। पड़ोसी किसानों के साथ गाड़ी साझा करके भाड़े में 75% तक की बचत करें!"
+    soloAlertText: "आपकी फसल की मात्रा कम है। नीचे उपलब्ध खाली ट्रक वाले किसानों को सीधे कॉल करके गाड़ी साझा करें!"
   }
 };
