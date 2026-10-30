@@ -33,6 +33,8 @@ export default function App() {
   const [quantity, setQuantity] = useState(8);
   const [freshness, setFreshness] = useState(6);
   const [originDistrict, setOriginDistrict] = useState('Chamarajanagar');
+  const [originTaluk, setOriginTaluk] = useState('');
+  const [originVillage, setOriginVillage] = useState('');
   const [vehicleType, setVehicleType] = useState('BOLERO_PICKUP');
 
   // Sensitivity Sliders
@@ -92,6 +94,33 @@ export default function App() {
     }
     initData();
   }, []);
+  // Auto-sync village when taluk changes (clears village if farmer is in city like Koppal City)
+  useEffect(() => {
+    const curDist = origins.find(o => o.district === originDistrict);
+    const curTaluk = curDist?.taluks?.find(t => t.name === originTaluk);
+    if (curTaluk) {
+      if (curTaluk.isCity || curTaluk.name === 'Koppal City' || !curTaluk.villages || curTaluk.villages.length === 0) {
+        setOriginVillage('');
+      } else {
+        const exists = curTaluk.villages.some(v => v.name === originVillage);
+        if (!exists) {
+          setOriginVillage(curTaluk.villages[0].name);
+        }
+      }
+    }
+  }, [originTaluk, originDistrict, origins]);
+
+  // Auto-sync taluk when district changes
+  useEffect(() => {
+    const cur = origins.find(o => o.district === originDistrict);
+    if (cur && cur.taluks && cur.taluks.length > 0) {
+      const exists = cur.taluks.some(t => t.name === originTaluk);
+      if (!exists) {
+        setOriginTaluk(cur.taluks[0].name);
+      }
+    }
+  }, [originDistrict, origins]);
+
 
   // 2. Perform Analysis Function
   const executeAnalysis = useCallback(async (params = {}) => {
@@ -101,6 +130,8 @@ export default function App() {
         cropName: params.cropName || selectedCrop,
         quantityQuintals: params.quantity !== undefined ? params.quantity : quantity,
         originDistrict: params.originDistrict || originDistrict,
+        originTaluk: params.originTaluk !== undefined ? params.originTaluk : originTaluk,
+        originVillage: params.originVillage !== undefined ? params.originVillage : originVillage,
         vehicleType: params.vehicleType || vehicleType,
         freshnessHours: params.freshness !== undefined ? params.freshness : freshness,
         fuelRateMultiplier: params.fuelRateMultiplier !== undefined ? params.fuelRateMultiplier : fuelRateMultiplier,
@@ -124,7 +155,7 @@ export default function App() {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedCrop, quantity, originDistrict, vehicleType, freshness, fuelRateMultiplier, spoilageMultiplier, cessRateOverride, speedKmph]);
+  }, [selectedCrop, quantity, originDistrict, originTaluk, originVillage, vehicleType, freshness, fuelRateMultiplier, spoilageMultiplier, cessRateOverride, speedKmph]);
 
   // Initial analysis once origins are loaded
   useEffect(() => {
@@ -140,7 +171,7 @@ export default function App() {
       executeAnalysis();
     }, 250);
     return () => clearTimeout(timer);
-  }, [selectedCrop, quantity, freshness, originDistrict, vehicleType, fuelRateMultiplier, spoilageMultiplier, cessRateOverride, speedKmph]);
+  }, [selectedCrop, quantity, freshness, originDistrict, originTaluk, originVillage, vehicleType, fuelRateMultiplier, spoilageMultiplier, cessRateOverride, speedKmph]);
 
   // Reset Sensitivity
   const handleResetSensitivity = () => {
@@ -264,6 +295,11 @@ export default function App() {
               setFreshness={setFreshness}
               originDistrict={originDistrict}
               setOriginDistrict={setOriginDistrict}
+              originTaluk={originTaluk}
+              setOriginTaluk={setOriginTaluk}
+              originVillage={originVillage}
+              setOriginVillage={setOriginVillage}
+              nearestApmc={analysis?.nearestApmc}
               vehicleType={vehicleType}
               setVehicleType={setVehicleType}
               onCalculate={() => executeAnalysis()}

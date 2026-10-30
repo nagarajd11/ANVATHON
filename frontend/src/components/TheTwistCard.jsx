@@ -33,7 +33,7 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
               The Trade-off Comparison
             </span>
             <span className="text-white/60 text-xs font-mono tabular-nums">
-              {quantityQuintals} quintals • {cropName}
+              {quantityQuintals} quintals • {cropName} {analysis.originLocationLabel ? `• Dispatch: ${analysis.originLocationLabel}` : ''}
             </span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-display font-bold tracking-tight text-white text-crisp">

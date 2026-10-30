@@ -17,7 +17,11 @@ const MarketPriceSchema = new mongoose.Schema({
   arrivals_tonnes_est: { type: Number, default: 50 },
   market_demand_proxy_tonnes_est: { type: Number, default: 50 },
   supply_demand_ratio_est: { type: Number, default: 1.0 },
-  market_purchase_capacity_tonnes_est: { type: Number, default: 100 }
+  market_purchase_capacity_tonnes_est: { type: Number, default: 100 },
+  price_source: { type: String, default: "REPORTED" },
+  reference_market: { type: String },
+  reference_district: { type: String },
+  reference_distance_km: { type: Number }
 }, { timestamps: true });
 
 MarketPriceSchema.index({ crop_name: 1, market_name: 1 });
