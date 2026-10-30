@@ -33,8 +33,8 @@ export default function FarmerDispatchSlip({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-pine/70 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-chlorophyll/15 relative my-8">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-white/30 relative my-8 print:bg-white print:p-0 print:border-none print:shadow-none">
         
         {/* Modal Controls (Hidden in print) */}
         <div className="flex items-center justify-between border-b border-chlorophyll/10 pb-4 mb-6 print:hidden">
@@ -47,14 +47,14 @@ export default function FarmerDispatchSlip({
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-chlorophyll hover:bg-[#0c3829] text-emerald-300 text-xs font-bold shadow-md transition-all border border-emerald-500/30 cursor-pointer"
+              className="btn-shimmer inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-chlorophyll hover:bg-[#0c3829] text-emerald-300 text-xs font-bold shadow-md transition-all border border-emerald-500/30 cursor-pointer"
             >
               <Printer className="w-4 h-4" />
               <span>Print Slip</span>
             </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl bg-black/5 hover:bg-black/10 text-chlorophyll/60 cursor-pointer"
+              className="p-2 rounded-xl bg-black/5 hover:bg-black/10 text-chlorophyll/60 cursor-pointer transition-colors"
             >
               <X className="w-4 h-4" />
             </button>

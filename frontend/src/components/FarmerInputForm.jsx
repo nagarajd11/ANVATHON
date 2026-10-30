@@ -54,222 +54,187 @@ export default function FarmerInputForm({
   };
 
   return (
-    <div className="glass-card rounded-3xl p-6 sm:p-8 mb-8 border border-emerald-900/10 shadow-[0_16px_45px_-10px_rgba(4,47,46,0.22),inset_0_1px_1px_0_rgba(255,255,255,0.9)]">
+    <div className="glass-card rounded-3xl p-6 sm:p-7 hover-lift h-full flex flex-col justify-between">
       
-      {/* Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-chlorophyll/10 pb-5 mb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="p-1 rounded-md bg-emerald-500/10 text-emerald-800">
-              <Wheat className="w-4 h-4 text-emerald-700" />
-            </span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-chlorophyll/60">
-              Karnataka Mandi Lot Configuration
-            </span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-serif italic text-chlorophyll tracking-wide">
-            {t.lotDetailsTitle}
-          </h2>
-          <p className="text-xs text-chlorophyll/70 mt-1 font-sans">
-            {t.datasetBadge} • 62 Regulated Yards
-          </p>
-        </div>
-        <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-900 border border-emerald-600/20 self-start sm:self-auto">
-          <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-          Live APMC Price Indices
-        </span>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-5">
-        
-        {/* 1. Crop Dropdown */}
-        <div>
-          <label className="block text-xs font-bold text-chlorophyll mb-2 flex items-center gap-1.5">
-            <Wheat className="w-3.5 h-3.5 text-emerald-700" />
-            {t.selectCrop}
-          </label>
-          <select
-            value={selectedCrop}
-            onChange={(e) => setSelectedCrop(e.target.value)}
-            className="w-full bg-white/90 border border-chlorophyll/15 rounded-xl px-3.5 py-3 text-sm font-semibold text-chlorophyll focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all cursor-pointer shadow-2xs"
-          >
-            {crops.map((crop) => (
-              <option key={crop.crop_id || crop.crop_name} value={crop.crop_name}>
-                {getCropDisplayName(crop)}
-              </option>
-            ))}
-          </select>
-          {currentCropObj && (
-            <div className="mt-2 flex items-center gap-1 text-[11px] text-chlorophyll/70">
-              <span className={`px-2 py-0.5 rounded-md font-bold uppercase tracking-wider text-[10px] ${
-                currentCropObj.perishability_tier === 'HIGH' ? 'bg-terracotta-50 text-terracotta-800 border border-terracotta-200' :
-                currentCropObj.perishability_tier === 'MEDIUM' ? 'bg-amber-50 text-amber-800 border border-amber-200' :
-                'bg-emerald-50 text-emerald-800 border border-emerald-200'
-              }`}>
-                {currentCropObj.perishability_tier} Perishability
+      <div>
+        {/* Header with human, respectful tone */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4 mb-5">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="p-1 rounded-md bg-emerald-500/20 text-emerald-300">
+                <Wheat className="w-4 h-4 text-emerald-300" />
+              </span>
+              <span className="text-[11px] font-semibold tracking-wider text-emerald-300/90 font-mono">
+                {t.datasetBadge}
               </span>
             </div>
-          )}
-        </div>
-
-        {/* 2. Quantity (Quintals) */}
-        <div>
-          <label className="block text-xs font-bold text-chlorophyll mb-2 flex items-center gap-1.5">
-            <Scale className="w-3.5 h-3.5 text-emerald-700" />
-            {t.enterQuantity}
-          </label>
-          <div className="relative">
-            <input
-              type="number"
-              min="1"
-              max="500"
-              value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, parseFloat(e.target.value) || 1))}
-              className="w-full bg-white/90 border border-chlorophyll/15 rounded-xl px-3.5 py-3 text-sm font-mono font-bold tabular-nums text-chlorophyll focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all shadow-2xs"
-            />
-            <span className="absolute right-3.5 top-3.5 text-xs font-mono font-bold text-chlorophyll/40">
-              qtl (100kg)
-            </span>
-          </div>
-          {/* Quick preset chips */}
-          <div className="mt-2 flex items-center gap-1.5">
-            {[5, 10, 20, 35, 50].map((val) => (
-              <button
-                key={val}
-                type="button"
-                onClick={() => setQuantity(val)}
-                className={`text-[11px] font-mono font-bold tabular-nums px-2 py-0.5 rounded-md border transition-all cursor-pointer ${
-                  quantity === val 
-                    ? 'bg-chlorophyll text-emerald-300 border-chlorophyll shadow-xs' 
-                    : 'bg-white/80 text-chlorophyll/80 hover:bg-white border-chlorophyll/15'
-                }`}
-              >
-                {val}q
-              </button>
-            ))}
+            <h2 className="text-xl sm:text-2xl font-display font-bold tracking-tight text-white text-crisp">
+              {t.lotDetailsTitle}
+            </h2>
+            <p className="text-xs text-white/70 mt-1 font-sans">
+              {t.lotDetailsSubtitle}
+            </p>
           </div>
         </div>
 
-        {/* 3. Freshness / Harvest Age */}
-        <div>
-          <label className="block text-xs font-bold text-chlorophyll mb-2 flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-emerald-700" />
-            {t.freshnessWindow}
-          </label>
-          <select
-            value={freshness}
-            onChange={(e) => setFreshness(parseFloat(e.target.value))}
-            className="w-full bg-white/90 border border-chlorophyll/15 rounded-xl px-3.5 py-3 text-sm font-semibold text-chlorophyll focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all cursor-pointer shadow-2xs"
-          >
-            <option value="6">{t.freshnessJustHarvested}</option>
-            <option value="24">{t.freshness1Day}</option>
-            <option value="48">{t.freshness2Days}</option>
-          </select>
-          <p className="mt-2 text-[11px] text-chlorophyll/60">
-            Affects non-linear transit decay
-          </p>
-        </div>
-
-        {/* 4. Origin District */}
-        <div>
-          <label className="block text-xs font-bold text-chlorophyll mb-2 flex items-center gap-1.5">
-            <MapPin className="w-3.5 h-3.5 text-emerald-700" />
-            {t.farmerOrigin}
-          </label>
-          <select
-            value={originDistrict}
-            onChange={(e) => setOriginDistrict(e.target.value)}
-            className="w-full bg-white/90 border border-chlorophyll/15 rounded-xl px-3.5 py-3 text-sm font-semibold text-chlorophyll focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all cursor-pointer shadow-2xs"
-          >
-            {origins.map((orig) => (
-              <option key={orig.district} value={orig.district}>
-                {getDistrictDisplayName(orig)}
-              </option>
-            ))}
-          </select>
-          <p className="mt-2 text-[11px] text-chlorophyll/60">
-            Farm / village dispatch hub
-          </p>
-        </div>
-
-        {/* 5. Transport Vehicle Class */}
-        <div>
-          <label className="block text-xs font-bold text-chlorophyll mb-2 flex items-center gap-1.5">
-            <Truck className="w-3.5 h-3.5 text-emerald-700" />
-            {t.selectVehicle}
-          </label>
-          <select
-            value={vehicleType}
-            onChange={(e) => setVehicleType(e.target.value)}
-            className="w-full bg-white/90 border border-chlorophyll/15 rounded-xl px-3.5 py-3 text-sm font-semibold text-chlorophyll focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 transition-all cursor-pointer shadow-2xs"
-          >
-            {Object.entries(vehicleCatalog).map(([key, vh]) => (
-              <option key={key} value={key}>
-                {vh.name} (≤{vh.capacity}q | ₹{vh.ratePerKm}/km)
-              </option>
-            ))}
-          </select>
-          {currentVehicleObj.isReefer ? (
-            <p className="mt-2 text-[11px] font-bold text-emerald-700 flex items-center gap-1 font-mono">
-              <Snowflake className="w-3 h-3 text-emerald-600" />
-              85% Decay Elimination
-            </p>
-          ) : tripsNeeded > 1 ? (
-            <p className="mt-2 text-[11px] font-bold text-terracotta-700 flex items-center gap-1 font-mono">
-              <AlertTriangle className="w-3 h-3 text-terracotta-600" />
-              Requires {tripsNeeded} trips (cap: {currentVehicleObj.capacity}q)
-            </p>
-          ) : (
-            <p className="mt-2 text-[11px] font-mono tabular-nums text-chlorophyll/60">
-              Capacity: {currentVehicleObj.capacity} quintals
-            </p>
-          )}
-        </div>
-
-      </div>
-
-      {/* Small Lot Optimization Callout */}
-      {quantity <= 15 && (
-        <div className="mt-6 p-4 bg-emerald-500/10 border border-emerald-600/20 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 backdrop-blur-md">
-          <div className="flex items-center gap-3">
-            <span className="p-2.5 bg-chlorophyll text-emerald-300 rounded-xl shrink-0 shadow-xs">
-              <Users className="w-4 h-4" />
-            </span>
-            <div>
-              <div className="text-xs font-bold text-chlorophyll flex items-center gap-2">
-                <span className="font-sans">{t.soloAlertBadge} ({quantity} Quintals)</span>
-                <span className="text-[10px] font-bold font-mono uppercase px-2 py-0.5 bg-emerald-500/20 text-emerald-900 border border-emerald-600/30 rounded-full">
-                  Save up to 75%
+        {/* Form Inputs Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          
+          {/* 1. Crop Dropdown */}
+          <div>
+            <label className="block text-xs font-semibold text-white/90 mb-1.5 flex items-center gap-1.5 font-sans">
+              <Wheat className="w-3.5 h-3.5 text-emerald-400" />
+              {t.selectCrop}
+            </label>
+            <select
+              value={selectedCrop}
+              onChange={(e) => setSelectedCrop(e.target.value)}
+              className="w-full glass-input rounded-xl px-3.5 py-2.5 text-sm font-medium text-white focus:outline-hidden cursor-pointer"
+            >
+              {crops.map((crop) => (
+                <option key={crop.crop_id || crop.crop_name} value={crop.crop_name}>
+                  {getCropDisplayName(crop)}
+                </option>
+              ))}
+            </select>
+            {currentCropObj && (
+              <div className="mt-1.5 flex items-center gap-1 text-[11px] text-white/60">
+                <span className={`px-2 py-0.5 rounded-md font-medium text-[10px] ${
+                  currentCropObj.perishability_tier === 'HIGH' ? 'bg-amber-500/20 text-amber-200 border border-amber-400/30' :
+                  currentCropObj.perishability_tier === 'MEDIUM' ? 'bg-amber-500/15 text-amber-200 border border-amber-400/20' :
+                  'bg-emerald-500/20 text-emerald-200 border border-emerald-400/30'
+                }`}>
+                  {currentCropObj.perishability_tier === 'HIGH' ? 'Highly Perishable' : 
+                   currentCropObj.perishability_tier === 'MEDIUM' ? 'Medium Perishable' : 'Durable Produce'}
                 </span>
               </div>
-              <p className="text-[11px] text-chlorophyll/70 mt-0.5 font-sans">
-                {t.soloAlertText}
-              </p>
+            )}
+          </div>
+
+          {/* 2. Quantity (Quintals) */}
+          <div>
+            <label className="block text-xs font-semibold text-white/90 mb-1.5 flex items-center gap-1.5 font-sans">
+              <Scale className="w-3.5 h-3.5 text-emerald-400" />
+              {t.enterQuantity}
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min="1"
+                max="500"
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(1, parseFloat(e.target.value) || 1))}
+                className="w-full glass-input rounded-xl px-3.5 py-2.5 text-sm font-mono font-medium tabular-nums text-white focus:outline-hidden"
+              />
+              <span className="absolute right-3.5 top-2.5 text-xs font-mono text-white/50 pointer-events-none">
+                quintals
+              </span>
+            </div>
+            {/* Quick preset chips */}
+            <div className="mt-1.5 flex items-center gap-1.5">
+              {[5, 10, 20, 35, 50].map((val) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => setQuantity(val)}
+                  className={`text-[11px] font-mono font-medium tabular-nums px-2 py-0.5 rounded-md border transition-all cursor-pointer hover-glow-pill ${
+                    quantity === val 
+                      ? 'bg-emerald-500 text-pine font-bold border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.4)]' 
+                      : 'bg-white/5 text-white/75 hover:bg-white/15 hover:text-white border-white/15'
+                  }`}
+                >
+                  {val}q
+                </button>
+              ))}
             </div>
           </div>
-          <a
-            href="#crop-pooling-section"
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-chlorophyll hover:bg-[#0c3829] text-emerald-300 font-bold text-xs shrink-0 transition-all border border-emerald-500/30 hover:border-emerald-400 shadow-xs"
-          >
-            <span>{t.poolNavBtn}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </a>
-        </div>
-      )}
 
-      {/* Action Button: Chlorophyll Pine with Magnetic Glow */}
-      <div className="mt-7 flex justify-end">
+          {/* 3. Freshness / Harvest Age */}
+          <div>
+            <label className="block text-xs font-semibold text-white/90 mb-1.5 flex items-center gap-1.5 font-sans">
+              <Clock className="w-3.5 h-3.5 text-emerald-400" />
+              {t.freshnessWindow}
+            </label>
+            <select
+              value={freshness}
+              onChange={(e) => setFreshness(parseFloat(e.target.value))}
+              className="w-full glass-input rounded-xl px-3.5 py-2.5 text-sm font-medium text-white focus:outline-hidden cursor-pointer"
+            >
+              <option value="6">{t.freshnessJustHarvested}</option>
+              <option value="24">{t.freshness1Day}</option>
+              <option value="48">{t.freshness2Days}</option>
+            </select>
+          </div>
+
+          {/* 4. Origin District */}
+          <div>
+            <label className="block text-xs font-semibold text-white/90 mb-1.5 flex items-center gap-1.5 font-sans">
+              <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+              {t.farmerOrigin}
+            </label>
+            <select
+              value={originDistrict}
+              onChange={(e) => setOriginDistrict(e.target.value)}
+              className="w-full glass-input rounded-xl px-3.5 py-2.5 text-sm font-medium text-white focus:outline-hidden cursor-pointer"
+            >
+              {origins.map((orig) => (
+                <option key={orig.district} value={orig.district}>
+                  {getDistrictDisplayName(orig)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* 5. Transport Vehicle Class */}
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-semibold text-white/90 mb-1.5 flex items-center gap-1.5 font-sans">
+              <Truck className="w-3.5 h-3.5 text-emerald-400" />
+              {t.selectVehicle}
+            </label>
+            <select
+              value={vehicleType}
+              onChange={(e) => setVehicleType(e.target.value)}
+              className="w-full glass-input rounded-xl px-3.5 py-2.5 text-sm font-medium text-white focus:outline-hidden cursor-pointer"
+            >
+              {Object.entries(vehicleCatalog).map(([key, vh]) => (
+                <option key={key} value={key}>
+                  {vh.name} (Cap: ≤{vh.capacity}q • ₹{vh.ratePerKm}/km)
+                </option>
+              ))}
+            </select>
+            {currentVehicleObj.isReefer ? (
+              <p className="mt-1 text-[11px] text-emerald-300 flex items-center gap-1">
+                <Snowflake className="w-3 h-3 text-emerald-300" />
+                <span>Refrigerated transport eliminates up to 85% of transit spoilage</span>
+              </p>
+            ) : tripsNeeded > 1 ? (
+              <p className="mt-1 text-[11px] text-amber-300 flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3 text-amber-300" />
+                <span>Requires {tripsNeeded} trips with this vehicle (capacity: {currentVehicleObj.capacity}q)</span>
+              </p>
+            ) : null}
+          </div>
+
+        </div>
+      </div>
+
+      {/* Action Footer */}
+      <div className="mt-6 pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <span className="text-xs text-white/60 font-sans">
+          Prices update across all 62 Karnataka mandis
+        </span>
+
         <button
           onClick={onCalculate}
           disabled={isLoading}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-9 py-4 rounded-xl bg-chlorophyll hover:bg-[#0c3829] text-emerald-300 font-bold text-sm tracking-wide shadow-md shadow-emerald-950/20 border border-emerald-500/40 hover:border-emerald-400 hover:shadow-[0_0_25px_rgba(16,185,129,0.35)] hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 cursor-pointer"
+          className="btn-shimmer w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-pine font-bold text-xs sm:text-sm tracking-wide shadow-lg shadow-emerald-950/40 border border-emerald-300/60 cursor-pointer disabled:opacity-50"
         >
           {isLoading ? (
             <span className="font-mono">{t.calculating}</span>
           ) : (
             <>
               <span>{t.calculateBtn}</span>
-              <ArrowRight className="w-4 h-4 text-emerald-400" />
+              <ArrowRight className="w-4 h-4 text-pine" />
             </>
           )}
         </button>

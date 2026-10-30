@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { Navigation, Trophy, AlertTriangle, Truck, MapPin } from 'lucide-react';
+import { Navigation, Trophy, AlertTriangle, Truck, MapPin, MousePointer, RotateCcw } from 'lucide-react';
 import { TRANSLATIONS } from '../translations';
 
 // Helper component to auto-fit map bounds when markets change
@@ -15,6 +15,24 @@ function MapBoundsUpdater({ bounds }) {
   return null;
 }
 
+// In-map interactive controller for Reset Bounds
+function MapActionControls({ bounds }) {
+  const map = useMap();
+
+  return (
+    <div className="leaflet-top leaflet-right" style={{ pointerEvents: 'auto', zIndex: 1000, margin: '14px' }}>
+      <button
+        onClick={() => map.fitBounds(bounds, { padding: [40, 40], animate: true })}
+        className="btn-shimmer flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-pine/90 text-emerald-300 text-[11px] font-bold border border-emerald-400/40 shadow-lg backdrop-blur-md cursor-pointer hover:bg-emerald-500 hover:text-pine transition-all"
+        title="Reset zoom to view all routes and mandis"
+      >
+        <RotateCcw className="w-3.5 h-3.5" />
+        <span>Reset View</span>
+      </button>
+    </div>
+  );
+}
+
 // Custom Organic Botanical Pin Icons
 const createCustomIcon = (type, label) => {
   let bgColor = '#059669';
@@ -22,19 +40,19 @@ const createCustomIcon = (type, label) => {
   let iconSvg = '';
 
   if (type === 'ORIGIN') {
-    bgColor = '#09261C';
+    bgColor = '#041610';
     borderColor = '#10b981';
     iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L4 6v12l8 4 8-4V6l-8-4z"/></svg>`;
   } else if (type === 'OPTIMAL') {
     bgColor = '#047857';
-    borderColor = '#10b981';
+    borderColor = '#34d399';
     iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fef08a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>`;
   } else if (type === 'TRAP') {
     bgColor = '#c2410c';
     borderColor = '#ea580c';
     iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
   } else {
-    bgColor = '#0f4c3a';
+    bgColor = '#064e3b';
     borderColor = '#34d399';
     iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`;
   }
@@ -43,7 +61,7 @@ const createCustomIcon = (type, label) => {
     <div style="
       background-color: ${bgColor};
       border: 2px solid ${borderColor};
-      box-shadow: 0 8px 24px rgba(4,47,46,0.35);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
       width: 32px;
       height: 32px;
       border-radius: 50%;
@@ -52,9 +70,10 @@ const createCustomIcon = (type, label) => {
       justify-content: center;
       cursor: pointer;
       position: relative;
+      transition: transform 0.2s ease;
     ">
       ${iconSvg}
-      ${label ? `<span style="position: absolute; bottom: -18px; background: rgba(9,38,28,0.92); color: #ecfdf5; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 4px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.15);">${label}</span>` : ''}
+      ${label ? `<span style="position: absolute; bottom: -18px; background: rgba(3,16,11,0.92); color: #ecfdf5; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 4px; white-space: nowrap; border: 1px solid rgba(255,255,255,0.2);">${label}</span>` : ''}
     </div>
   `;
 
@@ -86,54 +105,61 @@ export default function MarketMap({ analysis, lang }) {
   ];
 
   return (
-    <div className="glass-card rounded-3xl p-6 sm:p-8 mb-8 border border-emerald-900/10 shadow-[0_16px_45px_-10px_rgba(4,47,46,0.22),inset_0_1px_1px_0_rgba(255,255,255,0.9)]">
+    <div className="glass-card rounded-3xl p-6 sm:p-8 mb-8 hover-lift">
       
       {/* Header & Legend */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-chlorophyll/10 pb-5 mb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-5 mb-5">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="p-1 rounded-md bg-emerald-500/10 text-emerald-800">
-              <Navigation className="w-4 h-4 text-emerald-700" />
+            <span className="p-1 rounded-md bg-emerald-500/20 text-emerald-300">
+              <Navigation className="w-4 h-4 text-emerald-300" />
             </span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-chlorophyll/60">
-              GIS Transit Geodesics
+            <span className="text-[11px] font-semibold tracking-wider text-emerald-300/90 font-mono">
+              Live Mandi Network
             </span>
           </div>
-          <h3 className="text-2xl sm:text-3xl font-serif italic text-chlorophyll tracking-wide">
+          <h3 className="text-xl sm:text-2xl font-display font-bold tracking-tight text-white text-crisp">
             {t.mapTitle}
           </h3>
-          <p className="text-xs text-chlorophyll/70 mt-1 font-sans">
+          <p className="text-xs text-white/70 mt-1 font-sans">
             {t.mapSub}
           </p>
         </div>
 
-        {/* Legend */}
-        <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-chlorophyll/80 bg-white/70 px-3 py-2 rounded-xl border border-chlorophyll/10">
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-chlorophyll border border-emerald-400 inline-block" />
+        {/* Legend with interactive hover glow pills */}
+        <div className="flex flex-wrap items-center gap-2.5 text-xs font-semibold text-white/90">
+          <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-xl border border-white/15 backdrop-blur-md hover-glow-pill cursor-pointer">
+            <span className="w-3 h-3 rounded-full bg-pine border border-emerald-400 inline-block" />
             <span className="font-sans">{t.originLegend}</span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-xl border border-emerald-400/30 backdrop-blur-md hover-glow-pill cursor-pointer text-emerald-300">
             <span className="w-3 h-3 rounded-full bg-emerald-600 border border-emerald-300 inline-block" />
             <span className="font-sans">{t.optimalLegend}</span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-xl border border-terracotta-400/30 backdrop-blur-md hover-glow-pill cursor-pointer text-terracotta-300">
             <span className="w-3 h-3 rounded-full bg-terracotta-600 border border-terracotta-300 inline-block" />
             <span className="font-sans">{t.trapLegend}</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-[#0f4c3a] border border-emerald-400 inline-block" />
+          <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-xl border border-white/15 backdrop-blur-md hover-glow-pill cursor-pointer text-white/80">
+            <span className="w-3 h-3 rounded-full bg-[#064e3b] border border-emerald-400 inline-block" />
             <span className="font-sans">{t.otherLegend}</span>
+          </div>
+          <div className="flex items-center gap-1.5 bg-emerald-500/20 px-3 py-1.5 rounded-xl border border-emerald-400/40 text-emerald-300 text-[11px] font-mono">
+            <MousePointer className="w-3 h-3 text-emerald-300" />
+            <span>Mouse Scroll Zoom: ON</span>
           </div>
         </div>
       </div>
 
-      {/* Map Canvas */}
-      <div className="h-[440px] w-full rounded-2xl overflow-hidden border border-chlorophyll/15 relative shadow-inner">
+      {/* Map Canvas with Active Mouse Wheel Scroll Zoom enabled */}
+      <div className="h-[440px] w-full rounded-2xl overflow-hidden border border-white/20 relative shadow-2xl">
         <MapContainer
           center={[originLat, originLon]}
           zoom={8}
-          scrollWheelZoom={false}
+          scrollWheelZoom={true}
+          doubleClickZoom={true}
+          touchZoom={true}
+          dragging={true}
           className="h-full w-full"
         >
           <TileLayer
@@ -142,6 +168,7 @@ export default function MarketMap({ analysis, lang }) {
           />
 
           <MapBoundsUpdater bounds={bounds} />
+          <MapActionControls bounds={bounds} />
 
           {/* Farmer Origin Marker */}
           <Marker 
@@ -149,12 +176,12 @@ export default function MarketMap({ analysis, lang }) {
             icon={createCustomIcon('ORIGIN', originDistrict)}
           >
             <Popup>
-              <div className="p-1 text-chlorophyll font-sans">
+              <div className="p-1 text-slate-900 font-sans">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 block">
                   Departure Hub
                 </span>
                 <strong className="text-sm font-bold block">{originDistrict} District</strong>
-                <span className="text-xs text-chlorophyll/60">Farm lot dispatch node</span>
+                <span className="text-xs text-slate-600">Farm lot dispatch node</span>
               </div>
             </Popup>
           </Marker>
@@ -190,34 +217,34 @@ export default function MarketMap({ analysis, lang }) {
                   icon={createCustomIcon(markerType, `#${idx + 1}`)}
                 >
                   <Popup>
-                    <div className="p-2 min-w-[210px] text-chlorophyll font-sans">
+                    <div className="p-2 min-w-[210px] text-slate-900 font-sans">
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-[10px] font-bold font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
                           Rank #{idx + 1}
                         </span>
-                        <span className="text-xs font-mono tabular-nums text-chlorophyll/70 font-semibold">
+                        <span className="text-xs font-mono tabular-nums text-slate-600 font-semibold">
                           {mkt.roadDistanceKm} km ({mkt.transitHours}h)
                         </span>
                       </div>
-                      <h4 className="text-sm font-bold text-chlorophyll mb-0.5">
+                      <h4 className="text-sm font-bold text-slate-900 mb-0.5">
                         {mkt.marketName}
                       </h4>
-                      <p className="text-xs text-chlorophyll/60 mb-2">{mkt.district} District</p>
+                      <p className="text-xs text-slate-600 mb-2">{mkt.district} District</p>
                       
-                      <div className="bg-white/90 p-2.5 rounded-xl space-y-1 text-xs border border-chlorophyll/10 font-mono tabular-nums">
+                      <div className="bg-slate-50 p-2.5 rounded-xl space-y-1 text-xs border border-slate-200 font-mono tabular-nums">
                         <div className="flex justify-between">
-                          <span className="text-chlorophyll/60 font-sans">Mandi Price:</span>
-                          <span className="font-bold text-chlorophyll">₹{mkt.modalPrice}/qtl</span>
+                          <span className="text-slate-500 font-sans">Mandi Price:</span>
+                          <span className="font-bold text-slate-900">₹{mkt.modalPrice}/qtl</span>
                         </div>
-                        <div className="flex justify-between text-terracotta-600">
+                        <div className="flex justify-between text-terracotta-700">
                           <span className="font-sans">Freight Cost:</span>
                           <span>-₹{mkt.costs.transportCost.toLocaleString()}</span>
                         </div>
-                        <div className="flex justify-between text-terracotta-700">
+                        <div className="flex justify-between text-terracotta-800">
                           <span className="font-sans">Spoilage Loss:</span>
                           <span>-₹{mkt.costs.spoilageLoss.toLocaleString()} ({mkt.costs.spoilagePct}%)</span>
                         </div>
-                        <div className="flex justify-between border-t border-chlorophyll/10 pt-1 text-emerald-800 font-extrabold text-sm">
+                        <div className="flex justify-between border-t border-slate-200 pt-1 text-emerald-700 font-extrabold text-sm">
                           <span className="font-sans">Net In-Hand:</span>
                           <span>₹{mkt.netReturnInr.toLocaleString()}</span>
                         </div>

@@ -49,8 +49,9 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-        serif: ['"Instrument Serif"', 'Georgia', 'serif'],
+        sans: ['"Sporting Grotesque"', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        display: ['"Sporting Grotesque"', '"Outfit"', 'system-ui', 'sans-serif'],
+        heading: ['"Sporting Grotesque"', '"Outfit"', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
       boxShadow: {

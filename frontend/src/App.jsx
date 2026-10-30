@@ -12,11 +12,14 @@ import TransporterDirectory from './components/TransporterDirectory';
 import FarmerDispatchSlip from './components/FarmerDispatchSlip';
 import SavedAnalysesModal from './components/SavedAnalysesModal';
 import { TRANSLATIONS } from './translations';
-import { CheckCircle, Sparkles, Sprout, ArrowDown } from 'lucide-react';
+import { CheckCircle, Sparkles, Sprout, BarChart3, Map, Truck, ShieldCheck } from 'lucide-react';
 
 export default function App() {
   const [lang, setLang] = useState('en');
   const t = TRANSLATIONS[lang];
+
+  // Active view tab: 'rankings' | 'map' | 'logistics'
+  const [activeTab, setActiveTab] = useState('rankings');
 
   // System & Reference data
   const [crops, setCrops] = useState([]);
@@ -145,7 +148,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative min-h-screen text-chlorophyll font-sans selection:bg-emerald-500/30 selection:text-emerald-950">
+    <div className="relative min-h-screen text-white font-sans selection:bg-emerald-500/30 selection:text-emerald-950">
       
       {/* Scroll-Locked Background Video Layer */}
       <BackgroundVideo />
@@ -155,7 +158,7 @@ export default function App() {
         
         {/* Toast Notification */}
         {toastMessage && (
-          <div className="fixed top-20 right-6 z-50 glass-dark-card text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-white/20 flex items-center gap-3 text-xs animate-bounce font-mono">
+          <div className="fixed top-20 right-6 z-50 glass-dark-card text-white px-5 py-3 rounded-2xl shadow-xl border border-white/20 flex items-center gap-3 text-xs animate-bounce font-mono">
             <CheckCircle className="w-4 h-4 text-emerald-400" />
             <span className="font-sans">{toastMessage}</span>
           </div>
@@ -165,46 +168,51 @@ export default function App() {
         <Navbar
           lang={lang}
           setLang={setLang}
+          onSelectTab={(tab) => {
+            setActiveTab(tab);
+            const el = document.getElementById('details-section');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }}
         />
 
-        {/* Vision-OS Botanical Hero Header */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 w-full mb-8 pt-2">
-          <div className="glass-floating rounded-3xl p-8 sm:p-12 text-white border border-white/30 shadow-[0_20px_50px_-12px_rgba(4,47,46,0.35),inset_0_1px_1px_0_rgba(255,255,255,0.7)] backdrop-blur-2xl relative overflow-hidden">
+        {/* Hero Header */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 w-full mb-6 pt-1">
+          <div className="glass-floating rounded-3xl p-6 sm:p-10 text-white border border-white/20 shadow-[0_16px_40px_-10px_rgba(0,0,0,0.3)] backdrop-blur-md relative overflow-hidden">
             
-            {/* Ambient emerald light bloom */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-
             <div className="relative z-10 max-w-4xl">
-              <div className="flex flex-wrap items-center gap-2.5 mb-4">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 backdrop-blur-md">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-mono">
                   <Sprout className="w-3.5 h-3.5 text-emerald-300" />
-                  Domain 3: Agriculture & Rural Development
+                  {t.domainBadge}
                 </span>
-                <span className="px-3 py-1 rounded-full text-[10px] font-mono font-semibold bg-white/10 text-white/80 border border-white/15 backdrop-blur-md">
-                  87,420 Agmarknet APMC Records
+                <span className="px-3 py-1 rounded-full text-[10px] font-mono text-white/80 bg-white/5 border border-white/10">
+                  {t.datasetBadge}
+                </span>
+                <span className="px-3 py-1 rounded-full text-[10px] font-mono text-emerald-300/80 bg-emerald-500/10 border border-emerald-400/20">
+                  {t.noLoginBadge}
                 </span>
               </div>
 
-              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-serif italic tracking-wide text-white font-normal leading-[1.15]">
-                Find the Market That Pays the Most After Costs.
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-display font-extrabold tracking-tight text-white leading-[1.12] text-crisp">
+                Find the market that pays the most in your pocket — after all costs.
               </h2>
 
-              <p className="text-sm sm:text-base text-white/85 mt-4 leading-relaxed font-sans max-w-2xl font-normal">
-                Never load the truck for the wrong mandi again. HarvestRoute recalculates real in-hand cash after deducting road freight, non-linear transit decay on perishable crops, and statutory yard cess.
+              <p className="text-xs sm:text-sm text-white/80 mt-3 leading-relaxed font-sans max-w-3xl">
+                A higher price two hours away isn't worth it if fuel, road spoilage, and yard fees eat your margin. HarvestRoute calculates your real take-home earnings across Karnataka mandis so you always pick the best destination.
               </p>
 
-              <div className="flex flex-wrap items-center gap-4 mt-6 pt-6 border-t border-white/15 text-xs text-white/70 font-mono">
+              <div className="flex flex-wrap items-center gap-4 mt-5 pt-4 border-t border-white/10 text-xs text-white/70 font-mono">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   <span>62 Karnataka Mandis Monitored</span>
                 </div>
                 <span>•</span>
                 <div>
-                  <span>Haversine 1.28x Road Tortuosity</span>
+                  <span>Haversine Road Distance Matrix</span>
                 </div>
                 <span>•</span>
                 <div>
-                  <span>Non-Linear Spoilage Decay Curves</span>
+                  <span>Real Spoilage & Freshness Decay</span>
                 </div>
               </div>
             </div>
@@ -214,27 +222,50 @@ export default function App() {
         {/* Main Content Ledger */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 pb-16 flex-1 w-full">
           
-          {/* 1. Farmer Lot Configuration Input */}
-          <FarmerInputForm
-            lang={lang}
-            crops={crops}
-            origins={origins}
-            vehicleCatalog={vehicleCatalog}
-            selectedCrop={selectedCrop}
-            setSelectedCrop={setSelectedCrop}
-            quantity={quantity}
-            setQuantity={setQuantity}
-            freshness={freshness}
-            setFreshness={setFreshness}
-            originDistrict={originDistrict}
-            setOriginDistrict={setOriginDistrict}
-            vehicleType={vehicleType}
-            setVehicleType={setVehicleType}
-            onCalculate={() => executeAnalysis()}
-            isLoading={isLoading}
-          />
+          {/* GROUP 1: Two-Column Control Center (Lot Setup & Route Assumptions) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8 items-stretch">
+            
+            {/* Left (7 cols): Farmer Lot Configuration */}
+            <div className="lg:col-span-7">
+              <FarmerInputForm
+                lang={lang}
+                crops={crops}
+                origins={origins}
+                vehicleCatalog={vehicleCatalog}
+                selectedCrop={selectedCrop}
+                setSelectedCrop={setSelectedCrop}
+                quantity={quantity}
+                setQuantity={setQuantity}
+                freshness={freshness}
+                setFreshness={setFreshness}
+                originDistrict={originDistrict}
+                setOriginDistrict={setOriginDistrict}
+                vehicleType={vehicleType}
+                setVehicleType={setVehicleType}
+                onCalculate={() => executeAnalysis()}
+                isLoading={isLoading}
+              />
+            </div>
 
-          {/* 2. The Twist: Side-by-side Showcase */}
+            {/* Right (5 cols): Live Route Assumptions & Sliders */}
+            <div className="lg:col-span-5">
+              <SensitivityLab
+                lang={lang}
+                fuelRateMultiplier={fuelRateMultiplier}
+                setFuelRateMultiplier={setFuelRateMultiplier}
+                spoilageMultiplier={spoilageMultiplier}
+                setSpoilageMultiplier={setSpoilageMultiplier}
+                cessRateOverride={cessRateOverride}
+                setCessRateOverride={setCessRateOverride}
+                speedKmph={speedKmph}
+                setSpeedKmph={setSpeedKmph}
+                onReset={handleResetSensitivity}
+              />
+            </div>
+
+          </div>
+
+          {/* GROUP 2: The Twist — Side-by-side Showcase (Core Decision) */}
           {analysis && (
             <TheTwistCard
               analysis={analysis}
@@ -246,71 +277,118 @@ export default function App() {
             />
           )}
 
-          {/* 3. Interactive Route & Logistics Map */}
-          {analysis && (
-            <MarketMap
-              analysis={analysis}
-              lang={lang}
-            />
-          )}
+          {/* GROUP 3: Detailed Intelligence Tabs (Rankings, Map, Logistics) */}
+          <section id="details-section" className="mb-8">
+            
+            {/* Elegant Tab Switcher Bar */}
+            <div className="flex items-center justify-between flex-wrap gap-3 mb-6 border-b border-white/10 pb-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xs uppercase font-mono font-bold tracking-wider text-white/50">
+                  Explore Details:
+                </span>
+                <div className="flex items-center bg-black/30 backdrop-blur-md p-1 rounded-2xl border border-white/15">
+                  
+                  <button
+                    onClick={() => setActiveTab('rankings')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                      activeTab === 'rankings'
+                        ? 'bg-emerald-500 text-pine font-bold shadow-md'
+                        : 'text-white/70 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    <BarChart3 className="w-4 h-4" />
+                    <span>Mandi Rankings & Bill</span>
+                  </button>
 
-          {/* 4. Ranked APMC Leaderboard Table with Gliding Springs */}
-          {analysis && (
-            <MarketLeaderboard
-              analysis={analysis}
-              lang={lang}
-              onSelectMarketForSlip={(mkt) => {
-                setMarketForSlip(mkt);
-                setIsDispatchSlipOpen(true);
-              }}
-            />
-          )}
+                  <button
+                    onClick={() => setActiveTab('map')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                      activeTab === 'map'
+                        ? 'bg-emerald-500 text-pine font-bold shadow-md'
+                        : 'text-white/70 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    <Map className="w-4 h-4" />
+                    <span>Route Map & Distances</span>
+                  </button>
 
-          {/* 5. 'What-If' Dynamic Sensitivity Lab (Live Sliders) */}
-          <SensitivityLab
-            lang={lang}
-            fuelRateMultiplier={fuelRateMultiplier}
-            setFuelRateMultiplier={setFuelRateMultiplier}
-            spoilageMultiplier={spoilageMultiplier}
-            setSpoilageMultiplier={setSpoilageMultiplier}
-            cessRateOverride={cessRateOverride}
-            setCessRateOverride={setCessRateOverride}
-            speedKmph={speedKmph}
-            setSpeedKmph={setSpeedKmph}
-            onReset={handleResetSensitivity}
-          />
+                  <button
+                    onClick={() => setActiveTab('logistics')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                      activeTab === 'logistics'
+                        ? 'bg-emerald-500 text-pine font-bold shadow-md'
+                        : 'text-white/70 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    <Truck className="w-4 h-4" />
+                    <span>Trucks & Transporters</span>
+                  </button>
 
-          {/* 6. Visual Deductions Waterfall Chart */}
-          {analysis && (
-            <CostBreakdownChart
-              analysis={analysis}
-              lang={lang}
-            />
-          )}
+                </div>
+              </div>
 
-          {/* 7. Truck Sharing & Direct Phone Collaboration */}
-          <CropPoolingHub
-            lang={lang}
-            origins={origins}
-            crops={crops}
-            vehicleCatalog={vehicleCatalog}
-            currentDistrict={originDistrict}
-            currentCrop={selectedCrop}
-            currentQuantity={quantity}
-            onShowToast={showToast}
-          />
+              <div className="text-xs text-white/50 font-mono hidden sm:block">
+                {activeTab === 'rankings' ? 'Itemized deduction statements for top 10 mandis' :
+                 activeTab === 'map' ? 'Interactive Leaflet GIS route map' :
+                 'Find shared trucks or book verified carriers'}
+              </div>
+            </div>
 
-          {/* 8. Local Karnataka Transporter & Vehicle Directory */}
-          <TransporterDirectory
-            dealers={dealers}
-            lang={lang}
-            currentVehicleType={vehicleType}
-            onSelectVehicle={(vType) => {
-              setVehicleType(vType);
-              executeAnalysis({ vehicleType: vType });
-              showToast(`Vehicle updated to ${vType}. Analysis recalculated!`);
-            }}
-          />
+            {/* Tab 1: Mandi Rankings & Settlement Slips + Visual Chart */}
+            {activeTab === 'rankings' && analysis && (
+              <div className="space-y-6">
+                <MarketLeaderboard
+                  analysis={analysis}
+                  lang={lang}
+                  onSelectMarketForSlip={(mkt) => {
+                    setMarketForSlip(mkt);
+                    setIsDispatchSlipOpen(true);
+                  }}
+                />
+
+                <CostBreakdownChart
+                  analysis={analysis}
+                  lang={lang}
+                />
+              </div>
+            )}
+
+            {/* Tab 2: Interactive Route Map with Mouse Scroll Zoom */}
+            {activeTab === 'map' && analysis && (
+              <MarketMap
+                analysis={analysis}
+                lang={lang}
+              />
+            )}
+
+            {/* Tab 3: Logistics (Truck Sharing & Transporter Directory) */}
+            {activeTab === 'logistics' && (
+              <div className="space-y-6">
+                <CropPoolingHub
+                  lang={lang}
+                  origins={origins}
+                  crops={crops}
+                  vehicleCatalog={vehicleCatalog}
+                  currentDistrict={originDistrict}
+                  currentCrop={selectedCrop}
+                  currentQuantity={quantity}
+                  onShowToast={showToast}
+                />
+
+                <TransporterDirectory
+                  dealers={dealers}
+                  lang={lang}
+                  currentVehicleType={vehicleType}
+                  onSelectVehicle={(vType) => {
+                    setVehicleType(vType);
+                    executeAnalysis({ vehicleType: vType });
+                    showToast(`Vehicle updated to ${vType}. Analysis recalculated!`);
+                  }}
+                />
+              </div>
+            )}
+
+          </section>
 
         </main>
 
@@ -329,19 +407,19 @@ export default function App() {
         />
 
         {/* Editorial Footer */}
-        <footer className="glass-floating border-t border-white/20 text-white/70 py-8 text-xs backdrop-blur-2xl">
+        <footer className="glass-floating border-t border-white/15 text-white/70 py-7 text-xs backdrop-blur-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono">
             <div className="flex items-center gap-2.5">
               <div className="w-6 h-6 rounded-lg bg-emerald-500 text-pine flex items-center justify-center font-bold font-sans text-xs">
                 HR
               </div>
-              <span className="font-bold text-white font-sans">HarvestRoute Agricultural Intelligence</span>
+              <span className="font-bold text-white font-sans">HarvestRoute</span>
               <span>•</span>
-              <span>Domain 3 / Karnataka APMC Network</span>
+              <span>Karnataka APMC Agricultural Marketing Network</span>
             </div>
 
-            <div className="text-white/50 text-[11px]">
-              Crafted with botanical glass & mathematical rigor.
+            <div className="text-white/50 text-[11px] font-sans">
+              Helping farmers take home more cash on every harvest.
             </div>
           </div>
         </footer>

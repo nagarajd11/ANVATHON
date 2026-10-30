@@ -2,11 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Sporting Grotesque Webfont Declarations */
+@font-face {
+  font-family: 'Sporting Grotesque';
+  src: url('/fonts/Sporting_Grotesque-Regular_web.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sporting Grotesque';
+  src: url('/fonts/Sporting_Grotesque-Bold_web.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sporting Grotesque';
+  src: url('/fonts/Sporting_Grotesque-Bold_web.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sporting Grotesque';
+  src: url('/fonts/Sporting_Grotesque-Bold_web.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   body {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    color: #09261C;
-    background-color: #031a14;
+    font-family: 'Sporting Grotesque', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    color: #ffffff;
+    background-color: #020c08;
     overflow-x: hidden;
   }
 
@@ -16,34 +49,125 @@
   .font-mono {
     font-variant-numeric: tabular-nums;
   }
+
+  /* Ensure native dropdown options remain legible against transparent glass */
+  select option {
+    background-color: #081a13;
+    color: #ffffff;
+    padding: 8px 12px;
+  }
 }
 
 @layer components {
-  /* Organic Botanical Frosted Glass Panel */
+  /* Ultra-transparent Crystal Glass - preserves sharp video visibility with minimal 6px blur */
   .glass-card {
-    background-color: rgba(255, 255, 255, 0.88);
-    backdrop-filter: blur(28px) saturate(160%);
-    -webkit-backdrop-filter: blur(28px) saturate(160%);
-    border: 1px solid rgba(9, 38, 28, 0.08);
-    box-shadow: 0 16px 45px -10px rgba(4, 47, 46, 0.22), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
-  }
-
-  /* Floating Translucent Control Header / Pill */
-  .glass-floating {
-    background-color: rgba(255, 255, 255, 0.16);
-    backdrop-filter: blur(20px) saturate(140%);
-    -webkit-backdrop-filter: blur(20px) saturate(140%);
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    box-shadow: 0 8px 32px 0 rgba(4, 47, 46, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 0.6);
-  }
-
-  /* Dark Frosted Glass for The Twist Showcase */
-  .glass-dark-card {
-    background-color: rgba(5, 26, 19, 0.85);
-    backdrop-filter: blur(32px) saturate(160%);
-    -webkit-backdrop-filter: blur(32px) saturate(160%);
+    background-color: rgba(6, 18, 14, 0.22);
+    backdrop-filter: blur(6px) saturate(125%);
+    -webkit-backdrop-filter: blur(6px) saturate(125%);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.6), inset 0 1px 1px 0 rgba(255, 255, 255, 0.15);
+    box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+  }
+
+  /* Ultra-transparent light frosted glass for floating pills and toolbars */
+  .glass-floating {
+    background-color: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(8px) saturate(125%);
+    -webkit-backdrop-filter: blur(8px) saturate(125%);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 12px 30px 0 rgba(0, 0, 0, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+  }
+
+  /* Translucent Dark Glass for contrast panels without smearing the video */
+  .glass-dark-card {
+    background-color: rgba(4, 14, 10, 0.32);
+    backdrop-filter: blur(6px) saturate(125%);
+    -webkit-backdrop-filter: blur(6px) saturate(125%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.45), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+  }
+
+  /* Crystal Transparent Input Field */
+  .glass-input {
+    background-color: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .glass-input:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+    border-color: rgba(16, 185, 129, 0.5);
+    box-shadow: 0 0 16px -2px rgba(16, 185, 129, 0.25);
+  }
+  .glass-input:focus {
+    background-color: rgba(4, 14, 10, 0.65);
+    border-color: #10b981;
+    box-shadow: 0 0 20px -2px rgba(16, 185, 129, 0.4), inset 0 1px 2px rgba(0, 0, 0, 0.3);
+    outline: none;
+  }
+
+  /* Premium Light-Beam Shimmer on Buttons */
+  .btn-shimmer {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn-shimmer::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      60deg,
+      transparent 35%,
+      rgba(255, 255, 255, 0.30) 50%,
+      transparent 65%
+    );
+    transform: translateX(-100%);
+    transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+  .btn-shimmer:hover::after {
+    transform: translateX(100%);
+  }
+  .btn-shimmer:hover {
+    transform: translateY(-2px) scale(1.015);
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.4), 0 8px 20px -4px rgba(0, 0, 0, 0.35);
+    border-color: rgba(52, 211, 153, 0.65);
+  }
+  .btn-shimmer:active {
+    transform: translateY(0px) scale(0.985);
+  }
+
+  /* Micro-Lift Hover for Cards and Tiles */
+  .hover-lift {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2.5px);
+    box-shadow: 0 20px 45px -8px rgba(0, 0, 0, 0.4), 0 0 25px rgba(16, 185, 129, 0.18);
+    border-color: rgba(52, 211, 153, 0.45);
+  }
+
+  /* Glowing Interactive Pill Hover */
+  .hover-glow-pill {
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .hover-glow-pill:hover {
+    transform: translateY(-1.5px);
+    border-color: rgba(52, 211, 153, 0.5);
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
+  }
+
+  /* Crisp text shadow utility for readable typography over transparent glass */
+  .text-crisp {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   }
 
   /* Authentic Commodity Receipt Dashed Leader Line */
@@ -57,7 +181,7 @@
   .receipt-line::before {
     content: '';
     flex: 1;
-    border-bottom: 1px dashed rgba(9, 38, 28, 0.2);
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.18);
     margin: 0 0.5rem;
     order: 2;
   }
@@ -79,14 +203,14 @@
   height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(3, 26, 20, 0.8);
+  background: rgba(0, 0, 0, 0.4);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.4);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.6);
+  background: rgba(16, 185, 129, 0.75);
 }
 
 /* Leaflet map styles */
@@ -95,6 +219,38 @@
   height: 100%;
   border-radius: 1rem;
   z-index: 10;
+}
+
+/* Custom Leaflet Zoom Bar Glass with Hover Glow */
+.leaflet-bar {
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  background-color: transparent !important;
+}
+
+.leaflet-bar a {
+  background-color: rgba(4, 20, 14, 0.82) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  color: #34d399 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  width: 32px !important;
+  height: 32px !important;
+  line-height: 32px !important;
+  font-weight: bold !important;
+}
+
+.leaflet-bar a:hover {
+  background-color: #10b981 !important;
+  color: #02120b !important;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.75) !important;
+}
+
+.leaflet-bar a:last-child {
+  border-bottom: none !important;
 }
 
 /* Range input tactile styling */
@@ -111,20 +267,20 @@ input[type="range"]::-webkit-slider-thumb {
   width: 18px;
   border-radius: 50%;
   background: #ffffff;
-  border: 2px solid #059669;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  border: 2px solid #10b981;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.7);
   cursor: grab;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+  transform: scale(1.25);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.95);
 }
 
 input[type="range"]::-webkit-slider-thumb:active {
   cursor: grabbing;
-  transform: scale(1.05);
+  transform: scale(1.1);
 }
 
 /* Print styles for Farmer Dispatch Slip */
