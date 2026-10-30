@@ -139,7 +139,13 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
 
                       {/* Mandi Headline Price */}
                       <td className="py-3 px-2 sm:px-3 whitespace-nowrap font-mono tabular-nums text-white font-medium">
-                        ₹{mkt.modalPrice.toLocaleString()}<span className="text-[10px] text-white/50">/q</span>
+                        <div>₹{mkt.modalPrice.toLocaleString()}<span className="text-[10px] text-white/50">/q</span></div>
+                        {mkt.freshnessDiscountPct > 0 && (
+                          <div className="text-[10px] font-bold text-amber-300 flex items-center gap-1 mt-0.5">
+                            <span className="bg-amber-950/60 border border-amber-500/30 px-1.5 py-0.5 rounded">-{mkt.freshnessDiscountPct}% Age Cut</span>
+                            <span className="line-through text-white/40 font-normal">₹{mkt.baselineModalPrice}</span>
+                          </div>
+                        )}
                       </td>
 
                       {/* Gross */}

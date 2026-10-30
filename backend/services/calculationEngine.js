@@ -3,7 +3,7 @@ const { getRoadDistance, getTransitDurationHours } = require('./geoService');
 // Crop perishability database
 const CROP_PERISHABILITY = {
   'Tomato': { tier: 'HIGH', basePerHour: 0.007, shelfDays: 4, nameKn: 'ಟೊಮೇಟೊ', nameHi: 'टमाटर', icon: 'apple' },
-  'Banana': { tier: 'HIGH', basePerHour: 0.005, shelfDays: 5, nameKn: 'ಬಾಳೆಹಣ್ಣು', nameHi: 'केला', icon: 'banana' },
+  'Banana': { tier: 'HIGH', basePerHour: 0.005, shelfDays: 5, nameKn: 'ಬಾಳೆಹಣ್ಣು', nameHi: 'ಕೆಲಾ', icon: 'banana' },
   'Mango': { tier: 'HIGH', basePerHour: 0.006, shelfDays: 6, nameKn: 'ಮಾವಿನಹಣ್ಣು', nameHi: 'आम', icon: 'citrus' },
   'Onion': { tier: 'MEDIUM', basePerHour: 0.0012, shelfDays: 20, nameKn: 'ಈರುಳ್ಳಿ', nameHi: 'प्याज', icon: 'onion' },
   'Potato': { tier: 'MEDIUM', basePerHour: 0.001, shelfDays: 30, nameKn: 'ಆಲೂಗಡ್ಡೆ', nameHi: 'आलू', icon: 'potato' },
@@ -17,7 +17,7 @@ const CROP_PERISHABILITY = {
   'Coffee': { tier: 'LOW', basePerHour: 0.0002, shelfDays: 180, nameKn: 'ಕಾಫಿ', nameHi: 'कॉफ़ी', icon: 'coffee' },
   'Cocoa': { tier: 'LOW', basePerHour: 0.0003, shelfDays: 90, nameKn: 'ಕೋಕೋ', nameHi: 'कोको', icon: 'box' },
   'Tea': { tier: 'LOW', basePerHour: 0.0003, shelfDays: 90, nameKn: 'ಟೀ', nameHi: 'चाय', icon: 'cup-soda' },
-  'Arecanut': { tier: 'LOW', basePerHour: 0.0002, shelfDays: 120, nameKn: 'ಅಡಿಕೆ', nameHi: 'सुपारी', icon: 'nut' },
+  'Arecanut': { tier: 'LOW', basePerHour: 0.0002, shelfDays: 120, nameKn: 'ಅಡಿಕೆ', nameHi: 'ಸುಪಾರಿ', icon: 'nut' },
   'Coconut': { tier: 'LOW', basePerHour: 0.0003, shelfDays: 45, nameKn: 'ತೆಂಗಿನಕಾಯಿ', nameHi: 'नारियल', icon: 'circle' },
   'Paddy': { tier: 'NEGLIGIBLE', basePerHour: 0.0001, shelfDays: 180, nameKn: 'ಭತ್ತ', nameHi: 'धान', icon: 'wheat' },
   'Ragi': { tier: 'NEGLIGIBLE', basePerHour: 0.0001, shelfDays: 240, nameKn: 'ರಾಗಿ', nameHi: 'रागी', icon: 'wheat' },
@@ -113,9 +113,27 @@ function calculateMarketNetReturn({
   const roadDistanceKm = getRoadDistance(originLat, originLon, market.latitude, market.longitude);
   const transitHours = getTransitDurationHours(roadDistanceKm, speedKmph);
 
-  // 2. Gross Nominal Revenue
-  const modalPrice = marketPrice.modal_price_inr_per_unit;
-  const grossRevenue = Math.round(quantityQuintals * modalPrice);
+  // 2. Harvest Age Quality Discount on Mandi Auction Price
+  // Real-world APMC dynamics: older perishable produce gets discounted at auction due to softening/grade drop.
+  const baselineModalPrice = marketPrice.modal_price_inr_per_unit;
+  
+  let freshnessDiscountPct = 0;
+  if (freshnessHours > 6) {
+    if (cropConfig.tier === 'HIGH') {
+      // High perishables (Tomato, Banana, Mango): severe discount when harvested 24h-48h ago
+      freshnessDiscountPct = freshnessHours <= 24 ? 0.08 : 0.22;
+    } else if (cropConfig.tier === 'MEDIUM') {
+      // Medium perishables (Onion, Potato, Garlic, Ginger, Sugarcane)
+      freshnessDiscountPct = freshnessHours <= 24 ? 0.03 : 0.08;
+    } else {
+      // Low / Negligible perishables (Grains, Pulses, Spices)
+      freshnessDiscountPct = freshnessHours <= 24 ? 0 : 0.01;
+    }
+  }
+
+  // Realized Mandi Price per unit
+  const realizedPricePerUnit = Math.round(baselineModalPrice * (1 - freshnessDiscountPct));
+  const grossRevenue = Math.round(quantityQuintals * realizedPricePerUnit);
 
   // 3. Transport Cost
   const tripsRequired = Math.ceil(quantityQuintals / vehicle.capacity);
@@ -165,7 +183,10 @@ function calculateMarketNetReturn({
     longitude: market.longitude,
     roadDistanceKm,
     transitHours,
-    modalPrice,
+    modalPrice: realizedPricePerUnit,
+    baselineModalPrice,
+    freshnessDiscountPct: Math.round(freshnessDiscountPct * 100),
+    freshnessHours,
     minPrice: marketPrice.min_price_inr_per_unit,
     maxPrice: marketPrice.max_price_inr_per_unit,
     grossRevenue,
@@ -209,17 +230,16 @@ function calculateMarketNetReturn({
 }
 
 /**
- * Main Analysis Orchestrator
- * Evaluates candidate markets, ranks them by net return, and diagnoses "The Twist" (Nominal Winner vs Net Winner)
+ * Runs full comparative analysis across all candidate markets in Karnataka
  */
 function runHarvestRouteAnalysis({
   markets,
   marketPricesMap,
-  cropName,
-  quantityQuintals,
-  originDistrict,
-  originLat,
-  originLon,
+  cropName = 'Tomato',
+  quantityQuintals = 20,
+  originDistrict = 'Davanagere',
+  originLat = 14.4644,
+  originLon = 75.9218,
   vehicleType = 'BOLERO_PICKUP',
   freshnessHours = 6,
   fuelRateMultiplier = 1.0,
@@ -329,4 +349,3 @@ module.exports = {
   calculateMarketNetReturn,
   runHarvestRouteAnalysis
 };
-

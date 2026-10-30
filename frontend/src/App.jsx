@@ -118,7 +118,7 @@ export default function App() {
       executeAnalysis();
     }, 250);
     return () => clearTimeout(timer);
-  }, [fuelRateMultiplier, spoilageMultiplier, cessRateOverride, speedKmph]);
+  }, [selectedCrop, quantity, freshness, originDistrict, vehicleType, fuelRateMultiplier, spoilageMultiplier, cessRateOverride, speedKmph]);
 
   // Reset Sensitivity
   const handleResetSensitivity = () => {

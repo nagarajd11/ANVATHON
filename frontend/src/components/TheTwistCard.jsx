@@ -96,6 +96,11 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
               <span className="text-2xl sm:text-3xl font-bold text-amber-300 font-mono tabular-nums">
                 ₹{highestPriceMarket.modalPrice.toLocaleString()}<span className="text-xs font-normal text-white/50">/qtl</span>
               </span>
+              {highestPriceMarket.freshnessDiscountPct > 0 && (
+                <span className="text-[10px] font-bold text-rose-300 bg-rose-950/60 border border-rose-500/30 px-2 py-0.5 rounded-md">
+                  -{highestPriceMarket.freshnessDiscountPct}% Age Cut
+                </span>
+              )}
             </div>
           </div>
 
@@ -176,6 +181,11 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
               <span className="text-2xl sm:text-3xl font-bold text-emerald-400 font-mono tabular-nums">
                 ₹{bestNetMarket.modalPrice.toLocaleString()}<span className="text-xs font-normal text-white/50">/qtl</span>
               </span>
+              {bestNetMarket.freshnessDiscountPct > 0 && (
+                <span className="text-[10px] font-bold text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-md">
+                  -{bestNetMarket.freshnessDiscountPct}% Age Cut
+                </span>
+              )}
             </div>
           </div>
 
