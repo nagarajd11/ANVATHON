@@ -84,22 +84,20 @@ export const TRANSLATIONS = {
     // Cost breakdown chart
     costBreakdownTitle: "Deduction Breakdown (Where Does The Money Go?)",
 
-    // Empty Truck & Phone Collaboration
-    poolNavBtn: "Empty Trucks (Call to Share)",
-    poolHubTitle: "Available Empty Trucks & Direct Phone Collaboration",
-    poolHubSubtitle: "Only trucks with verified empty space are shown. Call the host farmer directly on their phone to load your produce and split transport expenses in cash in-person.",
-    emptyBadgeNotice: "Only Trucks With Empty Capacity Displayed",
-    createPoolBtn: "+ Post Empty Truck Request",
-    callFarmerBtn: "Call Farmer Directly",
+    // Truck Sharing & Call to Confirm
+    poolNavBtn: "Shared Trucks (Call to Confirm)",
+    poolHubTitle: "Truck Sharing & Direct Phone Collaboration",
+    poolHubSubtitle: "Find trucks heading to the same APMC. Call the farmer directly to confirm if space is available and agree on an in-person cash split.",
+    emptyBadgeNotice: "Call Host Farmer to Confirm Availability",
+    createPoolBtn: "+ Post Truck Sharing Request",
+    callToConfirmBtn: "Call to Confirm Space",
     whatsappFarmerBtn: "WhatsApp",
     filterDistrict: "Filter by Origin District",
     filterAll: "All Districts",
-    emptySpaceLabel: "Empty Space Available",
     departure: "Departure",
     totalFreight: "Vehicle Trip Freight",
-    soloVsPoolComparison: "Solo vs. Shared Vehicle Cost Savings",
     soloAlertBadge: "Small Lot Alert",
-    soloAlertText: "You have a small harvest lot. Check the empty trucks below to call and share vehicle freight!"
+    soloAlertText: "Have a smaller harvest? Call one of the shared trucks below to confirm space and split freight in cash!"
   },
 
   kn: {
@@ -187,22 +185,20 @@ export const TRANSLATIONS = {
     // Cost breakdown chart
     costBreakdownTitle: "ಖರ್ಚಿನ ವಿವರ (ಹಣ ಎಲ್ಲಿ ಹೋಯಿತು?)",
 
-    // Empty Truck & Phone Collaboration
-    poolNavBtn: "ಖಾಲಿ ವಾಹನಗಳು (ಕರೆ ಮಾಡಿ ಹಂಚಿಕೊಳ್ಳಿ)",
-    poolHubTitle: "ಖಾಲಿ ಇರುವ ವಾಹನಗಳು ಮತ್ತು ರೈತರಿಗೆ ನೇರ ಕರೆ ಸೌಲಭ್ಯ",
-    poolHubSubtitle: "ಖಾಲಿ ಸ್ಥಳಾವಕಾಶವಿರುವ ವಾಹನಗಳನ್ನು ಮಾತ್ರ ಇಲ್ಲಿ ತೋರಿಸಲಾಗುತ್ತದೆ. ರೈತರಿಗೆ ನೇರವಾಗಿ ಫೋನ್ ಕರೆ ಮಾಡಿ ನಿಮ್ಮ ಬೆಳೆ ಸಾಗಿಸಲು ಮಾತನಾಡಿ, ವೆಚ್ಚವನ್ನು ಮುಖಾಮುಖಿ ಹಂಚಿಕೊಳ್ಳಿ.",
-    emptyBadgeNotice: "ಖಾಲಿ ಸ್ಥಳಾವಕಾಶವಿರುವ ವಾಹನಗಳು ಮಾತ್ರ ಲಭ್ಯ",
-    createPoolBtn: "+ ಖಾಲಿ ವಾಹನ ವಿನಂತಿ ಹಾಕಿ",
-    callFarmerBtn: "ನೇರ ಕರೆ ಮಾಡಿ",
+    // Truck Sharing & Call to Confirm
+    poolNavBtn: "ವಾಹನ ಹಂಚಿಕೆ (ಕರೆ ಮಾಡಿ)",
+    poolHubTitle: "ವಾಹನ ಹಂಚಿಕೆ ಮತ್ತು ರೈತರಿಗೆ ನೇರ ಕರೆ ಸೌಲಭ್ಯ",
+    poolHubSubtitle: "ನಿಮ್ಮದೇ ಮಂಡಿಗೆ ಹೋಗುವ ವಾಹನಗಳನ್ನು ಹುಡುಕಿ. ಜಾಗ ಖಾಲಿ ಇದೆಯೇ ಎಂದು ತಿಳಿಯಲು ರೈತರಿಗೆ ನೇರವಾಗಿ ಫೋನ್ ಕರೆ ಮಾಡಿ, ಬಾಡಿಗೆಯನ್ನು ಮುಖಾಮುಖಿ ಹಂಚಿಕೊಳ್ಳಿ.",
+    emptyBadgeNotice: "ಸ್ಥಳಾವಕಾಶ ತಿಳಿಯಲು ನೇರ ಕರೆ ಮಾಡಿ",
+    createPoolBtn: "+ ವಾಹನ ಹಂಚಿಕೆ ವಿನಂತಿ ಹಾಕಿ",
+    callToConfirmBtn: "ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಲು ಕರೆ ಮಾಡಿ",
     whatsappFarmerBtn: "ವಾಟ್ಸಾಪ್",
     filterDistrict: "ಜಿಲ್ಲೆಯ ಮೂಲಕ ಫಿಲ್ಟರ್",
     filterAll: "ಎಲ್ಲ ಜಿಲ್ಲೆಗಳು",
-    emptySpaceLabel: "ಖಾಲಿ ಇರುವ ಸ್ಥಳಾವಕಾಶ",
     departure: "ಹೊರಡುವ ಸಮಯ",
     totalFreight: "ಒಟ್ಟು ವಾಹನ ಬಾಡಿಗೆ",
-    soloVsPoolComparison: "ಏಕಾಂಗಿ vs ಹಂಚಿಕೆಯ ಸಾಗಣೆ ಉಳಿತಾಯ",
     soloAlertBadge: "ಕಡಿಮೆ ಇಳುವರಿ ಎಚ್ಚರಿಕೆ",
-    soloAlertText: "ನಿಮ್ಮಲ್ಲಿ ಕಡಿಮೆ ಬೆಳೆ ಇದೆ. ಕೆಳಗಿನ ಖಾಲಿ ವಾಹನಗಳ ರೈತರಿಗೆ ಕರೆ ಮಾಡಿ ಬಾಡಿಗೆ ಹಂಚಿಕೊಳ್ಳಿ!"
+    soloAlertText: "ನಿಮ್ಮಲ್ಲಿ ಕಡಿಮೆ ಬೆಳೆ ಇದ್ದರೆ, ಕೆಳಗಿನ ವಾಹನಗಳ ರೈತರಿಗೆ ಕರೆ ಮಾಡಿ ಸ್ಥಳಾವಕಾಶ ಖಚಿತಪಡಿಸಿಕೊಂಡು ಬಾಡಿಗೆ ಉಳಿಸಿ!"
   },
 
   hi: {
@@ -290,21 +286,19 @@ export const TRANSLATIONS = {
     // Cost breakdown chart
     costBreakdownTitle: "कटौतियों का चार्ट (पैसा कहां खर्च हुआ?)",
 
-    // Empty Truck & Phone Collaboration
-    poolNavBtn: "खाली ट्रक (सीधे कॉल करें)",
-    poolHubTitle: "उपलब्ध खाली वाहन और सीधा फोन कॉल संपर्क",
-    poolHubSubtitle: "केवल वही गाड़ियां दिखाई जाती हैं जिनमें जगह खाली है। किसान को सीधे फोन करें, अपनी फसल लोड करें और नकद भाड़ा आपस में बांटें।",
-    emptyBadgeNotice: "केवल खाली जगह वाले वाहन प्रदर्शित हैं",
-    createPoolBtn: "+ खाली गाड़ी का अनुरोध बनाएं",
-    callFarmerBtn: "सीधे कॉल करें",
+    // Truck Sharing & Call to Confirm
+    poolNavBtn: "साझा गाड़ी (कॉल करके पूछें)",
+    poolHubTitle: "गाड़ी साझाकरण और सीधे किसान से फोन पर बातचीत",
+    poolHubSubtitle: "उसी मंडी जाने वाले किसान को सीधे फोन करें। जगह खाली होने की पुष्टि करें और नकद भाड़ा आपस में बांटें।",
+    emptyBadgeNotice: "जगह खाली होने की पुष्टि के लिए फोन करें",
+    createPoolBtn: "+ गाड़ी साझाकरण अनुरोध जोड़ें",
+    callToConfirmBtn: "पुष्टि के लिए कॉल करें",
     whatsappFarmerBtn: "व्हाट्सएप",
     filterDistrict: "जिले के अनुसार देखें",
     filterAll: "सभी जिले",
-    emptySpaceLabel: "खाली जगह उपलब्ध",
     departure: "रवानगी का समय",
     totalFreight: "गाड़ी का कुल भाड़ा",
-    soloVsPoolComparison: "अकेले vs साझा वाहन भाड़ा बचत",
     soloAlertBadge: "कम उपज सूचना",
-    soloAlertText: "आपकी फसल की मात्रा कम है। नीचे उपलब्ध खाली ट्रक वाले किसानों को सीधे कॉल करके गाड़ी साझा करें!"
+    soloAlertText: "कम फसल होने पर अकेले पूरा भाड़ा देने के बजाय, नीचे दी गई गाड़ियों के किसानों को सीधे कॉल करके जगह कन्फर्म करें!"
   }
 };
