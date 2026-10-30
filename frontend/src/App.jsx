@@ -13,7 +13,7 @@ import TransporterDirectory from './components/TransporterDirectory';
 import FarmerDispatchSlip from './components/FarmerDispatchSlip';
 import SavedAnalysesModal from './components/SavedAnalysesModal';
 import { TRANSLATIONS } from './translations';
-import { CheckCircle, Sparkles, Sprout, BarChart3, Map, Truck, ShieldCheck } from 'lucide-react';
+import { CheckCircle, Sparkles, BarChart3, Map, Truck, ShieldCheck } from 'lucide-react';
 
 export default function App() {
   const [lang, setLang] = useState('en');
@@ -238,19 +238,6 @@ export default function App() {
           <div className="glass-floating rounded-3xl p-6 sm:p-10 text-white border border-white/20 shadow-[0_16px_40px_-10px_rgba(0,0,0,0.3)] backdrop-blur-md relative overflow-hidden">
             
             <div className="relative z-10 max-w-4xl">
-              <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 font-mono">
-                  <Sprout className="w-3.5 h-3.5 text-emerald-300" />
-                  {t.domainBadge}
-                </span>
-                <span className="px-3 py-1 rounded-full text-xs font-mono text-white/70 bg-white/5 border border-white/10">
-                  {t.datasetBadge}
-                </span>
-                <span className="px-3 py-1 rounded-full text-xs font-mono text-emerald-300 bg-emerald-500/10 border border-emerald-400/20">
-                  {t.noLoginBadge}
-                </span>
-              </div>
-
               <h2 className="text-3xl sm:text-5xl lg:text-6xl font-display font-extrabold tracking-tight text-white leading-[1.12] text-crisp">
                 Find the market that pays the most in your pocket — after all costs.
               </h2>
