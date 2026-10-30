@@ -17,6 +17,7 @@ const {
   isDbConnected
 } = require('./services/dbService');
 const { runHarvestRouteAnalysis, VEHICLE_CATALOG } = require('./services/calculationEngine');
+const { KARNATAKA_DISTRICT_TALUKS } = require('./data/karnatakaTaluks');
 const { getRoadDistance } = require('./services/geoService');
 
 const app = express();
@@ -71,7 +72,8 @@ app.get('/api/origins', (req, res) => {
     district: name,
     kannada_name: val.kn,
     latitude: val.lat,
-    longitude: val.lon
+    longitude: val.lon,
+    taluks: KARNATAKA_DISTRICT_TALUKS[name] || []
   }));
   res.json(list);
 });
@@ -96,6 +98,10 @@ app.post('/api/analyze', async (req, res) => {
       cropName = 'Tomato',
       quantityQuintals = 20,
       originDistrict = 'Davanagere',
+      originTaluk = '',
+      originVillage = '',
+      originLat: inputLat,
+      originLon: inputLon,
       vehicleType = 'BOLERO_PICKUP',
       freshnessHours = 6,
       fuelRateMultiplier = 1.0,
@@ -108,9 +114,40 @@ app.post('/api/analyze', async (req, res) => {
     const pricesLookup = await getPricesLookup();
     const districtCenters = getDistrictCenters();
 
-    const origin = districtCenters[originDistrict] || districtCenters['Davanagere'];
-    const originLat = origin.lat;
-    const originLon = origin.lon;
+    let originLat = inputLat ? parseFloat(inputLat) : null;
+    let originLon = inputLon ? parseFloat(inputLon) : null;
+
+    if (!originLat || !originLon) {
+      const taluks = KARNATAKA_DISTRICT_TALUKS[originDistrict] || [];
+      let matchTaluk = taluks.find(t => originTaluk && t.name.toLowerCase() === originTaluk.toLowerCase());
+      if (!matchTaluk) {
+        matchTaluk = taluks.find(t => 
+          originTaluk && (t.name.toLowerCase().startsWith(originTaluk.toLowerCase()) || originTaluk.toLowerCase().startsWith(t.name.toLowerCase()))
+        );
+      }
+      if (matchTaluk) {
+        // Resolve exact village coordinates if village is matched
+        let matchVillage = (matchTaluk.villages || []).find(v =>
+          originVillage && v.name.toLowerCase() === originVillage.toLowerCase()
+        );
+        if (!matchVillage) {
+          matchVillage = (matchTaluk.villages || []).find(v =>
+            originVillage && (v.name.toLowerCase().includes(originVillage.toLowerCase()) || originVillage.toLowerCase().includes(v.name.toLowerCase()))
+          );
+        }
+        if (matchVillage) {
+          originLat = matchVillage.lat;
+          originLon = matchVillage.lon;
+        } else {
+          originLat = matchTaluk.lat;
+          originLon = matchTaluk.lon;
+        }
+      } else {
+        const origin = districtCenters[originDistrict] || districtCenters['Davanagere'];
+        originLat = origin.lat;
+        originLon = origin.lon;
+      }
+    }
 
     const analysisResult = runHarvestRouteAnalysis({
       markets,
@@ -118,6 +155,8 @@ app.post('/api/analyze', async (req, res) => {
       cropName,
       quantityQuintals: parseFloat(quantityQuintals),
       originDistrict,
+      originTaluk,
+      originVillage,
       originLat,
       originLon,
       vehicleType,

@@ -9,38 +9,75 @@ import {
   AlertTriangle,
   ArrowRight, 
   Sparkles,
-  Users
+  Users,
+  Building2,
+  Compass,
+  Navigation
 } from 'lucide-react';
 import { TRANSLATIONS } from '../translations';
 
 export default function FarmerInputForm({
-  lang,
-  crops,
-  origins,
-  vehicleCatalog,
-  selectedCrop,
-  setSelectedCrop,
-  quantity,
-  setQuantity,
-  freshness,
-  setFreshness,
-  originDistrict,
-  setOriginDistrict,
-  vehicleType,
-  setVehicleType,
-  onCalculate,
-  isLoading
+  lang = 'en',
+  crops = [],
+  origins = [],
+  vehicleCatalog = {},
+  selectedCrop = 'Tomato',
+  setSelectedCrop = () => {},
+  quantity = 10,
+  setQuantity = () => {},
+  freshness = 6,
+  setFreshness = () => {},
+  originDistrict = 'Chamarajanagar',
+  setOriginDistrict = () => {},
+  originTaluk = '',
+  setOriginTaluk = () => {},
+  originVillage = '',
+  setOriginVillage = () => {},
+  nearestApmc = null,
+  vehicleType = 'BOLERO_PICKUP',
+  setVehicleType = () => {},
+  onCalculate = () => {},
+  isLoading = false
 }) {
-  const t = TRANSLATIONS[lang];
+  const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
 
-  // Current crop metadata
-  const currentCropObj = crops.find(c => c.crop_name === selectedCrop);
-  const currentVehicleObj = vehicleCatalog[vehicleType] || {};
+  const safeOriginTaluk = originTaluk || '';
+  const safeOriginVillage = originVillage || '';
+
+  // Current crop and vehicle metadata
+  const currentCropObj = (crops || []).find(c => c.crop_name === selectedCrop);
+  const currentVehicleObj = (vehicleCatalog && vehicleCatalog[vehicleType]) || {};
 
   // Check if multiple trips required
   const tripsNeeded = currentVehicleObj.capacity 
     ? Math.ceil(quantity / currentVehicleObj.capacity) 
     : 1;
+
+  const [isCustomVillage, setIsCustomVillage] = React.useState(false);
+
+  // Selected district metadata and taluks list
+  const currentDistrictObj = (origins || []).find(o => o.district === originDistrict);
+  const talukList = currentDistrictObj?.taluks || [];
+  const currentTalukObj = talukList.find(t => t.name === safeOriginTaluk) || talukList[0];
+  const villageList = currentTalukObj?.villages || [];
+
+  // Farmer in City location (e.g. Koppal City or District City Center) - does not take villages
+  const isCityLocation = Boolean(
+    currentTalukObj?.isCity || 
+    safeOriginTaluk === 'Koppal City' || 
+    safeOriginTaluk.toLowerCase().includes('city') || 
+    (talukList.length > 0 && villageList.length === 0)
+  );
+
+  const getVillageDisplayName = (v) => {
+    if (lang === 'kn' && v.kn) return `${v.kn} (${v.name})`;
+    return v.name;
+  };
+
+  const getTalukDisplayName = (tlk) => {
+    if (lang === 'kn' && tlk.kn) return `${tlk.kn} (${tlk.name})`;
+    return tlk.name;
+  };
 
   const getCropDisplayName = (crop) => {
     if (lang === 'kn' && crop.kannada_name) return `${crop.kannada_name} (${crop.crop_name})`;
@@ -170,7 +207,7 @@ export default function FarmerInputForm({
           <div>
             <label className="block text-xs font-semibold text-white/90 mb-1.5 flex items-center gap-1.5 font-sans">
               <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-              {t.farmerOrigin}
+              {t.farmerOrigin || 'District'}
             </label>
             <select
               value={originDistrict}
@@ -178,11 +215,111 @@ export default function FarmerInputForm({
               className="w-full glass-input rounded-xl px-3.5 py-2.5 text-sm font-medium text-white focus:outline-hidden cursor-pointer"
             >
               {origins.map((orig) => (
-                <option key={orig.district} value={orig.district}>
+                <option key={orig.district} value={orig.district} className="bg-[#09261c] text-white">
                   {getDistrictDisplayName(orig)}
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* 5. Taluk / Town */}
+          <div>
+            <label className="block text-xs font-semibold text-white/90 mb-1.5 flex items-center gap-1.5 font-sans">
+              <Compass className="w-3.5 h-3.5 text-emerald-400" />
+              {t.farmerTaluk || 'Taluk / Local Town'}
+            </label>
+            <select
+              value={originTaluk}
+              onChange={(e) => setOriginTaluk(e.target.value)}
+              className="w-full glass-input rounded-xl px-3.5 py-2.5 text-sm font-medium text-white focus:outline-hidden cursor-pointer"
+            >
+              {talukList.length > 0 ? (
+                talukList.map((tlk) => (
+                  <option key={tlk.name} value={tlk.name} className="bg-[#09261c] text-white">
+                    {getTalukDisplayName(tlk)}
+                  </option>
+                ))
+              ) : (
+                <option value="" className="bg-[#09261c] text-white">{originDistrict} Central</option>
+              )}
+            </select>
+          </div>
+
+          {/* 6. Village / Place Selector OR City Center Badge */}
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-semibold text-white/90 mb-1.5 flex items-center justify-between font-sans">
+              <span className="flex items-center gap-1.5">
+                <Navigation className="w-3.5 h-3.5 text-emerald-400" />
+                {t.farmerVillage || 'Select Village / Place'}
+              </span>
+              {!isCityLocation && villageList.length > 0 && (
+                <span className="text-[11px] text-emerald-300 font-mono font-bold">
+                  {villageList.length} villages
+                </span>
+              )}
+            </label>
+
+            {isCityLocation ? (
+              <div className="w-full bg-emerald-500/15 border border-emerald-400/30 rounded-xl px-4 py-3 flex items-center gap-3 backdrop-blur-md">
+                <Building2 className="w-4 h-4 text-emerald-300 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-white truncate">
+                    {originTaluk === 'Koppal City' ? 'Koppal City Center' : `${originTaluk || originDistrict} City`}
+                  </p>
+                  <p className="text-[11px] text-emerald-300/90 font-medium">
+                    {lang === 'kn' ? 'ನಗರ ಪ್ರದೇಶ (ನೇರ ಎಪಿಎಂಸಿ - ಗ್ರಾಮ ಆಯ್ಕೆ ಅಗತ್ಯವಿಲ್ಲ)' : 'City Center Area (Direct Mandi Dispatch — No village needed)'}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <select
+                  value={isCustomVillage ? '__CUSTOM__' : originVillage}
+                  onChange={(e) => {
+                    if (e.target.value === '__CUSTOM__') {
+                      setIsCustomVillage(true);
+                      setOriginVillage('');
+                    } else {
+                      setIsCustomVillage(false);
+                      setOriginVillage(e.target.value);
+                    }
+                  }}
+                  className="w-full glass-input rounded-xl px-3.5 py-2.5 text-sm font-medium text-white focus:outline-hidden cursor-pointer"
+                >
+                  {villageList.map((v) => (
+                    <option key={v.name} value={v.name} className="bg-[#09261c] text-white">
+                      {getVillageDisplayName(v)}
+                    </option>
+                  ))}
+                  <option value="__CUSTOM__" className="bg-[#09261c] text-white">✍️ Other / Enter Custom Village Name...</option>
+                </select>
+
+                {isCustomVillage && (
+                  <input
+                    type="text"
+                    autoFocus
+                    value={originVillage}
+                    onChange={(e) => setOriginVillage(e.target.value)}
+                    placeholder={t.villagePlaceholder || "Type your village or farm location..."}
+                    className="mt-2 w-full glass-input rounded-xl px-3.5 py-2 text-xs font-medium text-white placeholder:text-white/40 focus:outline-hidden border-emerald-400/50"
+                  />
+                )}
+              </>
+            )}
+
+            {/* Nearest APMC Badge */}
+            {nearestApmc && (
+              <div className="mt-2.5 px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between text-xs font-mono">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-white/70">{t.nearestApmcBadge || 'Nearest APMC'}:</span>
+                  <span className="font-bold text-emerald-300">{nearestApmc.marketName}</span>
+                </div>
+                <div className="text-white/90 font-bold">
+                  {nearestApmc.roadDistanceKm} km <span className="text-white/50 font-normal">({nearestApmc.transitHours}h)</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 5. Transport Vehicle Class */}

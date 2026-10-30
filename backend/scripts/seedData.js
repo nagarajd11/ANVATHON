@@ -8,6 +8,8 @@ const Market = require('../models/Market');
 const MarketPrice = require('../models/MarketPrice');
 const Transporter = require('../models/Transporter');
 const { CROP_PERISHABILITY } = require('../services/calculationEngine');
+const { ALL_KARNATAKA_APMCS } = require('../data/karnatakaApmcRegistry');
+const { haversineDistance } = require('../services/geoService');
 
 const CSV_PATH = path.resolve(__dirname, '../../harvestroute_karnataka_market_crop.csv');
 const CACHE_DIR = path.resolve(__dirname, '../data');
@@ -303,14 +305,138 @@ async function seedData() {
     }
   }
 
-  const marketsList = Array.from(marketsMap.values());
+  // 4. Register all comprehensive Karnataka APMCs across all 31 districts
+  let newMarketIdSeq = 1000;
+  for (const reg of ALL_KARNATAKA_APMCS) {
+    if (!marketsMap.has(reg.market_name)) {
+      newMarketIdSeq++;
+      marketsMap.set(reg.market_name, {
+        market_id: `MKT_KA_${newMarketIdSeq}`,
+        market_name: reg.market_name,
+        district: reg.district,
+        market_town: reg.market_town,
+        latitude: reg.latitude,
+        longitude: reg.longitude,
+        apmc_cess_rate: 0.015,
+        hamali_rate_per_quintal: 25,
+        weighbridge_fee_flat: 50,
+        is_terminal_market: reg.is_terminal_market || false,
+        operating_hours: reg.is_terminal_market ? "04:30 AM - 02:00 PM" : "06:00 AM - 12:30 PM",
+        payment_settlement: "Direct Bank Transfer / Immediate Cash"
+      });
+    } else {
+      const existing = marketsMap.get(reg.market_name);
+      if (reg.is_terminal_market) existing.is_terminal_market = true;
+    }
+  }
+
+  // 5. Synthesize Prices for Uncovered APMCs using "Nearest District Benchmark"
   const cropsList = Array.from(cropsMap.values());
+  const marketsList = Array.from(marketsMap.values());
+
+  console.log(`Enriched APMC dataset to ${marketsList.length} markets across all 31 Karnataka districts.`);
+  console.log(`Synthesizing complete price matrix for ${marketsList.length} APMCs across ${cropsList.length} crops using Nearest District Benchmark...`);
+
+  for (const crop of cropsList) {
+    // 1. Gather all direct sources for this crop
+    const directSources = [];
+    for (const p of latestPriceMap.values()) {
+      if (p.crop_name === crop.crop_name && p.modal_price_inr_per_unit > 0) {
+        const m = marketsMap.get(p.market_name);
+        if (m) {
+          directSources.push({ price: p, market: m });
+        }
+      }
+    }
+
+    // 2. Gather group fallback sources if needed
+    const groupSources = [];
+    if (directSources.length === 0) {
+      for (const p of latestPriceMap.values()) {
+        const cMeta = cropsMap.get(p.crop_name);
+        if (cMeta && cMeta.commodity_group === crop.commodity_group && p.modal_price_inr_per_unit > 0) {
+          const m = marketsMap.get(p.market_name);
+          if (m) {
+            groupSources.push({ price: p, market: m });
+          }
+        }
+      }
+    }
+
+    const availableSources = directSources.length > 0 ? directSources : groupSources;
+
+    // 3. For each APMC, resolve price
+    for (const mkt of marketsList) {
+      const priceKey = `${mkt.market_name}___${crop.crop_name}`;
+      if (!latestPriceMap.has(priceKey)) {
+        if (availableSources.length === 0) continue;
+
+        // Find nearest market source
+        let nearest = availableSources[0];
+        let minDist = haversineDistance(mkt.latitude, mkt.longitude, nearest.market.latitude, nearest.market.longitude);
+
+        for (let i = 1; i < availableSources.length; i++) {
+          const d = haversineDistance(mkt.latitude, mkt.longitude, availableSources[i].market.latitude, availableSources[i].market.longitude);
+          if (d < minDist) {
+            minDist = d;
+            nearest = availableSources[i];
+          }
+        }
+
+        const base = nearest.price;
+        // Minor realistic spatial pricing adjustment:
+        // Terminal metro market premium vs regional taluk sub-yard
+        let priceScale = 1.0;
+        if (mkt.is_terminal_market && !nearest.market.is_terminal_market) {
+          priceScale = 1.025; // +2.5% at major terminal market
+        } else if (!mkt.is_terminal_market && nearest.market.is_terminal_market) {
+          priceScale = 0.98; // -2.0% at regional taluk yard
+        }
+
+        const modalPrice = Math.round(base.modal_price_inr_per_unit * priceScale);
+        const minPrice = Math.round(base.min_price_inr_per_unit * priceScale);
+        const maxPrice = Math.round(base.max_price_inr_per_unit * priceScale);
+
+        latestPriceMap.set(priceKey, {
+          market_id: mkt.market_id,
+          market_name: mkt.market_name,
+          district: mkt.district,
+          crop_id: crop.crop_id,
+          crop_name: crop.crop_name,
+          reported_month: base.reported_month || "Oct-2026",
+          year: base.year || 2026,
+          month: base.month || 10,
+          dateScore: base.dateScore || 202610,
+          season_label: base.season_label || "Kharif",
+          min_price_inr_per_unit: minPrice,
+          modal_price_inr_per_unit: modalPrice,
+          max_price_inr_per_unit: maxPrice,
+          price_unit: "INR_per_quintal",
+          arrivals_tonnes_est: Math.round((base.arrivals_tonnes_est || 50) * (mkt.is_terminal_market ? 1.4 : 0.7)),
+          market_demand_proxy_tonnes_est: Math.round((base.market_demand_proxy_tonnes_est || 50) * (mkt.is_terminal_market ? 1.5 : 0.7)),
+          supply_demand_ratio_est: base.supply_demand_ratio_est || 1.0,
+          market_purchase_capacity_tonnes_est: Math.round((base.market_purchase_capacity_tonnes_est || 100) * (mkt.is_terminal_market ? 1.4 : 0.8)),
+          price_source: "NEAREST_DISTRICT_BENCHMARK",
+          reference_market: nearest.market.market_name,
+          reference_district: nearest.market.district,
+          reference_distance_km: Math.round(minDist * 10) / 10
+        });
+      } else {
+        const p = latestPriceMap.get(priceKey);
+        p.price_source = "REPORTED";
+        p.reference_market = p.market_name;
+        p.reference_district = p.district;
+        p.reference_distance_km = 0;
+      }
+    }
+  }
+
   const pricesList = Array.from(latestPriceMap.values());
 
   console.log(`Parsed ${rowCount} rows from CSV:`);
-  console.log(`- Markets: ${marketsList.length}`);
+  console.log(`- Total Karnataka APMCs: ${marketsList.length} across 31 districts`);
   console.log(`- Crops: ${cropsList.length}`);
-  console.log(`- Unique (Market x Crop) latest price snapshots: ${pricesList.length}`);
+  console.log(`- Total (Market x Crop) comprehensive price matrix: ${pricesList.length} records`);
 
   // Create lookup dictionary for fast in-memory analysis
   const pricesLookup = {};
