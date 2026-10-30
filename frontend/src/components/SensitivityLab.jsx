@@ -18,7 +18,7 @@ export default function SensitivityLab({
   const t = TRANSLATIONS[lang];
 
   return (
-    <div className="glass-card rounded-3xl p-6 sm:p-7 hover-lift h-full flex flex-col justify-between">
+    <div className="glass-card rounded-3xl p-6 sm:p-7 hover-lift">
       
       <div>
         {/* Header */}
@@ -51,7 +51,7 @@ export default function SensitivityLab({
         </div>
 
         {/* 4 Sliders in 2x2 Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           
           {/* 1. Fuel / Freight Rate Slider */}
           <div className="bg-white/[0.04] border border-white/10 hover:border-amber-400/40 p-4 rounded-2xl transition-all">

@@ -16,7 +16,7 @@ import { TRANSLATIONS } from './translations';
 import { voiceAssistant } from './utils/voiceAssistant';
 import { useVoiceAssistant } from './hooks/useVoiceAssistant';
 import { parseVoiceCommand, generateVoiceFeedback } from './utils/voiceCommandParser';
-import { CheckCircle, Sparkles, Sprout, BarChart3, Map, Truck, ShieldCheck } from 'lucide-react';
+import { CheckCircle, Sparkles, Sprout, BarChart3, Map, Truck, ShieldCheck, Sliders } from 'lucide-react';
 
 export default function App() {
   const [lang, setLang] = useState('en');
@@ -43,6 +43,8 @@ export default function App() {
   const [quantity, setQuantity] = useState(8);
   const [freshness, setFreshness] = useState(6);
   const [originDistrict, setOriginDistrict] = useState('Chamarajanagar');
+  const [originTaluk, setOriginTaluk] = useState('');
+  const [originVillage, setOriginVillage] = useState('');
   const [vehicleType, setVehicleType] = useState('BOLERO_PICKUP');
 
   // Sensitivity Sliders
@@ -102,6 +104,35 @@ export default function App() {
     }
     initData();
   }, []);
+  // Auto-sync village when taluk changes (clears village if farmer is in city like Koppal City)
+  useEffect(() => {
+    const curDist = origins.find(o => o.district === originDistrict);
+    const curTaluk = curDist?.taluks?.find(t => t.name === originTaluk);
+    if (curTaluk) {
+      if (curTaluk.isCity || curTaluk.name === 'Koppal City' || !curTaluk.villages || curTaluk.villages.length === 0) {
+        setOriginVillage('');
+      } else {
+        const exists = curTaluk.villages.some(v => v.name === originVillage);
+        if (!exists) {
+          setOriginVillage(curTaluk.villages[0].name);
+        }
+      }
+    }
+  }, [originTaluk, originDistrict, origins]);
+
+  // Auto-sync taluk when district changes
+  useEffect(() => {
+    const cur = origins.find(o => o.district === originDistrict);
+    if (cur && cur.taluks && cur.taluks.length > 0) {
+      const exists = cur.taluks.some(t => t.name === originTaluk);
+      if (!exists) {
+        const ruralTaluk = cur.taluks.find(t => !t.isCity && t.villages && t.villages.length > 0);
+        const defaultTaluk = ruralTaluk || cur.taluks[0];
+        setOriginTaluk(defaultTaluk.name);
+      }
+    }
+  }, [originDistrict, origins]);
+
 
   // 2. Perform Analysis Function
   const executeAnalysis = useCallback(async (params = {}) => {
@@ -111,6 +142,8 @@ export default function App() {
         cropName: params.cropName || selectedCrop,
         quantityQuintals: params.quantity !== undefined ? params.quantity : quantity,
         originDistrict: params.originDistrict || originDistrict,
+        originTaluk: params.originTaluk !== undefined ? params.originTaluk : originTaluk,
+        originVillage: params.originVillage !== undefined ? params.originVillage : originVillage,
         vehicleType: params.vehicleType || vehicleType,
         freshnessHours: params.freshness !== undefined ? params.freshness : freshness,
         fuelRateMultiplier: params.fuelRateMultiplier !== undefined ? params.fuelRateMultiplier : fuelRateMultiplier,
@@ -134,7 +167,7 @@ export default function App() {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedCrop, quantity, originDistrict, vehicleType, freshness, fuelRateMultiplier, spoilageMultiplier, cessRateOverride, speedKmph]);
+  }, [selectedCrop, quantity, originDistrict, originTaluk, originVillage, vehicleType, freshness, fuelRateMultiplier, spoilageMultiplier, cessRateOverride, speedKmph]);
 
   // Initial analysis once origins are loaded
   useEffect(() => {
@@ -150,7 +183,7 @@ export default function App() {
       executeAnalysis();
     }, 250);
     return () => clearTimeout(timer);
-  }, [selectedCrop, quantity, freshness, originDistrict, vehicleType, fuelRateMultiplier, spoilageMultiplier, cessRateOverride, speedKmph]);
+  }, [selectedCrop, quantity, freshness, originDistrict, originTaluk, originVillage, vehicleType, fuelRateMultiplier, spoilageMultiplier, cessRateOverride, speedKmph]);
 
   // Reset Sensitivity
   const handleResetSensitivity = () => {
@@ -391,50 +424,34 @@ export default function App() {
         {/* Main Content Ledger */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 pb-16 flex-1 w-full">
           
-          {/* GROUP 1: Two-Column Control Center (Lot Setup & Route Assumptions) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8 items-stretch">
-            
-            {/* Left (7 cols): Farmer Lot Configuration */}
-            <div className="lg:col-span-7">
-              <FarmerInputForm
-                lang={lang}
-                crops={crops}
-                origins={origins}
-                vehicleCatalog={vehicleCatalog}
-                selectedCrop={selectedCrop}
-                setSelectedCrop={setSelectedCrop}
-                quantity={quantity}
-                setQuantity={setQuantity}
-                freshness={freshness}
-                setFreshness={setFreshness}
-                originDistrict={originDistrict}
-                setOriginDistrict={setOriginDistrict}
-                vehicleType={vehicleType}
-                setVehicleType={setVehicleType}
-                onCalculate={() => executeAnalysis()}
-                isLoading={isLoading}
-                onShowToast={showToast}
-                isListening={isListening}
-                onToggleVoiceCommand={handleToggleVoiceCommand}
-              />
-            </div>
-
-            {/* Right (5 cols): Live Route Assumptions & Sliders */}
-            <div className="lg:col-span-5">
-              <SensitivityLab
-                lang={lang}
-                fuelRateMultiplier={fuelRateMultiplier}
-                setFuelRateMultiplier={setFuelRateMultiplier}
-                spoilageMultiplier={spoilageMultiplier}
-                setSpoilageMultiplier={setSpoilageMultiplier}
-                cessRateOverride={cessRateOverride}
-                setCessRateOverride={setCessRateOverride}
-                speedKmph={speedKmph}
-                setSpeedKmph={setSpeedKmph}
-                onReset={handleResetSensitivity}
-              />
-            </div>
-
+{/* Farmer Lot Configuration */}
+          <div className="mb-8">
+            <FarmerInputForm
+              lang={lang}
+              crops={crops}
+              origins={origins}
+              vehicleCatalog={vehicleCatalog}
+              selectedCrop={selectedCrop}
+              setSelectedCrop={setSelectedCrop}
+              quantity={quantity}
+              setQuantity={setQuantity}
+              freshness={freshness}
+              setFreshness={setFreshness}
+              originDistrict={originDistrict}
+              setOriginDistrict={setOriginDistrict}
+              originTaluk={originTaluk}
+              setOriginTaluk={setOriginTaluk}
+              originVillage={originVillage}
+              setOriginVillage={setOriginVillage}
+              nearestApmc={analysis?.nearestApmc}
+              vehicleType={vehicleType}
+              setVehicleType={setVehicleType}
+              onCalculate={() => executeAnalysis()}
+              isLoading={isLoading}
+              onShowToast={showToast}
+              isListening={isListening}
+              onToggleVoiceCommand={handleToggleVoiceCommand}
+            />
           </div>
 
           {/* GROUP 2: The Twist — Side-by-side Showcase (Core Decision) */}
@@ -464,6 +481,15 @@ export default function App() {
                   >
                     <Map className="w-3.5 h-3.5 text-emerald-300" />
                     <span>Route Map</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('sensitivity-section')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="btn-secondary !py-1.5 !px-3 text-xs"
+                  >
+                    <Sliders className="w-3.5 h-3.5 text-emerald-300" />
+                    <span>Cost Sliders</span>
                   </button>
 
                   <button
@@ -501,7 +527,23 @@ export default function App() {
             </section>
           )}
 
-          {/* 4. Ranked Market Ledger & Itemized Deduction Bills */}
+          {/* 4. Market Conditions & Cost Sliders */}
+          <section id="sensitivity-section" className="mb-8 scroll-mt-20">
+            <SensitivityLab
+              lang={lang}
+              fuelRateMultiplier={fuelRateMultiplier}
+              setFuelRateMultiplier={setFuelRateMultiplier}
+              spoilageMultiplier={spoilageMultiplier}
+              setSpoilageMultiplier={setSpoilageMultiplier}
+              cessRateOverride={cessRateOverride}
+              setCessRateOverride={setCessRateOverride}
+              speedKmph={speedKmph}
+              setSpeedKmph={setSpeedKmph}
+              onReset={handleResetSensitivity}
+            />
+          </section>
+
+          {/* 5. Ranked Market Ledger & Itemized Deduction Bills */}
           {analysis && (
             <section id="rankings-section" className="mb-8 scroll-mt-20">
               <MarketLeaderboard

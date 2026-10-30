@@ -238,6 +238,8 @@ function runHarvestRouteAnalysis({
   cropName = 'Tomato',
   quantityQuintals = 20,
   originDistrict = 'Davanagere',
+  originTaluk = '',
+  originVillage = '',
   originLat = 14.4644,
   originLon = 75.9218,
   vehicleType = 'BOLERO_PICKUP',
@@ -329,16 +331,37 @@ function runHarvestRouteAnalysis({
     };
   }
 
+  // Identify Nearest APMC from farmer's specific village / taluk / farm origin
+  let nearestApmc = evaluated[0] || null;
+  let minRoadDistance = Infinity;
+  for (const item of evaluated) {
+    if (item.roadDistanceKm < minRoadDistance) {
+      minRoadDistance = item.roadDistanceKm;
+      nearestApmc = item;
+    }
+  }
+
+  // Compose originLocationLabel
+  const locationParts = [];
+  if (originVillage && originVillage.trim() && originVillage.trim().toLowerCase() !== (originTaluk || '').trim().toLowerCase()) locationParts.push(originVillage.trim());
+  if (originTaluk && originTaluk.trim()) locationParts.push(originTaluk.trim());
+  locationParts.push(originDistrict);
+  const originLocationLabel = locationParts.join(', ');
+
   return {
     cropName,
     cropConfig: CROP_PERISHABILITY[cropName],
     quantityQuintals,
     originDistrict,
+    originTaluk,
+    originVillage,
+    originLocationLabel,
     originCoordinates: { lat: originLat, lon: originLon },
     vehicleType,
     rankedMarkets: evaluated,
     bestNetMarket,
     highestPriceMarket,
+    nearestApmc,
     twist
   };
 }
