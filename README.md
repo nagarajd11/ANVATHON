@@ -1,89 +1,92 @@
-# 🌾 HarvestRoute: Find the Market That Pays the Most After Costs
+# 🌾 HarvestRoute
+### Intelligent Agricultural Market Net-Return & Logistics Optimization Platform
 > **Domain 3: Agriculture and Rural Development**  
 > **Problem Statement 1 | Category: Software | Theme: Agriculture and Food Systems**  
 > *Target Stakeholders: Farmer Producer Organizations (FPOs), Agricultural Marketing Boards, Small & Marginal Farmers*
 
 ---
 
-## 🌟 Executive Summary & Problem Dilemma
-
-A farmer in Karnataka with 20 quintals of freshly harvested tomatoes evaluates two options:
-* **Market A (Local Mandi, 45 km away)**: Lists a modest price of ₹2,766 / quintal.
-* **Market B (Terminal Market Yard, 420 km away)**: Lists an enticing, headline price of ₹2,944 / quintal (+₹178/qtl higher).
-
-Naturally, without transparent logistics intelligence, the farmer decides to hire a truck and head towards Market B. But after paying:
-1. High road freight and fuel surcharges,
-2. Transit spoilage and quality downgrades during a grueling 11-hour drive in an open cargo bed,
-3. Mandi market cess, unloading fees (hamali), and weighbridge charges,
-
-...the farmer takes home **₹38,515** at Market B, compared to **₹51,170** had they sold at Market A! 
-The farmer **loses ₹12,655 in cold, hard cash** because the highest listed price masked catastrophic transit overheads.
-
-**HarvestRoute solves this problem before the truck is ever loaded.**
+[![Node.js](https://img.shields.io/badge/Node.js-v18+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Active%20%7C%20Cached-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Leaflet](https://img.shields.io/badge/Leaflet-GIS%20Mapping-199900?logo=leaflet&logoColor=white)](https://leafletjs.com/)
+[![Language](https://img.shields.io/badge/Language-English%20%7C%20%E0%B2%95%E0%B2%A8%E0%B3%8D%E0%B2%A8%E0%B2%A1-brightgreen)](#-full-kannada-%E0%B2%95%E0%B2%A8%E0%B3%8D%E0%B2%A8%E0%B2%A1-localization)
 
 ---
 
-## ⚡ Key Highlights & Award-Winning Features
+## 🌟 Executive Summary & The "Mandi Trap" Dilemma
 
-### 1. 🏆 "The Twist": Nominal Price Trap vs. HarvestRoute Smart Choice
-* Side-by-side comparative diagnosis exposing the **Mandi Trap**.
-* Demonstrates why a market advertising a higher headline price often yields thousands of rupees *less* in farmer's pockets.
-* Provides a plain-language explanation tailored for rural producers in **English, ಕನ್ನಡ (Kannada), and हिन्दी (Hindi)**.
+A farmer in Davanagere, Karnataka with **20 quintals of freshly harvested tomatoes** evaluates two selling opportunities:
+* **Market A (Local Mandi, 45 km away)**: Lists a modest price of **₹2,766 / quintal**.
+* **Market B (Terminal Market Yard, 420 km away)**: Lists an enticing headline price of **₹2,944 / quintal** (+₹178 / qtl premium).
 
-### 2. 📊 Grounded on Real Dataset (87,420 Records)
-* Full integration of `harvestroute_karnataka_market_crop.csv`:
-  * **62 Real Karnataka APMC Mandis** (from Bidar to Chamarajanagar, Mangaluru to Kolar).
-  * **28 Agricultural Commodities** across 9 groups (Vegetables, Cereals, Pulses, Spices, Fruits, Commercial).
-  * Real geographic coordinates, arrivals, purchase capacities, and modal/min/max auction prices.
+Without transparent logistics and perishability intelligence, the farmer chooses Market B. However, upon arrival after:
+1. High road freight and fuel surcharges over a 420 km journey,
+2. Severe transit spoilage during an 11-hour drive in open cargo,
+3. Mandi market cess, unloading fees (hamali), and weighbridge charges,
 
-### 3. 🍃 Non-Linear Crop Perishability Dynamics
-* Accounts for crop-specific decay curves:
-  * **High Perishable (Tomato, Banana, Mango)**: 0.5%–0.7% quality loss per transit hour.
-  * **Medium Perishable (Onion, Potato, Garlic, Ginger, Sugarcane)**: 0.08%–0.18% per hour.
-  * **Low/Negligible Perishable (Paddy, Ragi, Maize, Cotton, Pulses, Coffee, Spices)**: 0.01% per hour.
-* Accounts for harvest freshness window (Harvested today vs 1-2 days ago).
+...the farmer takes home **₹38,515** at Market B, compared to **₹51,170** had they sold at Market A.  
+The farmer **loses ₹12,655 in cash** because the headline price masked crushing transit overheads.
 
-### 4. 👥 NEW FEATURE: Farmer Crop Pooling & Group Freight Sharing (ರೈತರ ಸಂಯುಕ್ತ ಸಾಗಣೆ)
-* **Solves the Small-Lot Transport Penalty**: Smallholder farmers with 4–10 quintals frequently pay for an entire vehicle alone (₹2,500–₹3,500 freight), suffering astronomical costs of ₹400–₹600/qtl that destroy profitability.
-* **Collaborative Pooling Board**:
-  * Farmers can post a pool request or browse and join existing vehicles departing from their district/village to the same APMC.
-  * Real-time visual capacity bar displaying occupied vs. available space (quintals).
-* **Proportional Weight-Based Expense Split**:
-  * Freight is distributed transparently based on each farmer's load weight (quintals).
-  * Delivers up to **75% freight savings** per farmer!
-* **In-Person Cash Settlement Slip**:
-  * Generates a printable, WhatsApp-shareable manifest detailing each farmer's share in rupees to settle cash in person directly with the vehicle driver or host upon loading or arrival at the APMC gate.
+**HarvestRoute exposes the Mandi Trap and calculates the true in-hand net return before the truck is ever loaded.**
 
-### 5. 🚛 Vehicle Fleet & Transporter Directory
-* Real-world transport vehicle classes:
+---
+
+## ⚡ Key Highlights & Core Features
+
+### 1. 🏆 "The Twist": Nominal Price Trap vs. HarvestRoute Smart Winner
+* **Side-by-Side Diagnosis**: Direct comparative card highlighting the difference between the headline price and the true net payout.
+* **Plain-Language Advisory**: Actionable guidance tailored for rural producers in **English and ಕನ್ನಡ (Kannada)**.
+* **Detailed Breakdown Drawers**: Itemized financial balance sheets for both the Recommended Net Winner and the Nominal Trap Market.
+
+### 2. 🎙️ Fluent Bilingual Voice Assistant (English & ಕನ್ನಡ)
+* **High-Definition Audio Guidance**: "Listen to Decision Audio" button (`ಧ್ವನಿ ಸಲಹೆ ಕೇಳಿ`) with dual-engine streaming (native browser speech synthesis + resilient `/api/tts` proxy).
+* **Focused 2-Market Comparison**: Explicitly compares the **Top 2 Mandis** from the farmer's filtered results, announces the exact net-profit difference in rupees, and advises the farmer on the most profitable choice in fluent conversational Kannada.
+
+### 3. 🚛 Automated Optimal Logistics & Verified Local Transporter Allocation
+* **Zero-Friction Vehicle Matchmaking**: The system automatically allocates the most cost-effective vehicle class based on load weight and crop perishability:
   * **Auto / Piaggio Ape** (≤ 8 qtl, ₹18/km)
   * **Tata Ace (Chota Hathi)** (≤ 15 qtl, ₹24/km)
   * **Mahindra Bolero Maxi Truck** (≤ 25 qtl, ₹28/km)
   * **Eicher 14ft Canter** (≤ 50 qtl, ₹38/km)
-  * **Cold-Chain Reefer Van** (≤ 35 qtl, ₹46/km — *eliminates 85% of transit spoilage!*)
-* Directory of verified local Karnataka transporters with direct phone call and WhatsApp linkage.
+  * **Cold-Chain Reefer Van** (≤ 35 qtl, ₹46/km — reduces transit spoilage by 85%)
+* **Verified Local Driver Contacts**: Instantly links verified regional Karnataka transporters with agency names, assigned drivers, direct call buttons, and 1-click WhatsApp messaging.
 
-### 6. 🗺️ Interactive GIS Route Map (Leaflet)
-* Visualizes the farmer's origin with a tractor icon.
-* Color-coded market beacons (🟢 Recommended Net Winner, 🔴 Nominal Price Trap, 🔵 Other Mandis).
-* Driving route polylines with road distance (km) and travel duration (hrs).
+### 4. 🌐 Full Kannada (ಕನ್ನಡ) Localization
+* Complete localization covering:
+  * **200 Karnataka APMC Mandi Names** (e.g., Davanagere $\rightarrow$ ದಾವಣಗೆರೆ, Kolar $\rightarrow$ ಕೋಲಾರ, Yeshwanthpur $\rightarrow$ ಯಶವಂತಪುರ).
+  * **31 Karnataka Districts & Taluks**.
+  * Mandi ranking badges, status tags, table headers, financial ledgers, and printable dispatch slips.
+  * Instant 1-click language switcher (`ಕನ್ನಡ / EN`).
+
+### 5. 🗺️ Interactive GIS Route Map (Leaflet)
+* Dynamic route visualization with custom marker icons:
+  * 🚜 Farmer origin pin.
+  * 🟢 Green beacon for Recommended Net Return Winner.
+  * 🔴 Red beacon for Nominal Price Trap Market.
+  * 🔵 Blue beacons for alternative APMC mandis.
+* Driving route polylines showing road distance (km) and travel duration (hrs).
 * Interactive popups with instant financial scorecards.
 
-### 7. 🎛️ Real-Time "What-If" Sensitivity Simulator
-* Live slider controls to adjust:
+### 6. 🎛️ Real-Time "What-If" Sensitivity Simulator
+* Interactive live sliders to stress-test real-world conditions:
   * **Fuel / Freight Rate Modifier** (0.7x to 2.0x)
-  * **Spoilage / Weather Severity** (Summer heatwave vs Winter cool)
+  * **Transit Spoilage Severity** (Summer heatwave vs. Winter cool)
   * **APMC Cess Rate** (0.5% to 3.5%)
-  * **Truck Transit Speed / Road Delay** (20 km/h to 65 km/h)
-* Instantaneous recalculation of rankings and cost breakdown chart without page refresh.
+  * **Truck Speed / Transit Delay** (20 km/h to 65 km/h)
+* Instant dynamic recalculation of rankings and cost breakdown charts without page reloading.
 
-### 8. 📄 Printable Farmer Dispatch Slip & Mandi Gate Pass
-* 1-click printable manifest for the farmer to hand over to the truck driver, complete with GPS route distance, agreed transporter charges, gate pass details, and itemized deduction ledger.
+### 7. 📄 Printable Gate Pass Slip & Settlement Manifest
+* **Clean Navigation**: Top header close button (`✕ / Close`), bottom return button (`← Return to Mandi Results`), backdrop overlay click, and `Escape` key shortcut.
+* **Winner Lock**: Lock the selected market to generate an official APMC Gate Pass slip.
+* **Complete Manifest**: Includes vehicle specs, driver contact, barcode/QR visual, GPS distance, itemized deductions, and net payable cash summary.
 
-### 9. 🍃 Zero-Login MongoDB Integration
-* Built with MongoDB (Mongoose) storing crops, markets, prices, transporter fleets, pool requests, and saved simulations.
-* Zero-friction guest experience: farmers can use the platform immediately without sign-up, save routes, and retrieve past simulations.
-* Built-in high-speed pre-indexed JSON cache ensures resilient, lightning-fast execution in any environment.
+### 8. 🍃 Zero-Login Resilient Database Architecture
+* Fully integrated with **MongoDB (Mongoose)** for persistent data management.
+* Built-in high-speed pre-indexed JSON cache (`seedDataCache.json`) provides resilient, zero-downtime execution even when MongoDB is offline.
+* Zero-friction guest experience: farmers can evaluate routes immediately without sign-up.
 
 ---
 
@@ -95,30 +98,122 @@ $$\text{Road Distance (km)} = \text{Haversine}(\text{Origin}, \text{Market}) \ti
 
 $$\text{Transit Time (hrs)} = \frac{\text{Road Distance}}{\text{Avg Speed (40 km/h)}} + 0.25$$
 
-$$\text{Transport Cost} = (\text{Base Fare}_v + \text{Distance} \times \text{Rate}_v \times \text{Fuel Multiplier} + \text{Toll}) \times \lceil Q / \text{Cap}_v \rceil$$
+$$\text{Transport Cost} = \left(\text{Base Fare}_v + (\text{Distance} \times \text{Rate}_v \times \text{Fuel Multiplier}) + \text{Toll Surcharges}\right) \times \lceil Q / \text{Cap}_v \rceil$$
 
 $$\text{Spoilage Loss} = \text{Gross Revenue} \times \left( \text{Base Decay}(\text{crop}) \times \text{Transit Hours} \times \text{Freshness Factor} \times (1 - \text{Reefer Discount}) \right)$$
 
-$$\text{Pooled Share}(\text{Farmer}_i) = \text{Total Vehicle Freight} \times \left( \frac{Q_i}{\sum Q_k} \right)$$
+$$\text{Mandi Expenses} = (\text{Gross Revenue} \times \text{Cess Rate}) + (Q \times \text{Hamali Rate}) + \text{Weighment Fee}$$
 
-$$\text{Net In-Hand Return} = \text{Gross} - \text{Transport Cost} - \text{Spoilage Loss} - \text{APMC Cess} - \text{Hamali Charges}$$
+$$\mathbf{\text{Net In-Hand Return}} = \mathbf{\text{Gross Revenue}} - \mathbf{\text{Transport Cost}} - \mathbf{\text{Spoilage Loss}} - \mathbf{\text{Mandi Expenses}}$$
+
+---
+
+## 🏛️ Project Architecture
+
+```
+Hackathon project/
+├── backend/
+│   ├── data/
+│   │   ├── karnatakaApmcRegistry.js      # 200 Karnataka APMCs with geocodes & cess
+│   │   ├── karnatakaTaluks.js            # 31 Districts & sub-district mappings
+│   │   ├── seedDataCache.json            # Pre-indexed offline cache (crops, markets, prices)
+│   │   └── verifiedTransportersDataset.js# Verified regional driver & vehicle fleet dataset
+│   ├── models/                           # Mongoose schemas (Crop, Market, Transporter, etc.)
+│   ├── scripts/                          # DB seed and import scripts
+│   ├── services/
+│   │   ├── calculationEngine.js          # Core net-return & perishability decay engine
+│   │   ├── dbService.js                  # Database abstraction with fallback caching
+│   │   ├── driverRegistry.js             # Automated vehicle & driver allocation
+│   │   └── geoService.js                 # Haversine distance & road routing service
+│   ├── package.json
+│   └── server.js                         # Express server, REST endpoints & /api/tts proxy
+├── frontend/
+│   ├── public/                           # Logos, fonts, and static assets
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── LandingView.jsx           # Hero presentation & value proposition
+│   │   │   ├── FarmerConfigView.jsx      # Farmer lot size, origin, and crop input
+│   │   │   ├── AnalysisResultsView.jsx   # Results hub (Twist, Map, Audio, Leaderboard)
+│   │   │   ├── MarketLeaderboard.jsx     # Bilingual Mandi rankings table
+│   │   │   ├── MarketMap.jsx             # Leaflet GIS route visualizer
+│   │   │   ├── TheTwistCard.jsx          # Mandi Trap comparative breakdown
+│   │   │   ├── FarmerDispatchSlip.jsx    # Printable Gate Pass modal with return navigation
+│   │   │   ├── SensitivityLab.jsx        # Real-time simulation sliders
+│   │   │   └── Navbar.jsx                # Responsive header with language toggle
+│   │   ├── hooks/
+│   │   │   └── useVoiceAssistant.js      # Bilingual speech synthesis hook
+│   │   ├── utils/
+│   │   │   ├── kannadaLocalization.js    # APMC & district Kannada translation dictionary
+│   │   │   └── voiceAssistant.js         # Top-2 Mandi comparison speech generator
+│   │   ├── App.jsx                       # Multi-view application router
+│   │   └── main.jsx
+│   ├── package.json
+│   └── vite.config.js
+├── package.json                          # Workspace root script runner
+└── README.md
+```
+
+---
+
+## 🔌 API Endpoints Summary
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/status` | System health, MongoDB connection status, and cache metrics |
+| `GET` | `/api/crops` | List of agricultural commodities, categories, and decay rates |
+| `GET` | `/api/origins` | List of Karnataka districts, Kannada names, coordinates, and taluks |
+| `GET` | `/api/transporters` | Vehicle catalog and verified regional transporter fleet |
+| `POST` | `/api/analyze` | Core optimization engine: ranks mandis by true net in-hand payout |
+| `GET` | `/api/tts` | High-quality multilingual TTS streaming proxy (Kannada, Hindi, English) |
+| `GET` | `/api/saved-analyses` | Retrieve saved routes and scenario simulations |
 
 ---
 
 ## 🚀 Quick Start Guide
 
 ### 1. Prerequisites
-- Node.js (v18+ recommended)
-- Git
-- MongoDB (Optional: automatically falls back to High-Speed JSON Cache if MongoDB is offline)
+* **Node.js** (v18.0.0 or higher recommended)
+* **npm** (v9.0.0 or higher)
+* **MongoDB** (*Optional*: automatically operates in High-Speed Memory Cache mode if MongoDB is not running)
 
-### 2. Run the Full-Stack Application
+### 2. Installation
+Clone the repository and install dependencies:
 ```bash
-# 1. Start the backend server (runs on port 5000, serves frontend automatically)
-npm start
+git clone https://github.com/nagarajd11/ANVATHON.git
+cd ANVATHON
 
-# Or run frontend and backend independently in development mode:
+# Install backend dependencies
+cd backend && npm install
+
+# Install frontend dependencies
+cd ../frontend && npm install
+cd ..
+```
+
+### 3. Run the Application
+
+#### Option A: Unified Full-Stack Server (Recommended)
+Builds the frontend and runs the unified server on port `5000`:
+```bash
+npm start
+```
+Open **[http://localhost:5000](http://localhost:5000)** in your browser.
+
+#### Option B: Independent Development Mode
+Run the backend and frontend development servers concurrently:
+```bash
+# Terminal 1: Backend API (port 5000)
 npm run dev:backend
+
+# Terminal 2: Frontend Vite HMR (port 5173)
 npm run dev:frontend
 ```
-Open your browser at `http://localhost:5000` to interact with HarvestRoute!
+Open **[http://localhost:5173](http://localhost:5173)** in your browser.
+
+---
+
+## 👥 Contributors & Hackathon Team
+* **Project**: HarvestRoute (ANVATHON)
+* **Theme**: Agriculture and Food Systems
+* **Repository**: [https://github.com/nagarajd11/ANVATHON](https://github.com/nagarajd11/ANVATHON)
+* **License**: MIT
