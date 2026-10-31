@@ -3,9 +3,10 @@
  * Supporting: English ('en' / 'en-IN'), Kannada ('kn' / 'kn-IN'), Hindi ('hi' / 'hi-IN')
  * 
  * Features:
- * 1. Text-to-Speech (TTS) with automatic Google Translate Audio Fallback for natural Indic pronunciation.
- * 2. Speech-to-Text (STT) Voice Command Recognition via Web Speech API with multi-alternative acoustic decoding.
- * 3. Text chunking for long sentences ensuring uninterrupted Google TTS playback.
+ * 1. Text-to-Speech (TTS) using high-fidelity backend proxy (/api/tts) for natural Indic speech.
+ * 2. Instant fallback to Web Speech API (speechSynthesis) if offline.
+ * 3. Text chunking for long sentences ensuring smooth, continuous audio playback.
+ * 4. Speech-to-Text (STT) Voice Command Recognition via Web Speech API.
  */
 
 class VoiceAssistantService {
@@ -52,11 +53,11 @@ class VoiceAssistantService {
     }
   }
 
-  // Split text into chunks <= 150 chars along punctuation boundaries for Google TTS endpoint limits
-  chunkText(text, maxLen = 150) {
+  // Split text into chunks <= 140 chars along natural phrase boundaries
+  chunkText(text, maxLen = 140) {
     if (!text || text.length <= maxLen) return [text];
     
-    // Split by sentence terminators or commas (supports English, Hindi danda ।, Kannada)
+    // Split by sentence terminators or clauses
     const rawTokens = text.match(/[^.,!?।;:\n]+[.,!?।;:\n]?/g) || [text];
     const chunks = [];
     let current = '';
@@ -88,15 +89,8 @@ class VoiceAssistantService {
     return chunks.length > 0 ? chunks : [text];
   }
 
-  // Check if browser speechSynthesis has a good native voice for this locale
-  hasBrowserVoice(langPrefix) {
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return false;
-    const voices = window.speechSynthesis.getVoices() || [];
-    return voices.some(v => v.lang && v.lang.toLowerCase().startsWith(langPrefix.toLowerCase()));
-  }
-
-  // Play audio chunks sequentially using Google Translate TTS Audio endpoint
-  playGoogleAudioChunks(chunks, tl, speechId, onComplete) {
+  // Play audio chunks sequentially using backend /api/tts streaming proxy
+  playAudioChunks(chunks, tl, speechId, onComplete, fullFallbackText) {
     if (!chunks || chunks.length === 0) {
       this.isPlaying = false;
       this.activeSpeechId = null;
@@ -107,7 +101,7 @@ class VoiceAssistantService {
 
     const currentText = chunks[0];
     const remaining = chunks.slice(1);
-    const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(currentText)}&tl=${tl}&client=tw-ob`;
+    const audioUrl = `/api/tts?text=${encodeURIComponent(currentText)}&lang=${tl}`;
 
     const audio = new Audio(audioUrl);
     this.currentAudio = audio;
@@ -116,18 +110,66 @@ class VoiceAssistantService {
     this.notifyStateChange();
 
     audio.onended = () => {
-      this.playGoogleAudioChunks(remaining, tl, speechId, onComplete);
+      this.playAudioChunks(remaining, tl, speechId, onComplete, fullFallbackText);
     };
 
     audio.onerror = (e) => {
-      console.warn('Google TTS audio playback error, continuing queue:', e);
-      this.playGoogleAudioChunks(remaining, tl, speechId, onComplete);
+      console.warn('Backend TTS stream failed, attempting browser speechSynthesis fallback:', e);
+      // Fallback immediately to browser SpeechSynthesis
+      this.speakWithSpeechSynthesis(fullFallbackText || currentText, tl, speechId, onComplete);
     };
 
     audio.play().catch(err => {
-      console.warn('Audio play blocked or failed:', err);
-      this.stop();
+      console.warn('Audio play error, falling back to browser SpeechSynthesis:', err);
+      this.speakWithSpeechSynthesis(fullFallbackText || currentText, tl, speechId, onComplete);
     });
+  }
+
+  // Fallback to browser SpeechSynthesis API
+  speakWithSpeechSynthesis(text, tl, speechId, onComplete) {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+      this.stop();
+      return;
+    }
+
+    try {
+      window.speechSynthesis.cancel();
+      const locale = tl === 'kn' ? 'kn-IN' : tl === 'hi' ? 'hi-IN' : 'en-IN';
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = locale;
+      utterance.rate = 0.95;
+      utterance.pitch = 1.0;
+
+      const voices = window.speechSynthesis.getVoices() || [];
+      const matchingVoice = voices.find(v => v.lang === locale) || 
+                            voices.find(v => v.lang.toLowerCase().startsWith(tl.toLowerCase()));
+      if (matchingVoice) {
+        utterance.voice = matchingVoice;
+      }
+
+      utterance.onstart = () => {
+        this.isPlaying = true;
+        this.activeSpeechId = speechId;
+        this.notifyStateChange();
+      };
+
+      utterance.onend = () => {
+        this.isPlaying = false;
+        this.activeSpeechId = null;
+        this.notifyStateChange();
+        if (onComplete) onComplete();
+      };
+
+      utterance.onerror = (err) => {
+        console.warn('SpeechSynthesis error:', err);
+        this.stop();
+      };
+
+      window.speechSynthesis.speak(utterance);
+    } catch (err) {
+      console.error('SpeechSynthesis exception:', err);
+      this.stop();
+    }
   }
 
   /**
@@ -148,62 +190,9 @@ class VoiceAssistantService {
 
     this.stop();
 
-    const { tl, locale } = this.getLocaleInfo(lang);
-
-    // Prefer Google Translate TTS for Kannada ('kn') and Hindi ('hi') because browser voices
-    // are frequently missing or robotic on non-Indic operating systems.
-    // For English, use browser speechSynthesis if available; otherwise fallback.
-    const preferGoogle = lang === 'kn' || lang === 'hi' || !this.hasBrowserVoice(tl);
-
-    if (preferGoogle) {
-      const chunks = this.chunkText(text);
-      this.playGoogleAudioChunks(chunks, tl, speechId, onComplete);
-      return;
-    }
-
-    // Attempt browser SpeechSynthesis for English
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      try {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = locale;
-        utterance.rate = 0.95; // Slightly slower for clear regional comprehension
-        utterance.pitch = 1.0;
-
-        const voices = window.speechSynthesis.getVoices() || [];
-        const matchingVoice = voices.find(v => v.lang === locale) || voices.find(v => v.lang.startsWith(tl));
-        if (matchingVoice) {
-          utterance.voice = matchingVoice;
-        }
-
-        utterance.onstart = () => {
-          this.isPlaying = true;
-          this.activeSpeechId = speechId;
-          this.notifyStateChange();
-        };
-
-        utterance.onend = () => {
-          this.isPlaying = false;
-          this.activeSpeechId = null;
-          this.notifyStateChange();
-          if (onComplete) onComplete();
-        };
-
-        utterance.onerror = (err) => {
-          console.warn('Browser speechSynthesis failed, falling back to Google TTS:', err);
-          const chunks = this.chunkText(text);
-          this.playGoogleAudioChunks(chunks, tl, speechId, onComplete);
-        };
-
-        window.speechSynthesis.speak(utterance);
-      } catch (err) {
-        console.warn('speechSynthesis exception, falling back to Google TTS:', err);
-        const chunks = this.chunkText(text);
-        this.playGoogleAudioChunks(chunks, tl, speechId, onComplete);
-      }
-    } else {
-      const chunks = this.chunkText(text);
-      this.playGoogleAudioChunks(chunks, tl, speechId, onComplete);
-    }
+    const { tl } = this.getLocaleInfo(lang);
+    const chunks = this.chunkText(text, 140);
+    this.playAudioChunks(chunks, tl, speechId, onComplete, text);
   }
 
   // Halt all audio and speech synthesis
@@ -261,7 +250,7 @@ class VoiceAssistantService {
       recognition.lang = locale;
       recognition.continuous = false;
       recognition.interimResults = false;
-      recognition.maxAlternatives = 5; // Collect top 5 acoustic candidates for maximum Indic accuracy
+      recognition.maxAlternatives = 5;
 
       recognition.onstart = () => {
         this.isListening = true;

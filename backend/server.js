@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const https = require('https');
 const { 
   initDatabase, 
   getCrops, 
@@ -186,6 +187,43 @@ app.post('/api/save-analysis', async (req, res) => {
     const saved = await saveAnalysisRecord(record);
     res.json({ success: true, record: saved });
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// 7.5 Multilingual High-Quality TTS Proxy (Kannada, Hindi, English)
+app.get('/api/tts', (req, res) => {
+  try {
+    const { text, lang = 'kn' } = req.query;
+    if (!text || !text.trim()) {
+      return res.status(400).json({ error: 'Text query parameter is required' });
+    }
+
+    const tl = lang === 'kn' ? 'kn' : lang === 'hi' ? 'hi' : 'en';
+    const cleanText = text.trim().slice(0, 200);
+    const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(cleanText)}&tl=${tl}&client=tw-ob`;
+
+    const proxyReq = https.get(googleTtsUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://translate.google.com/'
+      }
+    }, (googleRes) => {
+      if (googleRes.statusCode !== 200) {
+        return res.status(googleRes.statusCode).json({ error: 'TTS Provider Error' });
+      }
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      googleRes.pipe(res);
+    });
+
+    proxyReq.on('error', (err) => {
+      console.warn('TTS proxy request error:', err.message);
+      res.status(502).json({ error: 'Failed to fetch audio stream' });
+    });
+  } catch (err) {
+    console.error('TTS handler error:', err);
     res.status(500).json({ error: err.message });
   }
 });

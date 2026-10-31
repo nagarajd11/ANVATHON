@@ -15,8 +15,8 @@ export function useVoiceAssistant(lang = 'en') {
     return unsubscribe;
   }, []);
 
-  const speak = useCallback((text, speechId = 'custom', onComplete = null) => {
-    voiceAssistant.speak(text, lang, speechId, onComplete);
+  const speak = useCallback((text, speechId = 'custom', overrideLang = null, onComplete = null) => {
+    voiceAssistant.speak(text, overrideLang || lang, speechId, onComplete);
   }, [lang]);
 
   const stop = useCallback(() => {
@@ -41,4 +41,3 @@ export function useVoiceAssistant(lang = 'en') {
     isListening: voiceState.isListening
   };
 }
-

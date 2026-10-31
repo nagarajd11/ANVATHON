@@ -27,35 +27,42 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
 
   const { speak, stop, activeSpeechId } = useVoiceAssistant(lang);
 
-  const handleSpeakTwist = () => {
-    const speechId = 'twist-audio';
+    const getKannadaSpeechText = () => {
+    if (isSame) {
+      return `ಉತ್ತಮ ಮಂಡಿ: ${bestNetMarket.marketName}. ಇಲ್ಲಿ ಕ್ವಿಂಟಾಲ್‌ಗೆ ${bestNetMarket.modalPrice} ರೂಪಾಯಿ ಬೆಲೆ ಇದ್ದು, ಸಾರಿಗೆ ವೆಚ್ಚ ಮತ್ತು ಮಂಡಿ ಶುಲ್ಕ ಕಳೆದ ನಂತರ ನಿಮ್ಮ ಕೈಗೆ ಸಿಗುವ ನಿವ್ವಳ ಲಾಭ ${bestNetMarket.netReturnInr.toLocaleString()} ರೂಪಾಯಿಗಳು. ಈ ಮಂಡಿಯಲ್ಲಿ ಮಾರಾಟ ಮಾಡುವುದು ಅತ್ಯಂತ ಲಾಭದಾಯಕ.`;
+    }
+    const extraDistance = Math.round((highestPriceMarket.roadDistanceKm - bestNetMarket.roadDistanceKm) * 10) / 10;
+    const extraFreight = highestPriceMarket.costs.transportCost - bestNetMarket.costs.transportCost;
+    return `ಮಂಡಿ ಬೆಲೆಯ ಭ್ರಮೆ ಎಚ್ಚರಿಕೆ. ${highestPriceMarket.marketName} ಮಂಡಿಯಲ್ಲಿ ದರ ಕ್ವಿಂಟಾಲ್‌ಗೆ ${highestPriceMarket.modalPrice} ರೂಪಾಯಿ ಕಂಡರೂ, ${extraDistance} ಕಿಲೋಮೀಟರ್ ಹೆಚ್ಚುವರಿ ಸಾಗಿಸಲು ${extraFreight.toLocaleString()} ರೂಪಾಯಿ ಹೆಚ್ಚಿನ ಲಾರಿ ಬಾಡಿಗೆ ಮತ್ತು ${highestPriceMarket.costs.spoilageLoss.toLocaleString()} ರೂಪಾಯಿ ರಸ್ತೆ ಹಾಳಾಗುವಿಕೆಯ ನಷ್ಟ ಉಂಟಾಗುತ್ತದೆ. ಆದ್ದರಿಂದ ${bestNetMarket.marketName} ಮಂಡಿಗೆ ಮಾರಾಟ ಮಾಡಿದರೆ ನಿಮ್ಮ ಜೇಬಿನಲ್ಲಿ ${rupeeDifference.toLocaleString()} ರೂಪಾಯಿ ಹೆಚ್ಚಿನ ನೈಜ ಲಾಭ ಉಳಿಯುತ್ತದೆ. ${bestNetMarket.marketName} ಮಂಡಿಯನ್ನೇ ಆಯ್ಕೆ ಮಾಡಿ.`;
+  };
+
+  const getEnglishSpeechText = () => {
+    if (isSame) {
+      return `Optimal choice: ${bestNetMarket.marketName}. Modal auction price is ₹${bestNetMarket.modalPrice} per quintal. After deducting ₹${bestNetMarket.costs.totalDeductions.toLocaleString()} for transport and yard fees, your net in-hand earnings are ₹${bestNetMarket.netReturnInr.toLocaleString()}.`;
+    }
+    const extraDistance = Math.round((highestPriceMarket.roadDistanceKm - bestNetMarket.roadDistanceKm) * 10) / 10;
+    const extraFreight = highestPriceMarket.costs.transportCost - bestNetMarket.costs.transportCost;
+    return `Headline price alert: ${highestPriceMarket.marketName} advertises a higher price of ₹${highestPriceMarket.modalPrice} per quintal. But travelling ${extraDistance} km farther costs an extra ₹${extraFreight.toLocaleString()} in freight and road decay. Selling at ${bestNetMarket.marketName} puts ₹${rupeeDifference.toLocaleString()} MORE net cash directly into your pocket. Choose ${bestNetMarket.marketName} for best take-home returns.`;
+  };
+
+  const handleSpeakKn = () => {
+    const speechId = 'twist-audio-kn';
     if (activeSpeechId === speechId) {
       stop();
       return;
     }
+    const text = getKannadaSpeechText();
+    speak(text, speechId, 'kn');
+  };
 
-    let speechText = '';
-    if (lang === 'kn') {
-      if (isSame) {
-        speechText = `ಉತ್ತಮ ಮಂಡಿ: ${bestNetMarket.marketName}. ನಿವ್ವಳ ಲಾಭ ${bestNetMarket.netReturnInr} ರೂಪಾಯಿಗಳು.`;
-      } else {
-        speechText = `ಪ್ರಕಟಿತ ದರದ ಭ್ರಮೆ: ${highestPriceMarket.marketName} ಮಂಡಿಯಲ್ಲಿ ದರ ಕ್ವಿಂಟಾಲ್‌ಗೆ ${highestPriceMarket.modalPrice} ರೂಪಾಯಿ ಇದೆ. ಆದರೆ ಲಾರಿ ಬಾಡಿಗೆ ${highestPriceMarket.costs.transportCost} ರೂಪಾಯಿ ಮತ್ತು ಹಾಳಾಗುವಿಕೆಯ ನಂತರ, ${bestNetMarket.marketName} ಮಂಡಿ ನಿಮಗೆ ${rupeeDifference} ರೂಪಾಯಿ ಹೆಚ್ಚು ನೈಜ ಲಾಭ ಕೊಡುತ್ತದೆ. ಆದ್ದರಿಂದ ${bestNetMarket.marketName} ಮಂಡಿಯೇ ನಿಮ್ಮ ಅತ್ಯುತ್ತಮ ಆಯ್ಕೆ.`;
-      }
-    } else if (lang === 'hi') {
-      if (isSame) {
-        speechText = `सर्वोत्तम मंडी: ${bestNetMarket.marketName}। शुद्ध मुनाफा ${bestNetMarket.netReturnInr} रुपये।`;
-      } else {
-        speechText = `विज्ञापित भाव का भ्रम: ${highestPriceMarket.marketName} मंडी में भाव ${highestPriceMarket.modalPrice} रुपये प्रति क्विंटल है। लेकिन गाड़ी भाड़ा और रास्ते की फसल खराबी काटकर, ${bestNetMarket.marketName} मंडी में आपको ${rupeeDifference} रुपये अधिक शुद्ध बचत होगी। इसलिए ${bestNetMarket.marketName} मंडी सबसे फायदेमंद है।`;
-      }
-    } else {
-      if (isSame) {
-        speechText = `Optimal choice: ${bestNetMarket.marketName} with net in-hand earnings of ₹${bestNetMarket.netReturnInr.toLocaleString()}.`;
-      } else {
-        speechText = `Headline price alert: ${highestPriceMarket.marketName} lists the highest price of ₹${highestPriceMarket.modalPrice} per quintal. But after deducting transport cost of ₹${highestPriceMarket.costs.transportCost.toLocaleString()} and road spoilage, ${bestNetMarket.marketName} leaves you with ₹${rupeeDifference.toLocaleString()} more take-home cash in your pocket. Choose ${bestNetMarket.marketName} for best take-home returns.`;
-      }
+  const handleSpeakEn = () => {
+    const speechId = 'twist-audio-en';
+    if (activeSpeechId === speechId) {
+      stop();
+      return;
     }
-
-    speak(speechText, speechId);
+    const text = getEnglishSpeechText();
+    speak(text, speechId, 'en');
   };
 
   return (
@@ -81,39 +88,67 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
         </div>
 
                 <div className="flex items-center flex-wrap gap-3">
-          {/* Glowing Speaker Audio Button */}
-          <button
-            type="button"
-            onClick={handleSpeakTwist}
-            className={`btn-secondary !py-2.5 !px-3.5 flex items-center gap-2 transition-all cursor-pointer ${
-              activeSpeechId === 'twist-audio' 
-                ? 'bg-emerald-500 text-pine border-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.5)] font-bold' 
-                : 'hover:border-emerald-400/50 hover:text-emerald-300'
-            }`}
-            title={activeSpeechId === 'twist-audio' ? 'Stop Audio' : t.speakTwist}
-            aria-pressed={activeSpeechId === 'twist-audio'}
-          >
-            {activeSpeechId === 'twist-audio' ? (
-              <>
-                <VolumeX className="w-4 h-4 text-pine animate-pulse" />
-                <span className="text-xs font-bold text-pine font-sans flex items-center gap-1.5">
-                  <span>Playing...</span>
-                  <span className="flex gap-0.5">
-                    <span className="w-1 h-3 bg-pine animate-bounce" />
-                    <span className="w-1 h-4 bg-pine animate-bounce delay-100" />
-                    <span className="w-1 h-2 bg-pine animate-bounce delay-200" />
+          {/* Dual Bilingual Audio Buttons: Kannada & English */}
+          <div className="flex items-center gap-2">
+            {/* Primary Kannada Audio Button */}
+            <button
+              type="button"
+              onClick={handleSpeakKn}
+              className={`btn-secondary !py-2 !px-3 sm:!px-4 flex items-center gap-2 transition-all cursor-pointer font-sans text-xs ${
+                activeSpeechId === 'twist-audio-kn' 
+                  ? 'bg-emerald-500 text-pine border-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.5)] font-bold' 
+                  : 'bg-emerald-500/15 border-emerald-400/40 text-emerald-300 hover:bg-emerald-500/25'
+              }`}
+              title={activeSpeechId === 'twist-audio-kn' ? 'ಆಡಿಯೋ ನಿಲ್ಲಿಸಿ (Stop Audio)' : 'ಕನ್ನಡದಲ್ಲಿ ಸಲಹೆ ಆಲಿಸಿ'}
+              aria-pressed={activeSpeechId === 'twist-audio-kn'}
+            >
+              {activeSpeechId === 'twist-audio-kn' ? (
+                <>
+                  <VolumeX className="w-4 h-4 text-pine animate-pulse" />
+                  <span className="font-bold text-pine flex items-center gap-1.5">
+                    <span>ಕೇಳುತ್ತಿದೆ...</span>
+                    <span className="flex gap-0.5">
+                      <span className="w-1 h-3 bg-pine animate-bounce" />
+                      <span className="w-1 h-4 bg-pine animate-bounce delay-100" />
+                      <span className="w-1 h-2 bg-pine animate-bounce delay-200" />
+                    </span>
                   </span>
-                </span>
-              </>
-            ) : (
-              <>
-                <Volume2 className="w-4 h-4 text-emerald-300" />
-                <span className="text-xs font-semibold text-white/90 font-sans">
-                  {t.speakTwist}
-                </span>
-              </>
-            )}
-          </button>
+                </>
+              ) : (
+                <>
+                  <Volume2 className="w-4 h-4 text-emerald-300 animate-pulse" />
+                  <span className="font-bold">
+                    🔊 ಕನ್ನಡದಲ್ಲಿ ಕೇಳಿ (Audio)
+                  </span>
+                </>
+              )}
+            </button>
+
+            {/* English Audio Button */}
+            <button
+              type="button"
+              onClick={handleSpeakEn}
+              className={`btn-secondary !py-2 !px-3 flex items-center gap-1.5 transition-all cursor-pointer font-sans text-xs ${
+                activeSpeechId === 'twist-audio-en' 
+                  ? 'bg-emerald-500 text-pine border-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.5)] font-bold' 
+                  : 'text-white/80 hover:text-emerald-300 hover:border-emerald-400/40'
+              }`}
+              title={activeSpeechId === 'twist-audio-en' ? 'Stop Audio' : 'Listen in English'}
+              aria-pressed={activeSpeechId === 'twist-audio-en'}
+            >
+              {activeSpeechId === 'twist-audio-en' ? (
+                <>
+                  <VolumeX className="w-3.5 h-3.5 text-pine animate-pulse" />
+                  <span className="font-bold text-pine">Playing...</span>
+                </>
+              ) : (
+                <>
+                  <Volume2 className="w-3.5 h-3.5 text-white/70" />
+                  <span>English Audio</span>
+                </>
+              )}
+            </button>
+          </div>
 
           {!isSame && rupeeDifference > 0 && (
           <div className="bg-emerald-500/20 border border-emerald-400/40 rounded-2xl px-5 py-3 flex items-center gap-3.5 backdrop-blur-md shadow-[0_8px_25px_-5px_rgba(16,185,129,0.35)] hover-glow-pill cursor-pointer">
