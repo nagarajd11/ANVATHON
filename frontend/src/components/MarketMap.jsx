@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { Navigation, Trophy, AlertTriangle, Truck, MapPin, MousePointer, RotateCcw } from 'lucide-react';
+import { Navigation, Trophy, AlertTriangle, Truck, MapPin, RotateCcw } from 'lucide-react';
 import { TRANSLATIONS } from '../translations';
 
 // Helper component to auto-fit map bounds when markets change
@@ -151,10 +151,7 @@ export default function MarketMap({ analysis, lang }) {
             <span className="w-3 h-3 rounded-full bg-[#064e3b] border border-emerald-400 inline-block" />
             <span className="font-sans">{t.otherLegend}</span>
           </div>
-          <div className="flex items-center gap-1.5 bg-emerald-500/20 px-3 py-1.5 rounded-xl border border-emerald-400/40 text-emerald-300 text-xs font-mono">
-            <MousePointer className="w-3 h-3 text-emerald-300" />
-            <span>Mouse Scroll Zoom: ON</span>
-          </div>
+          
         </div>
       </div>
 

@@ -1,35 +1,54 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import BackgroundVideo from './components/BackgroundVideo';
 import FluidRippleCanvas from './components/FluidRippleCanvas';
-import FarmerInputForm from './components/FarmerInputForm';
-import TheTwistCard from './components/TheTwistCard';
-import MarketMap from './components/MarketMap';
-import MarketLeaderboard from './components/MarketLeaderboard';
-import SensitivityLab from './components/SensitivityLab';
-import CostBreakdownChart from './components/CostBreakdownChart';
-import TransporterDirectory from './components/TransporterDirectory';
+import LandingView from './components/LandingView';
+import FarmerConfigView from './components/FarmerConfigView';
+import AnalysisResultsView from './components/AnalysisResultsView';
 import FarmerDispatchSlip from './components/FarmerDispatchSlip';
 import SavedAnalysesModal from './components/SavedAnalysesModal';
 import { TRANSLATIONS } from './translations';
 import { voiceAssistant } from './utils/voiceAssistant';
 import { useVoiceAssistant } from './hooks/useVoiceAssistant';
 import { parseVoiceCommand, generateVoiceFeedback } from './utils/voiceCommandParser';
-import { CheckCircle, Sparkles, BarChart3, Map, Truck, ShieldCheck, Sliders } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
+
+const viewVariants = {
+  initial: { opacity: 0, y: 18 },
+  animate: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { 
+      type: 'spring', 
+      damping: 28, 
+      stiffness: 240, 
+      mass: 0.85 
+    } 
+  },
+  exit: { 
+    opacity: 0, 
+    y: -14, 
+    transition: { 
+      duration: 0.2, 
+      ease: [0.4, 0, 0.2, 1] 
+    } 
+  }
+};
 
 export default function App() {
   const [lang, setLang] = useState('en');
-  const t = TRANSLATIONS[lang];
+  const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
+
+  // View Router State: 'landing' | 'config' | 'analysis'
+  const [currentView, setCurrentView] = useState('landing');
 
   const handleSetLang = (newLang) => {
     voiceAssistant.stop();
     setLang(newLang);
-    const speechLocales = { en: 'English (en-IN)', kn: 'ಕನ್ನಡ (kn-IN)', hi: 'हिन्दी (hi-IN)' };
-    showToast(`🌐 Speech Locale: ${speechLocales[newLang] || newLang}`);
+    const speechLocales = { en: 'English (en-IN)', kn: 'α▓òα▓¿α│ìα▓¿α▓í (kn-IN)', hi: 'αñ╣αñ┐αñ¿αÑìαñªαÑÇ (hi-IN)' };
+    showToast(`≡ƒîÉ Speech Locale: ${speechLocales[newLang] || newLang}`);
   };
-
-  // Active view tab: 'rankings' | 'map' | 'logistics'
-  const [activeTab, setActiveTab] = useState('rankings');
 
   // System & Reference data
   const [crops, setCrops] = useState([]);
@@ -62,27 +81,6 @@ export default function App() {
   const [marketForSlip, setMarketForSlip] = useState(null);
   const [isSavedModalOpen, setIsSavedModalOpen] = useState(false);
 
-  // WebGL Interactive Fluid Wave Ripple FX State
-  const [isFluidFxEnabled, setIsFluidFxEnabled] = useState(() => {
-    try {
-      const saved = localStorage.getItem('harvestroute_fluid_fx');
-      return saved !== null ? JSON.parse(saved) : true;
-    } catch {
-      return true;
-    }
-  });
-
-  const handleToggleFluidFx = () => {
-    setIsFluidFxEnabled((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem('harvestroute_fluid_fx', JSON.stringify(next));
-      } catch {}
-      showToast(next ? '🌊 Fluid Water Ripples Active' : 'Static Background Active');
-      return next;
-    });
-  };
-
   // 1. Initial Load of Reference Data
   useEffect(() => {
     async function initData() {
@@ -103,7 +101,8 @@ export default function App() {
     }
     initData();
   }, []);
-  // Auto-sync village when taluk changes (clears village if farmer is in city like Koppal City)
+
+  // Auto-sync village when taluk changes (clears village if farmer is in city)
   useEffect(() => {
     const curDist = origins.find(o => o.district === originDistrict);
     const curTaluk = curDist?.taluks?.find(t => t.name === originTaluk);
@@ -132,7 +131,6 @@ export default function App() {
     }
   }, [originDistrict, origins]);
 
-
   // 2. Perform Analysis Function
   const executeAnalysis = useCallback(async (params = {}) => {
     setIsLoading(true);
@@ -143,7 +141,7 @@ export default function App() {
         originDistrict: params.originDistrict || originDistrict,
         originTaluk: params.originTaluk !== undefined ? params.originTaluk : originTaluk,
         originVillage: params.originVillage !== undefined ? params.originVillage : originVillage,
-        vehicleType: params.vehicleType || undefined,
+        vehicleType: params.vehicleType || vehicleType,
         freshnessHours: params.freshness !== undefined ? params.freshness : freshness,
         fuelRateMultiplier: params.fuelRateMultiplier !== undefined ? params.fuelRateMultiplier : fuelRateMultiplier,
         spoilageMultiplier: params.spoilageMultiplier !== undefined ? params.spoilageMultiplier : spoilageMultiplier,
@@ -159,8 +157,8 @@ export default function App() {
 
       if (res.ok) {
         const data = await res.json();
-        if (data.vehicleType) setVehicleType(data.vehicleType);
         setAnalysis(data);
+        return data;
       }
     } catch (err) {
       console.error('Analysis execution failed:', err);
@@ -169,7 +167,7 @@ export default function App() {
     }
   }, [selectedCrop, quantity, originDistrict, originTaluk, originVillage, vehicleType, freshness, fuelRateMultiplier, spoilageMultiplier, cessRateOverride, speedKmph]);
 
-  // Initial analysis once origins are loaded
+  // Initial background analysis once origins are loaded
   useEffect(() => {
     if (origins.length > 0) {
       executeAnalysis();
@@ -209,10 +207,25 @@ export default function App() {
       originDistrict: saved.origin_district,
       vehicleType: saved.vehicle_type
     });
+    setCurrentView('analysis');
     showToast(`Loaded scenario: ${saved.crop_name} (${saved.quantity_quintals} qtl) from ${saved.origin_district}`);
   };
 
-  
+  const handleRunAnalysisFromConfig = async () => {
+    await executeAnalysis();
+    setCurrentView('analysis');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSelectView = (view) => {
+    if (view === 'analysis' && !analysis) {
+      executeAnalysis();
+    }
+    setCurrentView(view);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Voice Assistant Hook & Parser
   const { speak, stop: stopVoice, startListening, stopListening, isListening } = useVoiceAssistant(lang);
 
   const handleToggleVoiceCommand = () => {
@@ -223,7 +236,7 @@ export default function App() {
 
     startListening({
       onStart: () => {
-        showToast(t.listeningActive || '🎙️ Listening... Speak origin, crop, quantity, vehicle');
+        showToast(t.listeningActive || '≡ƒÄÖ∩╕Å Listening... Speak origin, crop, quantity, vehicle');
       },
       onResult: (primaryTranscript, event, alternatives) => {
         const parsed = parseVoiceCommand(alternatives && alternatives.length ? alternatives : primaryTranscript);
@@ -288,7 +301,10 @@ export default function App() {
 
         // Action Navigation
         if (parsed.triggerOpenMap) {
-          document.getElementById('map-section')?.scrollIntoView({ behavior: 'smooth' });
+          setCurrentView('analysis');
+          setTimeout(() => {
+            document.getElementById('map-section')?.scrollIntoView({ behavior: 'smooth' });
+          }, 150);
           feedbackChanges.push('Open Map');
         }
 
@@ -299,14 +315,17 @@ export default function App() {
         }
 
         if (parsed.triggerOpenPooling) {
-          document.getElementById('pooling-section')?.scrollIntoView({ behavior: 'smooth' });
-          feedbackChanges.push('Truck Pooling');
+          setCurrentView('analysis');
+          setTimeout(() => {
+            document.getElementById('transporters-section')?.scrollIntoView({ behavior: 'smooth' });
+          }, 150);
+          feedbackChanges.push('Transporters');
         }
 
         if (parsed.triggerResetForm) {
           setSelectedCrop('Tomato');
-          setQuantity(20);
-          setOriginDistrict('Davanagere');
+          setQuantity(8);
+          setOriginDistrict('Chamarajanagar');
           setVehicleType('BOLERO_PICKUP');
           setFreshness(6);
           handleResetSensitivity();
@@ -316,6 +335,7 @@ export default function App() {
         // Calculate Trigger
         if (parsed.triggerCalculate) {
           executeAnalysis(updatedParams);
+          setCurrentView('analysis');
           feedbackChanges.push('Calculate');
         }
 
@@ -333,7 +353,7 @@ export default function App() {
 
         const transcriptDisplay = parsed.rawText || primaryTranscript;
         const summaryText = feedbackChanges.length > 0 ? feedbackChanges.join(', ') : 'Updated';
-        showToast(`🎙️ "${transcriptDisplay}" → ${summaryText}`);
+        showToast(`≡ƒÄÖ∩╕Å "${transcriptDisplay}" ΓåÆ ${summaryText}`);
       },
       onError: (err) => {
         console.warn('Voice command recognition error:', err);
@@ -343,15 +363,15 @@ export default function App() {
   };
 
   return (
-    <div className="relative min-h-screen text-white font-sans selection:bg-emerald-500/30 selection:text-emerald-950">
+    <div className="relative min-h-screen text-white font-sans selection:bg-emerald-500/30 selection:text-emerald-950 flex flex-col justify-between">
       
-      {/* Scroll-Locked Background Video Layer */}
+      {/* 1. Persistent Scroll-Locked Background Video Layer */}
       <BackgroundVideo />
 
-      {/* Interactive Real-Time WebGL Water Ripple & Fluid Wave */}
-      <FluidRippleCanvas enabled={isFluidFxEnabled} />
+      {/* 2. Persistent Interactive Water Ripple WebGL Shader Canvas */}
+      <FluidRippleCanvas enabled={true} />
 
-      {/* Main Foreground Interface */}
+      {/* 3. Main Foreground App Interface */}
       <div className="relative z-10 flex flex-col min-h-screen">
         
         {/* Toast Notification */}
@@ -362,217 +382,136 @@ export default function App() {
           </div>
         )}
 
-        {/* Top Navigation */}
+        {/* Top Clean Navbar */}
         <Navbar
           lang={lang}
           setLang={handleSetLang}
-          isFluidFxEnabled={isFluidFxEnabled}
-          onToggleFluidFx={handleToggleFluidFx}
           isListening={isListening}
           onToggleVoiceCommand={handleToggleVoiceCommand}
-          onSelectTab={(tab) => {
-            const id = tab === 'logistics' ? 'pooling-section' : tab === 'map' ? 'map-section' : 'rankings-section';
-            const el = document.getElementById(id);
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          onLogoClick={() => {
+            setCurrentView('landing');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         />
 
-        {/* Hero Header */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 w-full mb-6 pt-1">
-          <div className="glass-floating rounded-3xl p-6 sm:p-10 text-white border border-white/20 shadow-[0_16px_40px_-10px_rgba(0,0,0,0.3)] backdrop-blur-md relative overflow-hidden">
+        {/* Dynamic Multi-View Client-Side Router */}
+        <main className="flex-1 w-full">
+          <AnimatePresence mode="wait">
             
-            <div className="relative z-10 max-w-4xl">
-              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-display font-extrabold tracking-tight text-white leading-[1.12] text-crisp">
-                Find the market that pays the most in your pocket — after all costs.
-              </h2>
+            {/* VIEW 1: The Cinematic Landing & Explainer Page */}
+            {currentView === 'landing' && (
+              <motion.div
+                key="landing"
+                variants={viewVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <LandingView
+                  lang={lang}
+                  onLaunchCalculator={() => setCurrentView('config')}
+                  totalMarkets={200}
+                  totalCrops={28}
+                />
+              </motion.div>
+            )}
 
-              <p className="text-xs sm:text-sm text-white/80 mt-3 leading-relaxed font-sans max-w-3xl">
-                A higher price two hours away isn't worth it if fuel, road spoilage, and yard fees eat your margin. HarvestRoute calculates your real take-home earnings across Karnataka mandis so you always pick the best destination.
-              </p>
+            {/* VIEW 2: The Farmer Lot Configuration View */}
+            {currentView === 'config' && (
+              <motion.div
+                key="config"
+                variants={viewVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <FarmerConfigView
+                  lang={lang}
+                  crops={crops}
+                  origins={origins}
+                  vehicleCatalog={vehicleCatalog}
+                  selectedCrop={selectedCrop}
+                  setSelectedCrop={setSelectedCrop}
+                  quantity={quantity}
+                  setQuantity={setQuantity}
+                  freshness={freshness}
+                  setFreshness={setFreshness}
+                  originDistrict={originDistrict}
+                  setOriginDistrict={setOriginDistrict}
+                  originTaluk={originTaluk}
+                  setOriginTaluk={setOriginTaluk}
+                  originVillage={originVillage}
+                  setOriginVillage={setOriginVillage}
+                  nearestApmc={analysis?.nearestApmc}
+                  vehicleType={vehicleType}
+                  setVehicleType={setVehicleType}
+                  fuelRateMultiplier={fuelRateMultiplier}
+                  setFuelRateMultiplier={setFuelRateMultiplier}
+                  spoilageMultiplier={spoilageMultiplier}
+                  setSpoilageMultiplier={setSpoilageMultiplier}
+                  cessRateOverride={cessRateOverride}
+                  setCessRateOverride={setCessRateOverride}
+                  speedKmph={speedKmph}
+                  setSpeedKmph={setSpeedKmph}
+                  onResetSensitivity={handleResetSensitivity}
+                  onRunAnalysis={handleRunAnalysisFromConfig}
+                  onBackToLanding={() => setCurrentView('landing')}
+                  isLoading={isLoading}
+                  onShowToast={showToast}
+                  isListening={isListening}
+                  onToggleVoiceCommand={handleToggleVoiceCommand}
+                />
+              </motion.div>
+            )}
 
-              <div className="flex flex-wrap items-center gap-4 mt-5 pt-4 border-t border-white/10 text-xs text-white/70 font-mono">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>62 Karnataka Mandis Monitored</span>
-                </div>
-                <span>•</span>
-                <div>
-                  <span>Haversine Road Distance Matrix</span>
-                </div>
-                <span>•</span>
-                <div>
-                  <span>Real Spoilage & Freshness Decay</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+            {/* VIEW 3: The Analysis & Twist Results View */}
+            {currentView === 'analysis' && (
+              <motion.div
+                key="analysis"
+                variants={viewVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+              >
+                <AnalysisResultsView
+                  analysis={analysis}
+                  lang={lang}
+                  onBackToConfig={() => setCurrentView('config')}
+                  onOpenDispatchSlip={(mkt) => {
+                    setMarketForSlip(mkt);
+                    setIsDispatchSlipOpen(true);
+                  }}
+                  onOpenSavedModal={() => setIsSavedModalOpen(true)}
+                  fuelRateMultiplier={fuelRateMultiplier}
+                  setFuelRateMultiplier={setFuelRateMultiplier}
+                  spoilageMultiplier={spoilageMultiplier}
+                  setSpoilageMultiplier={setSpoilageMultiplier}
+                  cessRateOverride={cessRateOverride}
+                  setCessRateOverride={setCessRateOverride}
+                  speedKmph={speedKmph}
+                  setSpeedKmph={setSpeedKmph}
+                  onResetSensitivity={handleResetSensitivity}
+                  origins={origins}
+                  crops={crops}
+                  vehicleCatalog={vehicleCatalog}
+                  dealers={dealers}
+                  originDistrict={originDistrict}
+                  selectedCrop={selectedCrop}
+                  quantity={quantity}
+                  vehicleType={vehicleType}
+                  setVehicleType={setVehicleType}
+                  onVehicleChange={(vType) => {
+                    executeAnalysis({ vehicleType: vType });
+                  }}
+                  onShowToast={showToast}
+                />
+              </motion.div>
+            )}
 
-        {/* Main Content Ledger */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 pb-16 flex-1 w-full">
-          
-{/* Farmer Lot Configuration */}
-          <div className="mb-8">
-            <FarmerInputForm
-              lang={lang}
-              crops={crops}
-              origins={origins}
-              vehicleCatalog={vehicleCatalog}
-              selectedCrop={selectedCrop}
-              setSelectedCrop={setSelectedCrop}
-              quantity={quantity}
-              setQuantity={setQuantity}
-              freshness={freshness}
-              setFreshness={setFreshness}
-              originDistrict={originDistrict}
-              setOriginDistrict={setOriginDistrict}
-              originTaluk={originTaluk}
-              setOriginTaluk={setOriginTaluk}
-              originVillage={originVillage}
-              setOriginVillage={setOriginVillage}
-              nearestApmc={analysis?.nearestApmc}
-              vehicleType={vehicleType}
-              setVehicleType={setVehicleType}
-              onCalculate={() => executeAnalysis()}
-              isLoading={isLoading}
-              onShowToast={showToast}
-              isListening={isListening}
-              onToggleVoiceCommand={handleToggleVoiceCommand}
-            />
-          </div>
-
-          {/* GROUP 2: The Twist — Side-by-side Showcase (Core Decision) */}
-          {analysis && (
-            <TheTwistCard
-              analysis={analysis}
-              lang={lang}
-              onFocusMarket={(mkt) => {
-                setMarketForSlip(mkt);
-                setIsDispatchSlipOpen(true);
-              }}
-            />
-          )}
-
-          {/* Quick Jump Navigation Bar */}
-          {analysis && (
-            <div className="flex items-center justify-between flex-wrap gap-3 mb-8 py-3 px-5 glass-floating rounded-2xl border border-white/15">
-              <div className="flex items-center gap-2">
-                <span className="text-xs uppercase font-mono font-bold tracking-wider text-white/50">
-                  Quick Jump:
-                </span>
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <button
-                    type="button"
-                    onClick={() => document.getElementById('map-section')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="btn-secondary !py-1.5 !px-3 text-xs"
-                  >
-                    <Map className="w-3.5 h-3.5 text-emerald-300" />
-                    <span>Route Map</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => document.getElementById('sensitivity-section')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="btn-secondary !py-1.5 !px-3 text-xs"
-                  >
-                    <Sliders className="w-3.5 h-3.5 text-emerald-300" />
-                    <span>Cost Sliders</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => document.getElementById('rankings-section')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="btn-secondary !py-1.5 !px-3 text-xs"
-                  >
-                    <BarChart3 className="w-3.5 h-3.5 text-emerald-300" />
-                    <span>Mandi Rankings & Bill</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => document.getElementById('transporters-section')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="btn-secondary !py-1.5 !px-3 text-xs"
-                  >
-                    <Truck className="w-3.5 h-3.5 text-emerald-300" />
-                    <span>Transporters Directory</span>
-                  </button>
-                </div>
-              </div>
-              <div className="text-xs text-white/50 font-mono hidden sm:block">
-                All 62 Karnataka Mandis Active
-              </div>
-            </div>
-          )}
-
-          {/* 3. Interactive Route & Logistics Map (Directly Visible on Page) */}
-          {analysis && (
-            <section id="map-section" className="mb-8 scroll-mt-20">
-              <MarketMap
-                analysis={analysis}
-                lang={lang}
-              />
-            </section>
-          )}
-
-          {/* 4. Market Conditions & Cost Sliders */}
-          <section id="sensitivity-section" className="mb-8 scroll-mt-20">
-            <SensitivityLab
-              lang={lang}
-              fuelRateMultiplier={fuelRateMultiplier}
-              setFuelRateMultiplier={setFuelRateMultiplier}
-              spoilageMultiplier={spoilageMultiplier}
-              setSpoilageMultiplier={setSpoilageMultiplier}
-              cessRateOverride={cessRateOverride}
-              setCessRateOverride={setCessRateOverride}
-              speedKmph={speedKmph}
-              setSpeedKmph={setSpeedKmph}
-              onReset={handleResetSensitivity}
-            />
-          </section>
-
-          {/* 5. Ranked Market Ledger & Itemized Deduction Bills */}
-          {analysis && (
-            <section id="rankings-section" className="mb-8 scroll-mt-20">
-              <MarketLeaderboard
-                analysis={analysis}
-                lang={lang}
-                onSelectMarketForSlip={(mkt) => {
-                  setMarketForSlip(mkt);
-                  setIsDispatchSlipOpen(true);
-                }}
-              />
-            </section>
-          )}
-
-          {/* 5. Visual Net Return vs Gross Mirage Breakdown */}
-          {analysis && (
-            <section id="breakdown-section" className="mb-8 scroll-mt-20">
-              <CostBreakdownChart
-                analysis={analysis}
-                lang={lang}
-              />
-            </section>
-          )}
-
-          
-
-          {/* 7. Verified Regional Transporters Directory */}
-          <section id="transporters-section" className="mb-8 scroll-mt-20">
-            <TransporterDirectory
-              dealers={dealers}
-              lang={lang}
-              currentVehicleType={vehicleType}
-              onSelectVehicle={(vType) => {
-                setVehicleType(vType);
-                executeAnalysis({ vehicleType: vType });
-                showToast(`Vehicle updated to ${vType}. Analysis recalculated!`);
-              }}
-            />
-          </section>
-
+          </AnimatePresence>
         </main>
 
-        {/* Modals */}
+        {/* Global Modals */}
         <FarmerDispatchSlip
           isOpen={isDispatchSlipOpen}
           onClose={() => setIsDispatchSlipOpen(false)}
@@ -587,14 +526,14 @@ export default function App() {
         />
 
         {/* Editorial Footer */}
-        <footer className="glass-floating border-t border-white/15 text-white/70 py-7 text-xs backdrop-blur-md">
+        <footer className="glass-floating border-t border-white/15 text-white/70 py-6 text-xs backdrop-blur-md relative z-10 mt-auto">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono">
             <div className="flex items-center gap-2.5">
-              <div className="w-6 h-6 rounded-lg bg-emerald-500 text-pine flex items-center justify-center font-bold font-sans text-xs">
+              <div className="w-6 h-6 rounded-lg bg-emerald-500 text-pine flex items-center justify-center font-bold font-sans text-xs shadow-sm">
                 HR
               </div>
               <span className="font-bold text-white font-sans">HarvestRoute</span>
-              <span>•</span>
+              <span>ΓÇó</span>
               <span>Karnataka APMC Agricultural Marketing Network</span>
             </div>
 
