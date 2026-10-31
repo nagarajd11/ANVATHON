@@ -16,6 +16,61 @@ import {
 import { TRANSLATIONS } from '../translations';
 import { useVoiceAssistant } from '../hooks/useVoiceAssistant';
 
+// Comprehensive authentic Kannada names for Karnataka APMC mandis
+const KANNADA_MARKET_NAMES = {
+  'Koppal APMC': 'ಕೊಪ್ಪಳ ಎಪಿಎಂಸಿ',
+  'Gangavathi APMC': 'ಗಂಗಾವತಿ ಎಪಿಎಂಸಿ',
+  'Davanagere APMC': 'ದಾವಣಗೆರೆ ಎಪಿಎಂಸಿ',
+  'Harihar APMC': 'ಹರಿಹರ ಎಪಿಎಂಸಿ',
+  'Harihara APMC': 'ಹರಿಹರ ಎಪಿಎಂಸಿ',
+  'Kolar APMC': 'ಕೋಲಾರ ಎಪಿಎಂಸಿ',
+  'Bengaluru Market Yard': 'ಬೆಂಗಳೂರು ಮಾರುಕಟ್ಟೆ',
+  'Yeshwanthpur Market Yard': 'ಯಶವಂತಪುರ ಮಾರುಕಟ್ಟೆ',
+  'Mysuru APMC': 'ಮೈಸೂರು ಎಪಿಎಂಸಿ',
+  'Belagavi APMC': 'ಬೆಳಗಾವಿ ಎಪಿಎಂಸಿ',
+  'Hubballi APMC': 'ಹುಬ್ಬಳ್ಳಿ ಎಪಿಎಂಸಿ',
+  'Ballari APMC': 'ಬಳ್ಳಾರಿ ಎಪಿಎಂಸಿ',
+  'Shivamogga APMC': 'ಶಿವಮೊಗ್ಗ ಎಪಿಎಂಸಿ',
+  'Challakere APMC': 'ಚಳ್ಳಕೆರೆ ಎಪಿಎಂಸಿ',
+  'Chitradurga APMC': 'ಚಿತ್ರದುರ್ಗ ಎಪಿಎಂಸಿ',
+  'Ranebennur APMC': 'ರಾಣೆಬೆನ್ನೂರು ಎಪಿಎಂಸಿ',
+  'Gadag APMC': 'ಗದಗ ಎಪಿಎಂಸಿ',
+  'Haveri APMC': 'ಹಾವೇರಿ ಎಪಿಎಂಸಿ',
+  'Hassan APMC': 'ಹಾಸನ ಎಪಿಎಂಸಿ',
+  'Tumakuru APMC': 'ತುಮಕೂರು ಎಪಿಎಂಸಿ',
+  'Chikkaballapur APMC': 'ಚಿಕ್ಕಬಳ್ಳಾಪುರ ಎಪಿಎಂಸಿ',
+  'Chintamani APMC': 'ಚಿಂತಾಮಣಿ ಎಪಿಎಂಸಿ',
+  'Srinivaspur APMC': 'ಶ್ರೀನಿವಾಸಪುರ ಎಪಿಎಂಸಿ',
+  'Malur APMC': 'ಮಾಲೂರು ಎಪಿಎಂಸಿ',
+  'Ramanagara APMC': 'ರಾಮನಗರ ಎಪಿಎಂಸಿ',
+  'Mandya APMC': 'ಮಂಡ್ಯ ಎಪಿಎಂಸಿ',
+  'Maddur APMC': 'ಮದ್ದೂರು ಎಪಿಎಂಸಿ',
+  'Chamarajanagar APMC': 'ಚಾಮರಾಜನಗರ ಎಪಿಎಂಸಿ',
+  'Udupi APMC': 'ಉಡುಪಿ ಎಪಿಎಂಸಿ',
+  'Mangaluru APMC': 'ಮಂಗಳೂರು ಎಪಿಎಂಸಿ',
+  'Sirsi APMC': 'ಶಿರಸಿ ಎಪಿಎಂಸಿ',
+  'Karwar APMC': 'ಕಾರವಾರ ಎಪಿಎಂಸಿ',
+  'Dharwad APMC': 'ಧಾರವಾಡ ಎಪಿಎಂಸಿ',
+  'Bagalkot APMC': 'ಬಾಗಲಕೋಟೆ ಎಪಿಎಂಸಿ',
+  'Vijayapura APMC': 'ವಿಜಯಪುರ ಎಪಿಎಂಸಿ',
+  'Bidar APMC': 'ಬೀದರ್ ಎಪಿಎಂಸಿ',
+  'Raichur APMC': 'ರಾಯಚೂರು ಎಪಿಎಂಸಿ',
+  'Sindhanur APMC': 'ಸಿಂಧನೂರು ಎಪಿಎಂಸಿ',
+  'Yadgir APMC': 'ಯಾದಗಿರಿ ಎಪಿಎಂಸಿ',
+  'Kalaburagi APMC': 'ಕಲಬುರಗಿ ಎಪಿಎಂಸಿ',
+  'Sedam APMC': 'ಸೇಡಂ ಎಪಿಎಂಸಿ',
+  'Byadgi APMC': 'ಬ್ಯಾಡಗಿ ಎಪಿಎಂಸಿ',
+  'Tiptur APMC': 'ತಿಪಟೂರು ಎಪಿಎಂಸಿ',
+  'Hosapete APMC': 'ಹೊಸಪೇಟೆ ಎಪಿಎಂಸಿ',
+  'Bhadravathi APMC': 'ಭದ್ರಾವತಿ ಎಪಿಎಂಸಿ',
+  'Channapatna APMC': 'ಚನ್ನಪಟ್ಟಣ ಎಪಿಎಂಸಿ'
+};
+
+const toKannadaMandiName = (name = '') => {
+  if (KANNADA_MARKET_NAMES[name]) return KANNADA_MARKET_NAMES[name];
+  return name.replace(/\bAPMC\b/gi, 'ಎಪಿಎಂಸಿ').replace(/\bMarket Yard\b/gi, 'ಮಾರುಕಟ್ಟೆ');
+};
+
 export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
   if (!analysis || !analysis.twist) return null;
 
@@ -27,22 +82,57 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
 
   const { speak, stop, activeSpeechId } = useVoiceAssistant(lang);
 
-    const getKannadaSpeechText = () => {
-    if (isSame) {
-      return `ಉತ್ತಮ ಮಂಡಿ: ${bestNetMarket.marketName}. ಇಲ್ಲಿ ಕ್ವಿಂಟಾಲ್‌ಗೆ ${bestNetMarket.modalPrice} ರೂಪಾಯಿ ಬೆಲೆ ಇದ್ದು, ಸಾರಿಗೆ ವೆಚ್ಚ ಮತ್ತು ಮಂಡಿ ಶುಲ್ಕ ಕಳೆದ ನಂತರ ನಿಮ್ಮ ಕೈಗೆ ಸಿಗುವ ನಿವ್ವಳ ಲಾಭ ${bestNetMarket.netReturnInr.toLocaleString()} ರೂಪಾಯಿಗಳು. ಈ ಮಂಡಿಯಲ್ಲಿ ಮಾರಾಟ ಮಾಡುವುದು ಅತ್ಯಂತ ಲಾಭದಾಯಕ.`;
+  // Spoken audio decision: Compares strictly the TOP TWO ranked mandis from the farmer's filtered list
+  // Speaks authentic, fluent Kannada stating the net returns, distance, difference in rupees, and advising to sell at #1.
+  const getKannadaSpeechText = () => {
+    const m1 = (rankedMarkets && rankedMarkets[0]) || bestNetMarket;
+    const m2 = (rankedMarkets && rankedMarkets[1]) || null;
+    if (!m1) return '';
+
+    const name1 = toKannadaMandiName(m1.marketName);
+    const dist1 = Math.round(m1.roadDistanceKm);
+    const net1 = Math.round(m1.netReturnInr);
+
+    if (!m2 || m1.marketId === m2.marketId) {
+      return `ನಮಸ್ಕಾರ ರೈತ ಬಾಂಧವರೇ. ನೀವು ಆಯ್ಕೆ ಮಾಡಿದ ಫಿಲ್ಟರ್ ಪ್ರಕಾರ ನಿಮ್ಮ ಬೆಳೆಗೆ ಅತ್ಯುತ್ತಮ ಮಾರುಕಟ್ಟೆ ${name1} ಆಗಿದೆ. ಇದು ನಿಮ್ಮ ಸ್ಥಳದಿಂದ ${dist1} ಕಿಲೋಮೀಟರ್ ದೂರದಲ್ಲಿದ್ದು, ಸಾರಿಗೆ ವೆಚ್ಚ ಮತ್ತು ಎಲ್ಲಾ ಮಂಡಿ ಶುಲ್ಕ ಕಳೆದ ನಂತರ ನಿಮ್ಮ ಕೈಗೆ ${net1} ರೂಪಾಯಿಗಳ ನಿವ್ವಳ ಲಾಭ ಸಿಗುತ್ತದೆ. ಆದ್ದರಿಂದ ನೀವು ${name1} ಮಂಡಿಯಲ್ಲೇ ನಿಮ್ಮ ಬೆಳೆಯನ್ನು ಮಾರಾಟ ಮಾಡಿ ಗರಿಷ್ಠ ಲಾಭ ಗಳಿಸಿ.`;
     }
-    const extraDistance = Math.round((highestPriceMarket.roadDistanceKm - bestNetMarket.roadDistanceKm) * 10) / 10;
-    const extraFreight = highestPriceMarket.costs.transportCost - bestNetMarket.costs.transportCost;
-    return `ಮಂಡಿ ಬೆಲೆಯ ಭ್ರಮೆ ಎಚ್ಚರಿಕೆ. ${highestPriceMarket.marketName} ಮಂಡಿಯಲ್ಲಿ ದರ ಕ್ವಿಂಟಾಲ್‌ಗೆ ${highestPriceMarket.modalPrice} ರೂಪಾಯಿ ಕಂಡರೂ, ${extraDistance} ಕಿಲೋಮೀಟರ್ ಹೆಚ್ಚುವರಿ ಸಾಗಿಸಲು ${extraFreight.toLocaleString()} ರೂಪಾಯಿ ಹೆಚ್ಚಿನ ಲಾರಿ ಬಾಡಿಗೆ ಮತ್ತು ${highestPriceMarket.costs.spoilageLoss.toLocaleString()} ರೂಪಾಯಿ ರಸ್ತೆ ಹಾಳಾಗುವಿಕೆಯ ನಷ್ಟ ಉಂಟಾಗುತ್ತದೆ. ಆದ್ದರಿಂದ ${bestNetMarket.marketName} ಮಂಡಿಗೆ ಮಾರಾಟ ಮಾಡಿದರೆ ನಿಮ್ಮ ಜೇಬಿನಲ್ಲಿ ${rupeeDifference.toLocaleString()} ರೂಪಾಯಿ ಹೆಚ್ಚಿನ ನೈಜ ಲಾಭ ಉಳಿಯುತ್ತದೆ. ${bestNetMarket.marketName} ಮಂಡಿಯನ್ನೇ ಆಯ್ಕೆ ಮಾಡಿ.`;
+
+    const name2 = toKannadaMandiName(m2.marketName);
+    const dist2 = Math.round(m2.roadDistanceKm);
+    const net2 = Math.round(m2.netReturnInr);
+    const diff = Math.abs(net1 - net2);
+
+    return `ನಮಸ್ಕಾರ ರೈತ ಬಾಂಧವರೇ. ನೀವು ಆಯ್ಕೆ ಮಾಡಿದ ಫಿಲ್ಟರ್ ಪ್ರಕಾರ ಮಂಡಿ ರ‍್ಯಾಂಕಿಂಗ್ ಪಟ್ಟಿಯ ಅಗ್ರ ಎರಡು ಅತ್ಯುತ್ತಮ ಮಂಡಿಗಳು ಹೀಗಿವೆ. ` +
+      `ಮೊದಲನೆಯ ಅತ್ಯುತ್ತಮ ಮಂಡಿ ${name1}. ನಿಮ್ಮ ಸ್ಥಳದಿಂದ ಇದು ${dist1} ಕಿಲೋಮೀಟರ್ ದೂರವಿದ್ದು, ಎಲ್ಲಾ ಸಾರಿಗೆ ಮತ್ತು ಮಂಡಿ ಶುಲ್ಕ ಕಳೆದ ನಂತರ ನಿಮ್ಮ ಕೈಗೆ ${net1} ರೂಪಾಯಿಗಳ ನಿವ್ವಳ ಲಾಭ ಸಿಗುತ್ತದೆ. ` +
+      `ಎರಡನೆಯ ಮಂಡಿ ${name2}. ಇದು ${dist2} ಕಿಲೋಮೀಟರ್ ದೂರವಿದ್ದು, ಇಲ್ಲಿ ನಿಮಗೆ ${net2} ರೂಪಾಯಿಗಳ ನಿವ್ವಳ ಲಾಭ ಸಿಗುತ್ತದೆ. ` +
+      `${name1} ಮಂಡಿಯು ${name2} ಗಿಂತ ${diff} ರೂಪಾಯಿಗಳಷ್ಟು ಹೆಚ್ಚಿನ ನಿವ್ವಳ ಲಾಭ ನೀಡುತ್ತದೆ. ` +
+      `ಆದ್ದರಿಂದ ಹೆಚ್ಚು ಲಾಭ ಕೊಡುವ ಮೊದಲನೆಯ ${name1} ಮಂಡಿಯಲ್ಲೇ ನಿಮ್ಮ ಬೆಳೆಯನ್ನು ಮಾರಾಟ ಮಾಡಿ ಗರಿಷ್ಠ ಆದಾಯ ಪಡೆಯಿರಿ.`;
   };
 
+  // English counterpart for top two ranked mandis
   const getEnglishSpeechText = () => {
-    if (isSame) {
-      return `Optimal choice: ${bestNetMarket.marketName}. Modal auction price is ₹${bestNetMarket.modalPrice} per quintal. After deducting ₹${bestNetMarket.costs.totalDeductions.toLocaleString()} for transport and yard fees, your net in-hand earnings are ₹${bestNetMarket.netReturnInr.toLocaleString()}.`;
+    const m1 = (rankedMarkets && rankedMarkets[0]) || bestNetMarket;
+    const m2 = (rankedMarkets && rankedMarkets[1]) || null;
+    if (!m1) return '';
+
+    const name1 = m1.marketName;
+    const dist1 = Math.round(m1.roadDistanceKm);
+    const net1 = Math.round(m1.netReturnInr).toLocaleString();
+
+    if (!m2 || m1.marketId === m2.marketId) {
+      return `Hello farmer friend. Based on your selected filters, the top ranked market for your crop is ${name1}, at a distance of ${dist1} km, giving you a net in-hand profit of ₹${net1} after all expenses. We strongly recommend selling at ${name1} for maximum returns.`;
     }
-    const extraDistance = Math.round((highestPriceMarket.roadDistanceKm - bestNetMarket.roadDistanceKm) * 10) / 10;
-    const extraFreight = highestPriceMarket.costs.transportCost - bestNetMarket.costs.transportCost;
-    return `Headline price alert: ${highestPriceMarket.marketName} advertises a higher price of ₹${highestPriceMarket.modalPrice} per quintal. But travelling ${extraDistance} km farther costs an extra ₹${extraFreight.toLocaleString()} in freight and road decay. Selling at ${bestNetMarket.marketName} puts ₹${rupeeDifference.toLocaleString()} MORE net cash directly into your pocket. Choose ${bestNetMarket.marketName} for best take-home returns.`;
+
+    const name2 = m2.marketName;
+    const dist2 = Math.round(m2.roadDistanceKm);
+    const net2 = Math.round(m2.netReturnInr).toLocaleString();
+    const diff = Math.abs(Math.round(m1.netReturnInr) - Math.round(m2.netReturnInr)).toLocaleString();
+
+    return `Hello farmer friend. Based on your selected filters, here are the top two best mandis from the ranking list. ` +
+      `Rank 1 is ${name1}, located ${dist1} km away, yielding ₹${net1} net in-hand cash after all transport and fees. ` +
+      `Rank 2 is ${name2}, located ${dist2} km away, yielding ₹${net2} net in-hand cash. ` +
+      `${name1} gives you ₹${diff} more net profit than ${name2}. ` +
+      `Therefore, please sell at ${name1} to pocket the highest profit.`;
   };
 
   const handleSpeakKn = () => {
@@ -99,14 +189,14 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
                   ? 'bg-emerald-500 text-pine border-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.5)] font-bold' 
                   : 'bg-emerald-500/15 border-emerald-400/40 text-emerald-300 hover:bg-emerald-500/25'
               }`}
-              title={activeSpeechId === 'twist-audio-kn' ? 'ಆಡಿಯೋ ನಿಲ್ಲಿಸಿ (Stop Audio)' : 'ಕನ್ನಡದಲ್ಲಿ ಸಲಹೆ ಆಲಿಸಿ'}
+              title={activeSpeechId === 'twist-audio-kn' ? 'ಆಡಿಯೋ ನಿಲ್ಲಿಸಿ (Stop Audio)' : 'ಕನ್ನಡದಲ್ಲಿ ನಿರ್ಧಾರದ ಆಡಿಯೋ ಆಲಿಸಿ'}
               aria-pressed={activeSpeechId === 'twist-audio-kn'}
             >
               {activeSpeechId === 'twist-audio-kn' ? (
                 <>
                   <VolumeX className="w-4 h-4 text-pine animate-pulse" />
                   <span className="font-bold text-pine flex items-center gap-1.5">
-                    <span>ಕೇಳುತ್ತಿದೆ...</span>
+                    <span>ಆಲಿಸುತ್ತಿದೆ...</span>
                     <span className="flex gap-0.5">
                       <span className="w-1 h-3 bg-pine animate-bounce" />
                       <span className="w-1 h-4 bg-pine animate-bounce delay-100" />
@@ -118,7 +208,7 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
                 <>
                   <Volume2 className="w-4 h-4 text-emerald-300 animate-pulse" />
                   <span className="font-bold">
-                    🔊 ಕನ್ನಡದಲ್ಲಿ ಕೇಳಿ (Audio)
+                    🔊 ನಿರ್ಧಾರದ ಆಡಿಯೋ ಆಲಿಸಿ (ಕನ್ನಡ)
                   </span>
                 </>
               )}
@@ -144,7 +234,7 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
               ) : (
                 <>
                   <Volume2 className="w-3.5 h-3.5 text-white/70" />
-                  <span>English Audio</span>
+                  <span>Decision Audio (English)</span>
                 </>
               )}
             </button>
