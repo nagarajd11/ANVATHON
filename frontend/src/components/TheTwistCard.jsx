@@ -15,61 +15,7 @@ import {
 , Phone, MessageCircle, ShieldCheck } from 'lucide-react';
 import { TRANSLATIONS } from '../translations';
 import { useVoiceAssistant } from '../hooks/useVoiceAssistant';
-
-// Comprehensive authentic Kannada names for Karnataka APMC mandis
-const KANNADA_MARKET_NAMES = {
-  'Koppal APMC': 'ಕೊಪ್ಪಳ ಎಪಿಎಂಸಿ',
-  'Gangavathi APMC': 'ಗಂಗಾವತಿ ಎಪಿಎಂಸಿ',
-  'Davanagere APMC': 'ದಾವಣಗೆರೆ ಎಪಿಎಂಸಿ',
-  'Harihar APMC': 'ಹರಿಹರ ಎಪಿಎಂಸಿ',
-  'Harihara APMC': 'ಹರಿಹರ ಎಪಿಎಂಸಿ',
-  'Kolar APMC': 'ಕೋಲಾರ ಎಪಿಎಂಸಿ',
-  'Bengaluru Market Yard': 'ಬೆಂಗಳೂರು ಮಾರುಕಟ್ಟೆ',
-  'Yeshwanthpur Market Yard': 'ಯಶವಂತಪುರ ಮಾರುಕಟ್ಟೆ',
-  'Mysuru APMC': 'ಮೈಸೂರು ಎಪಿಎಂಸಿ',
-  'Belagavi APMC': 'ಬೆಳಗಾವಿ ಎಪಿಎಂಸಿ',
-  'Hubballi APMC': 'ಹುಬ್ಬಳ್ಳಿ ಎಪಿಎಂಸಿ',
-  'Ballari APMC': 'ಬಳ್ಳಾರಿ ಎಪಿಎಂಸಿ',
-  'Shivamogga APMC': 'ಶಿವಮೊಗ್ಗ ಎಪಿಎಂಸಿ',
-  'Challakere APMC': 'ಚಳ್ಳಕೆರೆ ಎಪಿಎಂಸಿ',
-  'Chitradurga APMC': 'ಚಿತ್ರದುರ್ಗ ಎಪಿಎಂಸಿ',
-  'Ranebennur APMC': 'ರಾಣೆಬೆನ್ನೂರು ಎಪಿಎಂಸಿ',
-  'Gadag APMC': 'ಗದಗ ಎಪಿಎಂಸಿ',
-  'Haveri APMC': 'ಹಾವೇರಿ ಎಪಿಎಂಸಿ',
-  'Hassan APMC': 'ಹಾಸನ ಎಪಿಎಂಸಿ',
-  'Tumakuru APMC': 'ತುಮಕೂರು ಎಪಿಎಂಸಿ',
-  'Chikkaballapur APMC': 'ಚಿಕ್ಕಬಳ್ಳಾಪುರ ಎಪಿಎಂಸಿ',
-  'Chintamani APMC': 'ಚಿಂತಾಮಣಿ ಎಪಿಎಂಸಿ',
-  'Srinivaspur APMC': 'ಶ್ರೀನಿವಾಸಪುರ ಎಪಿಎಂಸಿ',
-  'Malur APMC': 'ಮಾಲೂರು ಎಪಿಎಂಸಿ',
-  'Ramanagara APMC': 'ರಾಮನಗರ ಎಪಿಎಂಸಿ',
-  'Mandya APMC': 'ಮಂಡ್ಯ ಎಪಿಎಂಸಿ',
-  'Maddur APMC': 'ಮದ್ದೂರು ಎಪಿಎಂಸಿ',
-  'Chamarajanagar APMC': 'ಚಾಮರಾಜನಗರ ಎಪಿಎಂಸಿ',
-  'Udupi APMC': 'ಉಡುಪಿ ಎಪಿಎಂಸಿ',
-  'Mangaluru APMC': 'ಮಂಗಳೂರು ಎಪಿಎಂಸಿ',
-  'Sirsi APMC': 'ಶಿರಸಿ ಎಪಿಎಂಸಿ',
-  'Karwar APMC': 'ಕಾರವಾರ ಎಪಿಎಂಸಿ',
-  'Dharwad APMC': 'ಧಾರವಾಡ ಎಪಿಎಂಸಿ',
-  'Bagalkot APMC': 'ಬಾಗಲಕೋಟೆ ಎಪಿಎಂಸಿ',
-  'Vijayapura APMC': 'ವಿಜಯಪುರ ಎಪಿಎಂಸಿ',
-  'Bidar APMC': 'ಬೀದರ್ ಎಪಿಎಂಸಿ',
-  'Raichur APMC': 'ರಾಯಚೂರು ಎಪಿಎಂಸಿ',
-  'Sindhanur APMC': 'ಸಿಂಧನೂರು ಎಪಿಎಂಸಿ',
-  'Yadgir APMC': 'ಯಾದಗಿರಿ ಎಪಿಎಂಸಿ',
-  'Kalaburagi APMC': 'ಕಲಬುರಗಿ ಎಪಿಎಂಸಿ',
-  'Sedam APMC': 'ಸೇಡಂ ಎಪಿಎಂಸಿ',
-  'Byadgi APMC': 'ಬ್ಯಾಡಗಿ ಎಪಿಎಂಸಿ',
-  'Tiptur APMC': 'ತಿಪಟೂರು ಎಪಿಎಂಸಿ',
-  'Hosapete APMC': 'ಹೊಸಪೇಟೆ ಎಪಿಎಂಸಿ',
-  'Bhadravathi APMC': 'ಭದ್ರಾವತಿ ಎಪಿಎಂಸಿ',
-  'Channapatna APMC': 'ಚನ್ನಪಟ್ಟಣ ಎಪಿಎಂಸಿ'
-};
-
-const toKannadaMandiName = (name = '') => {
-  if (KANNADA_MARKET_NAMES[name]) return KANNADA_MARKET_NAMES[name];
-  return name.replace(/\bAPMC\b/gi, 'ಎಪಿಎಂಸಿ').replace(/\bMarket Yard\b/gi, 'ಮಾರುಕಟ್ಟೆ');
-};
+import { toLocalizedMandiName, toLocalizedDistrict } from '../utils/kannadaLocalization';
 
 export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
   if (!analysis || !analysis.twist) return null;
@@ -89,7 +35,7 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
     const m2 = (rankedMarkets && rankedMarkets[1]) || null;
     if (!m1) return '';
 
-    const name1 = toKannadaMandiName(m1.marketName);
+    const name1 = toLocalizedMandiName(m1.marketName);
     const dist1 = Math.round(m1.roadDistanceKm);
     const net1 = Math.round(m1.netReturnInr);
 
@@ -97,7 +43,7 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
       return `ನಮಸ್ಕಾರ ರೈತ ಬಾಂಧವರೇ. ನೀವು ಆಯ್ಕೆ ಮಾಡಿದ ಫಿಲ್ಟರ್ ಪ್ರಕಾರ ನಿಮ್ಮ ಬೆಳೆಗೆ ಅತ್ಯುತ್ತಮ ಮಾರುಕಟ್ಟೆ ${name1} ಆಗಿದೆ. ಇದು ನಿಮ್ಮ ಸ್ಥಳದಿಂದ ${dist1} ಕಿಲೋಮೀಟರ್ ದೂರದಲ್ಲಿದ್ದು, ಸಾರಿಗೆ ವೆಚ್ಚ ಮತ್ತು ಎಲ್ಲಾ ಮಂಡಿ ಶುಲ್ಕ ಕಳೆದ ನಂತರ ನಿಮ್ಮ ಕೈಗೆ ${net1} ರೂಪಾಯಿಗಳ ನಿವ್ವಳ ಲಾಭ ಸಿಗುತ್ತದೆ. ಆದ್ದರಿಂದ ನೀವು ${name1} ಮಂಡಿಯಲ್ಲೇ ನಿಮ್ಮ ಬೆಳೆಯನ್ನು ಮಾರಾಟ ಮಾಡಿ ಗರಿಷ್ಠ ಲಾಭ ಗಳಿಸಿ.`;
     }
 
-    const name2 = toKannadaMandiName(m2.marketName);
+    const name2 = toLocalizedMandiName(m2.marketName);
     const dist2 = Math.round(m2.roadDistanceKm);
     const net2 = Math.round(m2.netReturnInr);
     const diff = Math.abs(net1 - net2);
@@ -272,13 +218,13 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
             </span>
             <span className="text-xs text-emerald-300 font-medium flex items-center gap-1 font-mono">
               <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-              {bestNetMarket.district}
+              {toLocalizedDistrict(bestNetMarket.district, lang)}{lang === 'kn' ? ' ಜಿಲ್ಲೆ' : ''}
             </span>
           </div>
 
           <div className="mb-4">
             <h3 className="text-xl font-bold text-white mb-1 tracking-tight text-crisp">
-              {bestNetMarket.marketName}
+              {toLocalizedMandiName(bestNetMarket.marketName, lang)}
             </h3>
             <div className="flex items-baseline gap-2">
               <span className="text-xs text-white/50">{t.headlinePrice}:</span>
@@ -370,13 +316,13 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
             </span>
             <span className="text-xs text-white/60 font-medium flex items-center gap-1 font-mono">
               <MapPin className="w-3.5 h-3.5 text-amber-400/80" />
-              {highestPriceMarket.district}
+              {toLocalizedDistrict(highestPriceMarket.district, lang)}{lang === 'kn' ? ' ಜಿಲ್ಲೆ' : ''}
             </span>
           </div>
 
           <div className="mb-4">
             <h3 className="text-xl font-bold text-white mb-1 tracking-tight text-crisp">
-              {highestPriceMarket.marketName}
+              {toLocalizedMandiName(highestPriceMarket.marketName, lang)}
             </h3>
             <div className="flex items-baseline gap-2">
               <span className="text-xs text-white/50">{t.headlinePrice}:</span>

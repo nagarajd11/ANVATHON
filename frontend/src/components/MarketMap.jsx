@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-
 import L from 'leaflet';
 import { Navigation, Trophy, AlertTriangle, Truck, MapPin, RotateCcw } from 'lucide-react';
 import { TRANSLATIONS } from '../translations';
+import { toLocalizedMandiName, toLocalizedDistrict } from '../utils/kannadaLocalization';
 
 // Helper component to auto-fit map bounds when markets change
 function MapBoundsUpdater({ bounds }) {
@@ -184,7 +185,7 @@ export default function MarketMap({ analysis, lang }) {
                 <span className="text-xs font-bold uppercase tracking-widest text-emerald-700 block">
                   Departure Hub
                 </span>
-                <strong className="text-sm font-bold block">{originDistrict} District</strong>
+                <strong className="text-sm font-bold block">{toLocalizedDistrict(originDistrict, lang)}{lang === 'kn' ? ' ಜಿಲ್ಲೆ' : ' District'}</strong>
                 <span className="text-xs text-slate-600">Farm lot dispatch node</span>
               </div>
             </Popup>
@@ -231,9 +232,9 @@ export default function MarketMap({ analysis, lang }) {
                         </span>
                       </div>
                       <h4 className="text-sm font-bold text-slate-900 mb-0.5">
-                        {mkt.marketName}
+                        {toLocalizedMandiName(mkt.marketName, lang)}
                       </h4>
-                      <p className="text-xs text-slate-600 mb-2">{mkt.district} District</p>
+                      <p className="text-xs text-slate-600 mb-2">{toLocalizedDistrict(mkt.district, lang)}{lang === 'kn' ? ' ಜಿಲ್ಲೆ' : ' District'}</p>
                       
                       <div className="bg-slate-50 p-2.5 rounded-xl space-y-1 text-xs border border-slate-200 font-mono tabular-nums">
                         <div className="flex justify-between">

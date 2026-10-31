@@ -7,20 +7,19 @@ import {
   AlertTriangle, 
   Truck, 
   Flame, 
-  Receipt,
+  Receipt, 
   ArrowRight, 
-  Sparkles,
-  Scale,
-  Volume2,
-  VolumeX
+  Volume2, 
+  VolumeX 
 } from 'lucide-react';
 import { TRANSLATIONS } from '../translations';
 import { useVoiceAssistant } from '../hooks/useVoiceAssistant';
+import { toLocalizedMandiName, toLocalizedDistrict } from '../utils/kannadaLocalization';
 
-export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSlip }) {
-  if (!analysis) return null;
+export default function MarketLeaderboard({ analysis, lang = 'en', onSelectMarketForSlip }) {
+  if (!analysis || !analysis.rankedMarkets) return null;
 
-  const t = TRANSLATIONS[lang];
+  const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
   const { rankedMarkets, quantityQuintals, cropName } = analysis;
   const [expandedId, setExpandedId] = useState(rankedMarkets[0]?.marketId || null);
 
@@ -40,17 +39,96 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
       return;
     }
 
+    const knName = toLocalizedMandiName(mkt.marketName, 'kn');
     let speechText = '';
     if (lang === 'kn') {
-      speechText = `${mkt.marketName} ಮಂಡಿ. ಪ್ರಕಟಿತ ದರ ${mkt.modalPrice} ರೂಪಾಯಿ. ಸಾರಿಗೆ ವೆಚ್ಚ ಮೈನಸ್ ${mkt.costs.transportCost} ರೂಪಾಯಿ. ಹಾಳಾಗುವಿಕೆ ನಷ್ಟ ಮೈನಸ್ ${mkt.costs.spoilageLoss} ರೂಪಾಯಿ. ಕೈಗೆ ಸಿಗುವ ಒಟ್ಟು ನಿವ್ವಳ ಹಣ ${mkt.netReturnInr} ರೂಪಾಯಿಗಳು.`;
+      speechText = `${knName}. ಪ್ರಕಟಿತ ದರ ${mkt.modalPrice} ರೂಪಾಯಿ. ಸಾರಿಗೆ ವೆಚ್ಚ ${mkt.costs.transportCost} ರೂಪಾಯಿ. ಹಾಳಾಗುವಿಕೆ ನಷ್ಟ ${mkt.costs.spoilageLoss} ರೂಪಾಯಿ. ನಿಮ್ಮ ಕೈಗೆ ಸಿಗುವ ಒಟ್ಟು ನಿವ್ವಳ ಲಾಭ ${Math.round(mkt.netReturnInr)} ರೂಪಾಯಿಗಳು.`;
     } else if (lang === 'hi') {
-      speechText = `${mkt.marketName} मंडी। विज्ञापित भाव ${mkt.modalPrice} रुपये। गाड़ी भाड़ा माइनस ${mkt.costs.transportCost} रुपये। फसल खराबी माइनस ${mkt.costs.spoilageLoss} रुपये। जेब में आने वाला कुल शुद्ध मुनाफा ${mkt.netReturnInr} रुपये।`;
+      speechText = `${mkt.marketName} मंडी। विज्ञापित भाव ${mkt.modalPrice} रुपये। गाड़ी भाड़ा ${mkt.costs.transportCost} रुपये। फसल खराबी ${mkt.costs.spoilageLoss} रुपये। जेब में आने वाला शुद्ध मुनाफा ${Math.round(mkt.netReturnInr)} रुपये।`;
     } else {
-      speechText = `${mkt.marketName} APMC. Listed rate ₹${mkt.modalPrice} per quintal. Transport cost minus ₹${mkt.costs.transportCost.toLocaleString()}. Spoilage loss minus ₹${mkt.costs.spoilageLoss.toLocaleString()}. Final in-hand return: ₹${mkt.netReturnInr.toLocaleString()}.`;
+      speechText = `${mkt.marketName}. Listed rate ₹${mkt.modalPrice} per quintal. Transport cost minus ₹${mkt.costs.transportCost.toLocaleString()}. Spoilage loss minus ₹${mkt.costs.spoilageLoss.toLocaleString()}. Final in-hand return: ₹${Math.round(mkt.netReturnInr).toLocaleString()}.`;
     }
 
-    speak(speechText, speechId);
+    speak(speechText, speechId, lang);
   };
+
+  // Localized UI dictionary
+  const uiText = {
+    en: {
+      badgeTitle: "Net Returns Ranked",
+      topCandidateBadge: `Top ${top10.length} Candidate Mandis`,
+      bestChoice: "Best Choice",
+      districtSuffix: "District",
+      highArrivals: "High Arrivals",
+      hrsDrive: "hrs drive",
+      ageCut: "Age Cut",
+      perQtl: "/qtl",
+      billTitle: "Projected Mandi Settlement Statement",
+      yardPrefix: "Yard",
+      grossAuction: "GROSS AUCTION VALUE",
+      freightDiesel: "(-) VEHICLE FREIGHT & DIESEL",
+      decayDiscount: "(-) ROAD DECAY & WEIGHT DISCOUNT",
+      apmcCess: "(-) APMC STATUTORY MANDI CESS",
+      unloadingWeigh: "(-) UNLOADING & WEIGHBRIDGE",
+      hamaliLabel: "Hamali",
+      ticketLabel: "Ticket",
+      cashInHand: "(=) ESTIMATED CASH IN HAND",
+      capacityLabel: "Mandi Capacity",
+      gateHours: "Gate Hours: 05:30 AM - 01:00 PM",
+      printSlip: "Print Gate Pass & Settlement Slip",
+      driveTime: "drive"
+    },
+    kn: {
+      badgeTitle: "ನಿವ್ವಳ ಲಾಭದ ಶ್ರೇಯಾಂಕ",
+      topCandidateBadge: `ಅಗ್ರ ${top10.length} ಮಂಡಿಗಳು`,
+      bestChoice: "ಅತ್ಯುತ್ತಮ ಆಯ್ಕೆ",
+      districtSuffix: "ಜಿಲ್ಲೆ",
+      highArrivals: "ಹೆಚ್ಚಿನ ಆವಕ",
+      hrsDrive: "ಗಂಟೆ ಪ್ರಯಾಣ",
+      ageCut: "ಹಳೆಯ ಕೊಯ್ಲು ಕಡಿತ",
+      perQtl: "/ಕ್ವಿಂಟಾಲ್",
+      billTitle: "ಅಂದಾಜು ಮಂಡಿ ಇತ್ಯರ್ಥ ವಿವರಣೆ ಪಟ್ಟಿ",
+      yardPrefix: "ಮಂಡಿ",
+      grossAuction: "ಒಟ್ಟು ಹರಾಜು ಮೌಲ್ಯ",
+      freightDiesel: "(-) ವಾಹನ ಬಾಡಿಗೆ ಮತ್ತು ಡೀಸೆಲ್",
+      decayDiscount: "(-) ರಸ್ತೆ ಹಾಳಾಗುವಿಕೆ ನಷ್ಟ",
+      apmcCess: "(-) ಎಪಿಎಂಸಿ ಶಾಸನಬದ್ಧ ಮಂಡಿ ಸೆಸ್",
+      unloadingWeigh: "(-) ಇಳಿಸುವಿಕೆ ಹಮಾಲಿ ಮತ್ತು ತೂಕ",
+      hamaliLabel: "ಹಮಾಲಿ",
+      ticketLabel: "ತೂಕ ಶುಲ್ಕ",
+      cashInHand: "(=) ಕೈಗೆ ಸಿಗುವ ಅಂದಾಜು ನೈಜ ನಗದು",
+      capacityLabel: "ಮಂಡಿ ಸಾಮರ್ಥ್ಯ",
+      gateHours: "ಗೇಟ್ ಸಮಯ: ಮುಂಜಾನೆ 05:30 - ಮಧ್ಯಾಹ್ನ 01:00",
+      printSlip: "ಗೇಟ್ ಪಾಸ್ & ಇತ್ಯರ್ಥ ರಸೀದಿ ಮುದ್ರಿಸಿ",
+      driveTime: "ಪ್ರಯಾಣ"
+    },
+    hi: {
+      badgeTitle: "शुद्ध मुनाफे की रैंकिंग",
+      topCandidateBadge: `शीर्ष ${top10.length} मंडियां`,
+      bestChoice: "सर्वोत्तम विकल्प",
+      districtSuffix: "जिला",
+      highArrivals: "अधिक आवक",
+      hrsDrive: "घंटे का सफर",
+      ageCut: "बासी फसल कटौती",
+      perQtl: "/क्विंटल",
+      billTitle: "अनुमानित मंडी भुगतान विवरण पर्ची",
+      yardPrefix: "मंडी",
+      grossAuction: "कुल नीलामी मूल्य",
+      freightDiesel: "(-) वाहन भाड़ा एवं डीजल",
+      decayDiscount: "(-) रास्ते में फसल खराबी नुकसान",
+      apmcCess: "(-) एपीएमसी वैधानिक मंडी उपकर",
+      unloadingWeigh: "(-) उतराई हमाली एवं तुलाई",
+      hamaliLabel: "हमाली",
+      ticketLabel: "कांटा पर्ची",
+      cashInHand: "(=) हाथ में आने वाला शुद्ध नकद",
+      capacityLabel: "मंडी क्षमता",
+      gateHours: "गेट समय: 05:30 पूर्वाह्न - 01:00 अपराह्न",
+      printSlip: "गेट पास और निपटान पर्ची प्रिंट करें",
+      driveTime: "सफर"
+    }
+  };
+
+  const ui = uiText[lang] || uiText.en;
 
   return (
     <div className="glass-card rounded-3xl p-6 sm:p-7 mb-8 overflow-hidden hover-lift">
@@ -63,7 +141,7 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
               <Trophy className="w-4 h-4 text-emerald-300" />
             </span>
             <span className="text-xs font-semibold tracking-wider text-emerald-300 font-mono">
-              Net Returns Ranked
+              {ui.badgeTitle}
             </span>
           </div>
           <h3 className="text-xl sm:text-2xl font-display font-bold tracking-tight text-white text-crisp">
@@ -73,8 +151,8 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
             {t.leaderboardSub}
           </p>
         </div>
-        <span className="text-xs font-mono tabular-nums font-medium px-3 py-1 rounded-full bg-white/5 text-emerald-300 border border-white/15 self-start sm:self-auto backdrop-blur-sm">
-          Top {top10.length} Candidate Mandis
+        <span className="text-xs font-mono tabular-nums font-medium px-3.5 py-1.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-400/30 self-start sm:self-auto backdrop-blur-sm shadow-xs">
+          {ui.topCandidateBadge}
         </span>
       </div>
 
@@ -100,6 +178,8 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
               {top10.map((mkt, idx) => {
                 const isFirst = idx === 0;
                 const isExpanded = expandedId === mkt.marketId;
+                const displayName = toLocalizedMandiName(mkt.marketName, lang);
+                const displayDistrict = toLocalizedDistrict(mkt.district, lang);
 
                 return (
                   <React.Fragment key={mkt.marketId}>
@@ -135,20 +215,20 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
                       {/* Market Name & District */}
                       <td className="py-3 px-3 sm:px-4">
                         <div>
-                          <div className="font-bold text-white flex items-center gap-2">
-                            <span className="text-sm font-sans tracking-tight">{mkt.marketName}</span>
+                          <div className="font-bold text-white flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-sans tracking-tight text-crisp">{displayName}</span>
                             {isFirst && (
                               <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500 text-pine shadow-xs">
-                                Best Choice
+                                {ui.bestChoice}
                               </span>
                             )}
                           </div>
-                          <div className="text-xs text-white/70 mt-0.5">
-                            {mkt.district} District
+                          <div className="text-xs text-white/70 mt-0.5 font-sans">
+                            {displayDistrict} {ui.districtSuffix}
                             {mkt.capacityInfo.hasGlutRisk && (
                               <span className="ml-1.5 text-amber-300 font-medium inline-flex items-center gap-0.5">
                                 <AlertTriangle className="w-3 h-3 text-amber-400" />
-                                High Arrivals
+                                {ui.highArrivals}
                               </span>
                             )}
                           </div>
@@ -158,15 +238,15 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
                       {/* Distance & Transit Hours */}
                       <td className="py-3 px-2 sm:px-3 text-white/80 whitespace-nowrap font-mono tabular-nums">
                         <div className="font-medium">{mkt.roadDistanceKm} km</div>
-                        <div className="text-xs text-white/50">{mkt.transitHours} hrs drive</div>
+                        <div className="text-xs text-white/50">{mkt.transitHours} {ui.hrsDrive}</div>
                       </td>
 
                       {/* Mandi Headline Price */}
                       <td className="py-3 px-2 sm:px-3 whitespace-nowrap font-mono tabular-nums text-white font-medium">
-                        <div>₹{mkt.modalPrice.toLocaleString()}<span className="text-xs text-white/50">/q</span></div>
+                        <div>₹{mkt.modalPrice.toLocaleString()}<span className="text-xs text-white/50">{ui.perQtl}</span></div>
                         {mkt.freshnessDiscountPct > 0 && (
                           <div className="text-xs font-bold text-amber-300 flex items-center gap-1 mt-0.5">
-                            <span className="bg-amber-950/60 border border-amber-500/30 px-1.5 py-0.5 rounded">-{mkt.freshnessDiscountPct}% Age Cut</span>
+                            <span className="bg-amber-950/60 border border-amber-500/30 px-1.5 py-0.5 rounded">-{mkt.freshnessDiscountPct}% {ui.ageCut}</span>
                             <span className="line-through text-white/40 font-normal">₹{mkt.baselineModalPrice}</span>
                           </div>
                         )}
@@ -199,7 +279,7 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
                           ₹{mkt.netReturnInr.toLocaleString()}
                         </div>
                         <div className="text-xs font-mono tabular-nums text-emerald-400/80">
-                          ₹{mkt.netReturnPerQuintal}/q
+                          ₹{mkt.netReturnPerQuintal}{ui.perQtl}
                         </div>
                       </td>
 
@@ -229,46 +309,46 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-3 border-b border-dashed border-white/15 text-white">
                                 <div className="flex items-center gap-2">
                                   <Receipt className="w-4 h-4 text-emerald-400" />
-                                  <span className="font-bold tracking-wider text-xs text-emerald-300 uppercase">
-                                    Projected Mandi Settlement Statement
+                                  <span className="font-bold tracking-wider text-xs text-emerald-300 uppercase font-sans">
+                                    {ui.billTitle}
                                   </span>
                                 </div>
-                                <div className="text-xs text-white/70 font-sans">
-                                  Yard: {mkt.marketName} • {mkt.district}
+                                <div className="text-xs text-white/70 font-sans mt-1 sm:mt-0">
+                                  {ui.yardPrefix}: <span className="font-bold text-white">{displayName}</span> • {displayDistrict}
                                 </div>
                               </div>
 
                               {/* Monospace Right-Aligned Ledger Table */}
-                              <div className="space-y-2 text-xs text-white/90 leading-relaxed">
+                              <div className="space-y-2 text-xs text-white/90 leading-relaxed font-sans">
                                 
-                                <div className="receipt-line">
-                                  <span>[1] GROSS AUCTION VALUE ({quantityQuintals} qtl @ ₹{mkt.modalPrice}/qtl)</span>
+                                <div className="receipt-line font-mono">
+                                  <span>[1] {ui.grossAuction} ({quantityQuintals} {lang === 'kn' ? 'ಕ್ವಿಂ' : 'qtl'} @ ₹{mkt.modalPrice}{ui.perQtl})</span>
                                   <span className="font-bold text-white">₹ {mkt.grossRevenue.toLocaleString()}.00</span>
                                 </div>
 
-                                <div className="receipt-line text-amber-200">
-                                  <span>[2] (-) VEHICLE FREIGHT & DIESEL ({mkt.roadDistanceKm} km via {mkt.vehicleUsed.name})</span>
+                                <div className="receipt-line text-amber-200 font-mono">
+                                  <span>[2] {ui.freightDiesel} ({mkt.roadDistanceKm} km, {mkt.vehicleUsed?.name || 'Truck'})</span>
                                   <span className="font-semibold">-₹ {mkt.costs.transportCost.toLocaleString()}.00</span>
                                 </div>
 
-                                <div className="receipt-line text-amber-300">
-                                  <span>[3] (-) ROAD DECAY & WEIGHT DISCOUNT ({mkt.costs.spoilagePct}% over {mkt.transitHours}h drive)</span>
+                                <div className="receipt-line text-amber-300 font-mono">
+                                  <span>[3] {ui.decayDiscount} ({mkt.costs.spoilagePct}%, {mkt.transitHours}h {ui.driveTime})</span>
                                   <span className="font-semibold">-₹ {mkt.costs.spoilageLoss.toLocaleString()}.00</span>
                                 </div>
 
-                                <div className="receipt-line text-white/70">
-                                  <span>[4] (-) APMC STATUTORY MANDI CESS ({mkt.costs.marketFeesBreakdown.cessRatePct}%)</span>
-                                  <span>-₹ {mkt.costs.marketFeesBreakdown.apmcCess.toLocaleString()}.00</span>
+                                <div className="receipt-line text-white/70 font-mono">
+                                  <span>[4] {ui.apmcCess} ({mkt.costs.marketFeesBreakdown?.cessRatePct || '1.5'}%)</span>
+                                  <span>-₹ {mkt.costs.marketFeesBreakdown?.apmcCess.toLocaleString() || '0'}.00</span>
                                 </div>
 
-                                <div className="receipt-line text-white/70">
-                                  <span>[5] (-) UNLOADING & WEIGHBRIDGE (Hamali ₹{mkt.costs.marketFeesBreakdown.hamali} + Ticket ₹{mkt.costs.marketFeesBreakdown.weighbridge})</span>
-                                  <span>-₹ {(mkt.costs.marketFeesBreakdown.hamali + mkt.costs.marketFeesBreakdown.weighbridge).toLocaleString()}.00</span>
+                                <div className="receipt-line text-white/70 font-mono">
+                                  <span>[5] {ui.unloadingWeigh} ({ui.hamaliLabel} ₹{mkt.costs.marketFeesBreakdown?.hamali || 0} + {ui.ticketLabel} ₹{mkt.costs.marketFeesBreakdown?.weighbridge || 0})</span>
+                                  <span>-₹ {((mkt.costs.marketFeesBreakdown?.hamali || 0) + (mkt.costs.marketFeesBreakdown?.weighbridge || 0)).toLocaleString()}.00</span>
                                 </div>
 
                                 <div className="border-t-2 border-dashed border-emerald-500/40 pt-3 mt-2.5 flex justify-between items-baseline font-bold text-sm text-emerald-300">
-                                  <span className="uppercase tracking-tight font-sans">(=) ESTIMATED CASH IN HAND</span>
-                                  <span className="text-emerald-300 font-extrabold text-base sm:text-lg">
+                                  <span className="uppercase tracking-tight font-sans">{ui.cashInHand}</span>
+                                  <span className="text-emerald-300 font-extrabold text-base sm:text-lg font-mono">
                                     ₹ {mkt.netReturnInr.toLocaleString()}.00
                                   </span>
                                 </div>
@@ -277,19 +357,44 @@ export default function MarketLeaderboard({ analysis, lang, onSelectMarketForSli
 
                               {/* Action Link to Dispatch Slip */}
                               <div className="mt-4 pt-3 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-3">
-                                <span className="text-xs text-white/50 font-sans">
-                                  Mandi Capacity: {mkt.capacityInfo.capacityUtilPct}% • Gate Hours: 05:30 AM - 01:00 PM
+                                <span className="text-xs text-white/60 font-sans">
+                                  {ui.capacityLabel}: {mkt.capacityInfo?.capacityUtilPct || 65}% • {ui.gateHours}
                                 </span>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onSelectMarketForSlip(mkt);
-                                  }}
-                                  className="btn-shimmer text-xs font-sans font-bold text-emerald-300 hover:text-pine hover:bg-emerald-400 inline-flex items-center gap-1.5 transition-all cursor-pointer bg-white/5 px-4 py-2 rounded-xl border border-emerald-400/40 shadow-xs"
-                                >
-                                  <span>Print Gate Pass & Settlement Slip</span>
-                                  <ArrowRight className="w-3.5 h-3.5 text-emerald-400 group-hover:text-pine" />
-                                </button>
+                                <div className="flex items-center gap-2">
+                                  {/* Listen to this mandi return audio */}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleSpeakMandi(mkt);
+                                    }}
+                                    className="btn-secondary !py-2 !px-3 text-xs font-sans font-bold flex items-center gap-1.5 cursor-pointer text-emerald-300 hover:text-white"
+                                    title={activeSpeechId === `mkt-${mkt.marketId}` ? 'Stop Audio' : 'Listen'}
+                                  >
+                                    {activeSpeechId === `mkt-${mkt.marketId}` ? (
+                                      <>
+                                        <VolumeX className="w-3.5 h-3.5 text-pine animate-pulse" />
+                                        <span>{lang === 'kn' ? 'ಆಲಿಸುತ್ತಿದೆ...' : 'Playing...'}</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Volume2 className="w-3.5 h-3.5 text-emerald-300" />
+                                        <span>{lang === 'kn' ? '🔊 ಆಲಿಸಿ' : '🔊 Listen'}</span>
+                                      </>
+                                    )}
+                                  </button>
+
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onSelectMarketForSlip(mkt);
+                                    }}
+                                    className="btn-shimmer text-xs font-sans font-bold text-pine bg-emerald-500 hover:bg-emerald-400 inline-flex items-center gap-1.5 transition-all cursor-pointer px-4 py-2 rounded-xl border border-emerald-400 shadow-sm"
+                                  >
+                                    <span>{ui.printSlip}</span>
+                                    <ArrowRight className="w-3.5 h-3.5 text-pine" />
+                                  </button>
+                                </div>
                               </div>
 
                             </div>

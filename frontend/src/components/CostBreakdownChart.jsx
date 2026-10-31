@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import { BarChart3 } from 'lucide-react';
 import { TRANSLATIONS } from '../translations';
+import { toLocalizedMandiName } from '../utils/kannadaLocalization';
 
 export default function CostBreakdownChart({ analysis, lang }) {
   if (!analysis || !analysis.rankedMarkets) return null;
@@ -20,8 +21,8 @@ export default function CostBreakdownChart({ analysis, lang }) {
 
   // Prepare chart data
   const chartData = topMarkets.map((mkt) => ({
-    name: mkt.marketName.replace(' APMC', '').replace(' Market Yard', ''),
-    fullName: mkt.marketName,
+    name: toLocalizedMandiName(mkt.marketName, lang).replace(' ಎಪಿಎಂಸಿ', '').replace(' ಮಾರುಕಟ್ಟೆ', '').replace(' APMC', '').replace(' Market Yard', ''),
+    fullName: toLocalizedMandiName(mkt.marketName, lang),
     "Cash in Pocket": mkt.netReturnInr,
     "Freight & Fuel": mkt.costs.transportCost,
     "Produce Decay": mkt.costs.spoilageLoss,

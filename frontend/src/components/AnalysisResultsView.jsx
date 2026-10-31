@@ -19,6 +19,7 @@ import SensitivityLab from './SensitivityLab';
 import CostBreakdownChart from './CostBreakdownChart';
 import TransporterDirectory from './TransporterDirectory';
 import { TRANSLATIONS } from '../translations';
+import { toLocalizedMandiName } from '../utils/kannadaLocalization';
 
 export default function AnalysisResultsView({
   analysis,
@@ -95,7 +96,8 @@ export default function AnalysisResultsView({
 
   const l = labels[lang] || labels.en;
 
-  const topMandi = analysis?.topOpportunity?.mandi_name || 'Top Mandi';
+  const rawTopMandi = analysis?.topOpportunity?.mandi_name || analysis?.bestNetMarket?.marketName || 'Top Mandi';
+  const topMandi = toLocalizedMandiName(rawTopMandi, lang);
   const topProfit = analysis?.topOpportunity?.net_earnings_total || 0;
 
   return (
@@ -233,7 +235,7 @@ export default function AnalysisResultsView({
           </div>
 
           <div className="text-xs text-white/50 font-mono hidden sm:block">
-            200 APMCs Monitored
+            {lang === 'kn' ? '200 ಎಪಿಎಂಸಿ ಮಂಡಿಗಳು' : lang === 'hi' ? '200 मंडियों की निगरानी' : '200 APMCs Monitored'}
           </div>
         </div>
       )}
