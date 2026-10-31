@@ -102,7 +102,7 @@ app.post('/api/analyze', async (req, res) => {
       originVillage = '',
       originLat: inputLat,
       originLon: inputLon,
-      vehicleType = 'BOLERO_PICKUP',
+      vehicleType = null,
       freshnessHours = 6,
       fuelRateMultiplier = 1.0,
       spoilageMultiplier = 1.0,

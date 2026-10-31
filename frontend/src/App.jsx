@@ -8,7 +8,6 @@ import MarketMap from './components/MarketMap';
 import MarketLeaderboard from './components/MarketLeaderboard';
 import SensitivityLab from './components/SensitivityLab';
 import CostBreakdownChart from './components/CostBreakdownChart';
-import CropPoolingHub from './components/CropPoolingHub';
 import TransporterDirectory from './components/TransporterDirectory';
 import FarmerDispatchSlip from './components/FarmerDispatchSlip';
 import SavedAnalysesModal from './components/SavedAnalysesModal';
@@ -144,7 +143,7 @@ export default function App() {
         originDistrict: params.originDistrict || originDistrict,
         originTaluk: params.originTaluk !== undefined ? params.originTaluk : originTaluk,
         originVillage: params.originVillage !== undefined ? params.originVillage : originVillage,
-        vehicleType: params.vehicleType || vehicleType,
+        vehicleType: params.vehicleType || undefined,
         freshnessHours: params.freshness !== undefined ? params.freshness : freshness,
         fuelRateMultiplier: params.fuelRateMultiplier !== undefined ? params.fuelRateMultiplier : fuelRateMultiplier,
         spoilageMultiplier: params.spoilageMultiplier !== undefined ? params.spoilageMultiplier : spoilageMultiplier,
@@ -160,6 +159,7 @@ export default function App() {
 
       if (res.ok) {
         const data = await res.json();
+        if (data.vehicleType) setVehicleType(data.vehicleType);
         setAnalysis(data);
       }
     } catch (err) {
@@ -490,11 +490,11 @@ export default function App() {
 
                   <button
                     type="button"
-                    onClick={() => document.getElementById('pooling-section')?.scrollIntoView({ behavior: 'smooth' })}
+                    onClick={() => document.getElementById('transporters-section')?.scrollIntoView({ behavior: 'smooth' })}
                     className="btn-secondary !py-1.5 !px-3 text-xs"
                   >
                     <Truck className="w-3.5 h-3.5 text-emerald-300" />
-                    <span>Truck Sharing & Transporters</span>
+                    <span>Transporters Directory</span>
                   </button>
                 </div>
               </div>
@@ -554,19 +554,7 @@ export default function App() {
             </section>
           )}
 
-          {/* 6. Farmer Crop Pooling & Group Freight Sharing */}
-          <section id="pooling-section" className="mb-8 scroll-mt-20">
-            <CropPoolingHub
-              lang={lang}
-              origins={origins}
-              crops={crops}
-              vehicleCatalog={vehicleCatalog}
-              currentDistrict={originDistrict}
-              currentCrop={selectedCrop}
-              currentQuantity={quantity}
-              onShowToast={showToast}
-            />
-          </section>
+          
 
           {/* 7. Verified Regional Transporters Directory */}
           <section id="transporters-section" className="mb-8 scroll-mt-20">

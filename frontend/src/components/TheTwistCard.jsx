@@ -12,7 +12,7 @@ import {
   ArrowRight,
   Volume2,
   VolumeX
-} from 'lucide-react';
+, Phone, MessageCircle, ShieldCheck } from 'lucide-react';
 import { TRANSLATIONS } from '../translations';
 import { useVoiceAssistant } from '../hooks/useVoiceAssistant';
 
@@ -319,6 +319,111 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
 
         </div>
       </div>
+
+      {/* Assigned Best Vehicle & Verified Driver Dispatch Card */}
+      {analysis.allocatedTransport && (
+        <div className="rounded-2xl p-5 border-2 border-emerald-400/40 bg-gradient-to-br from-emerald-950/40 via-pine/30 to-black/50 shadow-xl backdrop-blur-md mb-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/10">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-pine flex items-center justify-center font-black shadow-lg shadow-emerald-950/40 shrink-0">
+                <Truck className="w-6 h-6 text-pine" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                    {lang === 'kn' ? 'ಹಂಚಿಕೆಯಾದ ಅತ್ಯುತ್ತಮ ವಾಹನ' : 'Assigned Optimal Transport'}
+                  </span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-xs font-mono text-emerald-400 font-semibold hidden sm:inline">Ready to Dispatch</span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-display font-extrabold text-white mt-1">
+                  {lang === 'kn' ? analysis.allocatedTransport.vehicleNameKn : analysis.allocatedTransport.vehicleName}
+                </h3>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs font-mono">
+              <div className="bg-black/40 border border-white/15 px-3 py-1.5 rounded-xl">
+                <span className="text-white/50">Capacity: </span>
+                <span className="text-emerald-300 font-bold">{analysis.allocatedTransport.capacityQuintals} qtl</span>
+              </div>
+              <div className="bg-black/40 border border-white/15 px-3 py-1.5 rounded-xl">
+                <span className="text-white/50">Trips: </span>
+                <span className="text-white font-bold">{analysis.allocatedTransport.tripsRequired} direct haul</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Reason banner */}
+          <div className="py-3 text-xs text-emerald-200/90 font-sans leading-relaxed flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>{lang === 'kn' ? analysis.allocatedTransport.recommendationReasonKn : analysis.allocatedTransport.recommendationReason}</span>
+          </div>
+
+          {/* Driver Card & Contact details */}
+          {analysis.allocatedTransport.driver && (
+            <div className="mt-2 pt-3 border-t border-white/10 bg-black/30 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-full bg-emerald-500/20 border-2 border-emerald-400/40 flex items-center justify-center font-bold text-emerald-300 shrink-0 text-base shadow-sm">
+                  {analysis.allocatedTransport.driver.name.charAt(0)}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-bold text-white text-sm sm:text-base font-sans">
+                      {lang === 'kn' ? analysis.allocatedTransport.driver.nameKn : analysis.allocatedTransport.driver.name}
+                    </span>
+                    <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" title="Verified Carrier" />
+                    <span className="text-xs px-2 py-0.5 rounded-md bg-white/10 text-white/80 font-mono">
+                      {analysis.allocatedTransport.driver.plateNumber}
+                    </span>
+                    <span className="text-xs font-bold text-amber-300 font-mono">
+                      ★ {analysis.allocatedTransport.driver.rating}
+                    </span>
+                  </div>
+                  <div className="text-xs text-white/60 font-mono mt-0.5 flex items-center gap-2">
+                    <span>{analysis.allocatedTransport.driver.baseStand}</span>
+                    <span>•</span>
+                    <span className="text-emerald-400 font-semibold">{analysis.allocatedTransport.driver.statusLabel}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Direct Call & WhatsApp */}
+              <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+                <a
+                  href={`tel:${analysis.allocatedTransport.driver.cleanPhone}`}
+                  className="px-3.5 py-2 rounded-xl bg-emerald-950/70 border border-emerald-500/50 flex items-center gap-2 hover:bg-emerald-900/60 transition-colors"
+                >
+                  <Phone className="w-4 h-4 text-emerald-400 shrink-0 animate-pulse" />
+                  <span className="font-mono text-sm sm:text-base font-bold text-emerald-300 tracking-wide">
+                    {analysis.allocatedTransport.driver.phone}
+                  </span>
+                </a>
+
+                <a
+                  href={`tel:${analysis.allocatedTransport.driver.cleanPhone}`}
+                  className="btn-shimmer inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-pine font-bold text-xs shadow-md transition-all cursor-pointer"
+                  title="Call Driver Now"
+                >
+                  <Phone className="w-3.5 h-3.5 fill-pine text-pine" />
+                  <span>Call Driver</span>
+                </a>
+
+                <a
+                  href={analysis.allocatedTransport.driver.whatsappUri}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-secondary inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold hover:text-emerald-300 transition-all cursor-pointer"
+                  title="WhatsApp Driver"
+                >
+                  <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>WhatsApp</span>
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Plain Language Farmer Decision Advisory */}
       <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-5 backdrop-blur-sm hover-glow-pill">

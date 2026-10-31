@@ -129,7 +129,18 @@ export default function FarmerDispatchSlip({
                 Verified Mandi Transport
               </span>
             </div>
-            <div className="font-bold text-chlorophyll text-sm font-sans">{targetMarket.vehicleUsed.name}</div>
+            <div className="font-bold text-chlorophyll text-sm font-sans flex items-center justify-between">
+              <span>{targetMarket.vehicleUsed.name}</span>
+              {analysis.allocatedTransport?.driver && (
+                <span className="font-mono text-xs text-chlorophyll/80">{analysis.allocatedTransport.driver.plateNumber}</span>
+              )}
+            </div>
+            {analysis.allocatedTransport?.driver && (
+              <div className="mt-1 text-xs text-chlorophyll font-sans flex items-center justify-between border-t border-chlorophyll/10 pt-1">
+                <span>Assigned Driver: <strong className="font-bold">{analysis.allocatedTransport.driver.name}</strong></span>
+                <span className="font-mono font-bold text-emerald-800">Phone: {analysis.allocatedTransport.driver.phone}</span>
+              </div>
+            )}
             <div className="text-xs text-chlorophyll/60 flex justify-between mt-1 tabular-nums">
               <span>Agreed Freight Quote: ₹{targetMarket.costs.transportCost.toLocaleString()}</span>
               <span>Trips Required: {targetMarket.vehicleUsed.tripsRequired}</span>

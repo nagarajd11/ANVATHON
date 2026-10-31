@@ -1,8 +1,7 @@
 import React from 'react';
 import { 
   Sprout, 
-  Languages, 
-  Users,
+  Languages,
   Sparkles,
   Droplets,
   Mic,
@@ -100,16 +99,7 @@ export default function Navbar({
             </button>
           )}
 
-          {/* Quick Link to Truck Sharing */}
-          <button
-            type="button"
-            onClick={() => onSelectTab && onSelectTab('logistics')}
-            className="btn-secondary !py-1.5 !px-3 font-sans text-xs hidden md:inline-flex"
-            title={t.poolNavBtn}
-          >
-            <Users className="w-3.5 h-3.5 text-emerald-300" />
-            <span>{t.poolNavBtn}</span>
-          </button>
+          
 
           {/* Language Switcher */}
           <div className="flex items-center bg-black/30 backdrop-blur-md p-1 rounded-xl border border-white/15 shadow-inner">

@@ -1,4 +1,5 @@
 const { getRoadDistance, getTransitDurationHours } = require('./geoService');
+const { resolveDistrictDriver } = require('./driverRegistry');
 
 // Crop perishability database
 const CROP_PERISHABILITY = {
@@ -13,12 +14,12 @@ const CROP_PERISHABILITY = {
   'Turmeric': { tier: 'LOW', basePerHour: 0.0003, shelfDays: 90, nameKn: 'ಅರಿಶಿನ', nameHi: 'हल्दी', icon: 'sparkles' },
   'Black Pepper': { tier: 'LOW', basePerHour: 0.0002, shelfDays: 120, nameKn: 'ಕರಿಮೆಣಸು', nameHi: 'काली मिर्च', icon: 'nut' },
   'Cardamom': { tier: 'LOW', basePerHour: 0.0002, shelfDays: 120, nameKn: 'ಏಲಕ್ಕಿ', nameHi: 'इलायची', icon: 'leaf' },
-  'Cashew': { tier: 'LOW', basePerHour: 0.0002, shelfDays: 90, nameKn: 'ಗೋಡಂಬಿ', nameHi: 'काजू', icon: 'nut' },
+  'Cashew': { tier: 'LOW', basePerHour: 0.0002, shelfDays: 90, nameKn: 'ಗೋಡಂಬಿ', nameHi: 'ಕಾಜೂ', icon: 'nut' },
   'Coffee': { tier: 'LOW', basePerHour: 0.0002, shelfDays: 180, nameKn: 'ಕಾಫಿ', nameHi: 'कॉफ़ी', icon: 'coffee' },
   'Cocoa': { tier: 'LOW', basePerHour: 0.0003, shelfDays: 90, nameKn: 'ಕೋಕೋ', nameHi: 'कोको', icon: 'box' },
   'Tea': { tier: 'LOW', basePerHour: 0.0003, shelfDays: 90, nameKn: 'ಟೀ', nameHi: 'चाय', icon: 'cup-soda' },
   'Arecanut': { tier: 'LOW', basePerHour: 0.0002, shelfDays: 120, nameKn: 'ಅಡಿಕೆ', nameHi: 'ಸುಪಾರಿ', icon: 'nut' },
-  'Coconut': { tier: 'LOW', basePerHour: 0.0003, shelfDays: 45, nameKn: 'ತೆಂಗಿನಕಾಯಿ', nameHi: 'नारियल', icon: 'circle' },
+  'Coconut': { tier: 'LOW', basePerHour: 0.0003, shelfDays: 45, nameKn: 'ತೆಂಗಿನಕಾಯಿ', nameHi: 'ನಾರಿಯಲ್', icon: 'circle' },
   'Paddy': { tier: 'NEGLIGIBLE', basePerHour: 0.0001, shelfDays: 180, nameKn: 'ಭತ್ತ', nameHi: 'धान', icon: 'wheat' },
   'Ragi': { tier: 'NEGLIGIBLE', basePerHour: 0.0001, shelfDays: 240, nameKn: 'ರಾಗಿ', nameHi: 'रागी', icon: 'wheat' },
   'Maize': { tier: 'NEGLIGIBLE', basePerHour: 0.00012, shelfDays: 150, nameKn: 'ಮೆಕ್ಕೆಜೋಳ', nameHi: 'मक्का', icon: 'corn' },
@@ -93,7 +94,6 @@ function calculateMarketNetReturn({
   originLon,
   vehicleType = 'BOLERO_PICKUP',
   freshnessHours = 6,
-  // Sensitivity adjustment overrides
   fuelRateMultiplier = 1.0,
   spoilageMultiplier = 1.0,
   cessRateOverride = null,
@@ -114,19 +114,15 @@ function calculateMarketNetReturn({
   const transitHours = getTransitDurationHours(roadDistanceKm, speedKmph);
 
   // 2. Harvest Age Quality Discount on Mandi Auction Price
-  // Real-world APMC dynamics: older perishable produce gets discounted at auction due to softening/grade drop.
   const baselineModalPrice = marketPrice.modal_price_inr_per_unit;
   
   let freshnessDiscountPct = 0;
   if (freshnessHours > 6) {
     if (cropConfig.tier === 'HIGH') {
-      // High perishables (Tomato, Banana, Mango): severe discount when harvested 24h-48h ago
       freshnessDiscountPct = freshnessHours <= 24 ? 0.08 : 0.22;
     } else if (cropConfig.tier === 'MEDIUM') {
-      // Medium perishables (Onion, Potato, Garlic, Ginger, Sugarcane)
       freshnessDiscountPct = freshnessHours <= 24 ? 0.03 : 0.08;
     } else {
-      // Low / Negligible perishables (Grains, Pulses, Spices)
       freshnessDiscountPct = freshnessHours <= 24 ? 0 : 0.01;
     }
   }
@@ -139,17 +135,14 @@ function calculateMarketNetReturn({
   const tripsRequired = Math.ceil(quantityQuintals / vehicle.capacity);
   const baseTransportFare = vehicle.baseFare * tripsRequired;
   const mileageCost = roadDistanceKm * vehicle.ratePerKm * fuelRateMultiplier * tripsRequired;
-  // Toll / highway surcharge for distances > 80km
   const tollSurcharge = roadDistanceKm > 80 ? Math.round((roadDistanceKm / 60) * 120 * tripsRequired) : 0;
   const totalTransportCost = Math.round(baseTransportFare + mileageCost + tollSurcharge);
 
   // 4. Spoilage Loss Calculation
-  // Exponential decay acceleration with age at harvest
   const ageFactor = 1 + (freshnessHours / (cropConfig.shelfDays * 24)) * 1.5;
   const reeferFactor = vehicle.isReefer ? (1 - vehicle.coolingBenefitPct) : 1.0;
   
   const decayRate = cropConfig.basePerHour * transitHours * ageFactor * spoilageMultiplier * reeferFactor;
-  // Cap max spoilage to 35% in realistic worst cases
   const effectiveSpoilagePct = Math.min(0.35, Math.max(0.001, decayRate));
   const spoilageLossInr = Math.round(grossRevenue * effectiveSpoilagePct);
   const effectiveSpoilageQuantityQtl = Math.round(quantityQuintals * effectiveSpoilagePct * 100) / 100;
@@ -230,6 +223,110 @@ function calculateMarketNetReturn({
 }
 
 /**
+ * Automatically evaluates available vehicle types and selects the vehicle
+ * that delivers MAXIMUM net take-home earnings and optimal capacity for the farmer.
+ */
+function selectOptimalVehicle({
+  quantityQuintals,
+  cropName,
+  freshnessHours = 6,
+  cropConfig,
+  candidateMarkets = [],
+  marketPricesMap = {},
+  originLat,
+  originLon,
+  speedKmph = 40,
+  fuelRateMultiplier = 1.0,
+  spoilageMultiplier = 1.0,
+  cessRateOverride = null
+}) {
+  const candidateKeys = ['THREE_WHEELER', 'CHOTA_HATHI', 'BOLERO_PICKUP', 'CANTER_TRUCK'];
+  if (cropConfig && cropConfig.tier === 'HIGH') {
+    candidateKeys.push('COLD_CHAIN_REEFER');
+  }
+
+  let bestVehicleKey = 'BOLERO_PICKUP';
+  let bestAverageNet = -Infinity;
+
+  const sampleMarkets = candidateMarkets.slice(0, 8);
+
+  for (const vKey of candidateKeys) {
+    const v = VEHICLE_CATALOG[vKey];
+    const trips = Math.ceil(quantityQuintals / v.capacity);
+    
+    // Evaluate total net return across sample markets
+    let totalNet = 0;
+    let validMarkets = 0;
+
+    for (const mkt of sampleMarkets) {
+      const priceKey = `${mkt.market_name}___${cropName}`;
+      const priceRecord = marketPricesMap[priceKey] || marketPricesMap[mkt.market_name];
+      if (!priceRecord) continue;
+
+      const evalItem = calculateMarketNetReturn({
+        market: mkt,
+        marketPrice: priceRecord,
+        cropName,
+        quantityQuintals,
+        originLat,
+        originLon,
+        vehicleType: vKey,
+        freshnessHours,
+        fuelRateMultiplier,
+        spoilageMultiplier,
+        cessRateOverride,
+        speedKmph
+      });
+
+      totalNet += evalItem.netReturnInr;
+      validMarkets++;
+    }
+
+    const avgNet = validMarkets > 0 ? totalNet / validMarkets : 0;
+    
+    // Penalize running more than 2 trips when a bigger single-trip vehicle exists
+    const tripPenalty = trips > 2 ? 2000 * (trips - 1) : 0;
+    const adjustedNet = avgNet - tripPenalty;
+
+    if (adjustedNet > bestAverageNet) {
+      bestAverageNet = adjustedNet;
+      bestVehicleKey = vKey;
+    }
+  }
+
+  // Construct farmer-friendly explanations
+  const vObj = VEHICLE_CATALOG[bestVehicleKey];
+  const trips = Math.ceil(quantityQuintals / vObj.capacity);
+  let reasonEn = '';
+  let reasonKn = '';
+
+  if (bestVehicleKey === 'COLD_CHAIN_REEFER') {
+    reasonEn = `Refrigerated Cold-Van chosen: active cooling eliminates 85% of road spoilage for delicate ${cropName}, putting the most net cash in your pocket.`;
+    reasonKn = `ಶೀತಲೀಕೃತ ವಾಹನ ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ: ತಾಪಮಾನ ನಿಯಂತ್ರಣವು ${cropName} ಕೊಳೆಯುವುದನ್ನು ಶೇ.85 ರಷ್ಟು ತಡೆದು ಹೆಚ್ಚಿನ ಲಾಭ ನೀಡುತ್ತದೆ.`;
+  } else if (bestVehicleKey === 'THREE_WHEELER') {
+    reasonEn = `Auto / Piaggio Ape chosen: lowest freight cost (₹18/km) perfectly matched to your compact ${quantityQuintals} qtl lot size.`;
+    reasonKn = `ಆಟೋ / ಪಿಯಾಜಿಯೊ ಏಪ್ ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ: ನಿಮ್ಮ ${quantityQuintals} ಕ್ವಿಂಟಾಲ್ ಬೆಳೆಗೆ ಅತಿ ಕಡಿಮೆ ಸಾರಿಗೆ ವೆಚ್ಚ (₹18/ಕಿ.ಮೀ).`;
+  } else if (bestVehicleKey === 'CHOTA_HATHI') {
+    reasonEn = `Tata Ace (Chota Hathi) chosen: optimal capacity (15q) transports your ${quantityQuintals} qtl harvest in 1 direct trip without deadweight penalty.`;
+    reasonKn = `ಟಾಟಾ ಏಸ್ ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ: ನಿಮ್ಮ ${quantityQuintals} ಕ್ವಿಂಟಾಲ್ ಬೆಳೆಯನ್ನು 1 ಟ್ರಿಪ್‌ನಲ್ಲಿ ಸಾಗಿಸಲು ಸೂಕ್ತ ಸಾಮರ್ಥ್ಯ (15 ಕ್ವಿಂಟಾಲ್).`;
+  } else if (bestVehicleKey === 'BOLERO_PICKUP') {
+    reasonEn = `Mahindra Bolero Maxi Truck chosen: dependable 25q capacity moves your ${quantityQuintals} qtl cargo in ${trips} direct trip(s) with minimal road delay.`;
+    reasonKn = `ಮಹೀಂದ್ರಾ ಬೊಲೆರೋ ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ: 25 ಕ್ವಿಂಟಾಲ್ ಸಾಮರ್ಥ್ಯದೊಂದಿಗೆ ನಿಮ್ಮ ${quantityQuintals} ಕ್ವಿಂಟಾಲ್ ಬೆಳೆಯನ್ನು ವೇಗವಾಗಿ ಸಾಗಿಸುತ್ತದೆ.`;
+  } else {
+    reasonEn = `Eicher 14ft Canter chosen: high 50q capacity moves your ${quantityQuintals} qtl bulk consignment in 1 trip, avoiding expensive multiple vehicle hires.`;
+    reasonKn = `ಐಷರ್ 14 ಅಡಿ ಕ್ಯಾಂಟರ್ ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ: ನಿಮ್ಮ ${quantityQuintals} ಕ್ವಿಂಟಾಲ್ ಬೃಹತ್ ಬೆಳೆಯನ್ನು ಒಂದೇ ಟ್ರಿಪ್‌ನಲ್ಲಿ ಸಾಗಿಸಿ ಹಣ ಉಳಿಸುತ್ತದೆ.`;
+  }
+
+  return {
+    vehicleType: bestVehicleKey,
+    vehicle: vObj,
+    tripsRequired: trips,
+    reasonEn,
+    reasonKn
+  };
+}
+
+/**
  * Runs full comparative analysis across all candidate markets in Karnataka
  */
 function runHarvestRouteAnalysis({
@@ -242,13 +339,51 @@ function runHarvestRouteAnalysis({
   originVillage = '',
   originLat = 14.4644,
   originLon = 75.9218,
-  vehicleType = 'BOLERO_PICKUP',
+  vehicleType = null,
   freshnessHours = 6,
   fuelRateMultiplier = 1.0,
   spoilageMultiplier = 1.0,
   cessRateOverride = null,
   speedKmph = 40
 }) {
+  const cropConfig = CROP_PERISHABILITY[cropName] || {
+    tier: 'MEDIUM',
+    basePerHour: 0.002,
+    shelfDays: 14,
+    nameKn: cropName,
+    nameHi: cropName
+  };
+
+  // 1. Auto-select optimal vehicle if not manually forced
+  let optimalVehicleInfo = null;
+  if (!vehicleType || vehicleType === 'AUTO' || vehicleType === 'AUTO_OPTIMIZE') {
+    optimalVehicleInfo = selectOptimalVehicle({
+      quantityQuintals,
+      cropName,
+      freshnessHours,
+      cropConfig,
+      candidateMarkets: markets,
+      marketPricesMap,
+      originLat,
+      originLon,
+      speedKmph,
+      fuelRateMultiplier,
+      spoilageMultiplier,
+      cessRateOverride
+    });
+    vehicleType = optimalVehicleInfo.vehicleType;
+  } else {
+    const vObj = VEHICLE_CATALOG[vehicleType] || VEHICLE_CATALOG['BOLERO_PICKUP'];
+    optimalVehicleInfo = {
+      vehicleType,
+      vehicle: vObj,
+      tripsRequired: Math.ceil(quantityQuintals / vObj.capacity),
+      reasonEn: `Matched ${vObj.name} (Capacity: ${vObj.capacity}q).`,
+      reasonKn: `${vObj.nameKn} (ಸಾಮರ್ಥ್ಯ: ${vObj.capacity}ಕ್ವಿಂಟಾಲ್).`
+    };
+  }
+
+  // 2. Evaluate all candidate markets with the selected best vehicle
   const evaluated = [];
 
   for (const mkt of markets) {
@@ -348,9 +483,19 @@ function runHarvestRouteAnalysis({
   locationParts.push(originDistrict);
   const originLocationLabel = locationParts.join(', ');
 
+  // 3. Resolve Verified Local Driver in the farmer's district
+  const allocatedDriver = resolveDistrictDriver({
+    district: originDistrict,
+    taluk: originTaluk,
+    vehicleType,
+    cropName
+  });
+
+  const activeVehicle = VEHICLE_CATALOG[vehicleType] || VEHICLE_CATALOG['BOLERO_PICKUP'];
+
   return {
     cropName,
-    cropConfig: CROP_PERISHABILITY[cropName],
+    cropConfig,
     quantityQuintals,
     originDistrict,
     originTaluk,
@@ -358,6 +503,19 @@ function runHarvestRouteAnalysis({
     originLocationLabel,
     originCoordinates: { lat: originLat, lon: originLon },
     vehicleType,
+    allocatedTransport: {
+      vehicleType,
+      vehicleName: activeVehicle.name,
+      vehicleNameKn: activeVehicle.nameKn,
+      capacityQuintals: activeVehicle.capacity,
+      ratePerKm: activeVehicle.ratePerKm,
+      baseFare: activeVehicle.baseFare,
+      isReefer: activeVehicle.isReefer,
+      tripsRequired: Math.ceil(quantityQuintals / activeVehicle.capacity),
+      recommendationReason: optimalVehicleInfo.reasonEn,
+      recommendationReasonKn: optimalVehicleInfo.reasonKn,
+      driver: allocatedDriver
+    },
     rankedMarkets: evaluated,
     bestNetMarket,
     highestPriceMarket,
@@ -369,6 +527,7 @@ function runHarvestRouteAnalysis({
 module.exports = {
   CROP_PERISHABILITY,
   VEHICLE_CATALOG,
+  selectOptimalVehicle,
   calculateMarketNetReturn,
   runHarvestRouteAnalysis
 };
