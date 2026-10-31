@@ -517,6 +517,7 @@ export default function App() {
           onClose={() => setIsDispatchSlipOpen(false)}
           analysis={analysis}
           marketOverride={marketForSlip}
+          lang={lang}
         />
 
         <SavedAnalysesModal

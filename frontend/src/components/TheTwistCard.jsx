@@ -288,10 +288,16 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
 
           {/* Direct CTA to Focus / Open Slip */}
           <button
-            onClick={() => onFocusMarket && onFocusMarket(bestNetMarket)}
-            className="btn-shimmer btn-primary w-full mt-3.5 py-2.5 text-xs"
+            onClick={() => onFocusMarket && onFocusMarket(bestNetMarket || (analysis && analysis.bestNetMarket) || (rankedMarkets && rankedMarkets[0]))}
+            className="btn-shimmer btn-primary w-full mt-3.5 py-2.5 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-all shadow-md"
           >
-            <span>Lock Winner & Print Settlement Pass</span>
+            <span>
+              {lang === 'kn' 
+                ? 'ಗೆದ್ದ ಮಂಡಿ ಲಾಕ್ ಮಾಡಿ & ಗೇಟ್ ಪಾಸ್ ಮುದ್ರಿಸಿ' 
+                : lang === 'hi' 
+                  ? 'विजेता मंडी लॉक करें और गेट पास प्रिंट करें' 
+                  : 'Lock Winner & Print Settlement Pass'}
+            </span>
             <ArrowRight className="w-3.5 h-3.5 text-pine" />
           </button>
 

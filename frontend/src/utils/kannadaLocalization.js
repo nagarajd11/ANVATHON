@@ -295,3 +295,4 @@ export const toLocalizedDistrict = (district = '', lang = 'en') => {
   }
   return district;
 };
+

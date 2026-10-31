@@ -144,7 +144,7 @@ export default function AnalysisResultsView({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => onOpenDispatchSlip(analysis?.topOpportunity || null)}
+              onClick={() => onOpenDispatchSlip(analysis?.bestNetMarket || (analysis?.rankedMarkets && analysis.rankedMarkets[0]) || null)}
               className="btn-primary !py-2 !px-3.5 text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-500/30 cursor-pointer"
               title={l.printSlipBtn}
             >
