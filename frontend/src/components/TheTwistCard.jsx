@@ -20,7 +20,7 @@ export default function TheTwistCard({ analysis, lang, onFocusMarket }) {
   if (!analysis || !analysis.twist) return null;
 
   const t = TRANSLATIONS[lang];
-  const { twist, quantityQuintals, cropName } = analysis;
+  const { twist, quantityQuintals, cropName, rankedMarkets } = analysis;
   const { bestNetMarket, highestPriceMarket, isSame, rupeeDifference } = twist;
 
   const explanationText = twist.explanation[lang] || twist.explanation.en;

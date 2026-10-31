@@ -201,7 +201,7 @@ app.get('/api/tts', (req, res) => {
     }
 
     const tl = lang === 'kn' ? 'kn' : lang === 'hi' ? 'hi' : 'en';
-    const cleanText = text.trim().slice(0, 200);
+    const cleanText = text.trim().slice(0, 350);
     const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(cleanText)}&tl=${tl}&client=tw-ob`;
 
     const proxyReq = https.get(googleTtsUrl, {
