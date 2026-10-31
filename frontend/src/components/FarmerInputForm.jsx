@@ -45,7 +45,8 @@ lang = 'en',
   isLoading = false,
   onShowToast = () => {},
   isListening: externalIsListening,
-  onToggleVoiceCommand: externalToggleVoiceCommand
+  onToggleVoiceCommand: externalToggleVoiceCommand,
+  hideSubmitButton = false
 }) {
   const t = TRANSLATIONS[lang] || TRANSLATIONS.en;
 
@@ -499,9 +500,10 @@ lang = 'en',
       </div>
 
       {/* Action Footer */}
+      {!hideSubmitButton && (
       <div className="mt-6 pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
         <span className="text-xs text-white/60 font-sans">
-          Prices update across all 62 Karnataka mandis
+          Real-time prices updated across all 200 Karnataka APMCs
         </span>
 
         <button
@@ -520,6 +522,7 @@ lang = 'en',
         </button>
       </div>
 
+      )}
     </div>
   );
 }
