@@ -63,6 +63,8 @@ lang = 'en',
     : 1;
 
   const [isCustomVillage, setIsCustomVillage] = React.useState(false);
+  const isVillageInList = !originVillage || villageList.some(v => v.name === originVillage);
+  const effectiveIsCustom = isCustomVillage || (!isVillageInList && originVillage !== '');
 
   // Selected district metadata and taluks list
   const currentDistrictObj = (origins || []).find(o => o.district === originDistrict);
@@ -119,13 +121,24 @@ lang = 'en',
         if (onShowToast) onShowToast(t.listeningState);
       },
       onResult: (primaryTranscript, event, alternatives) => {
-        const parsed = parseVoiceCommand(alternatives && alternatives.length ? alternatives : primaryTranscript);
+        const parsed = parseVoiceCommand(
+          alternatives && alternatives.length ? alternatives : primaryTranscript,
+          { origins, currentDistrict: originDistrict, currentTaluk: originTaluk, currentVillage: originVillage }
+        );
         if (!parsed) return;
 
         const summary = [];
         if (parsed.matchedOrigin) {
           setOriginDistrict(parsed.matchedOrigin);
           summary.push(parsed.matchedOrigin);
+        }
+        if (parsed.matchedTaluk) {
+          setOriginTaluk(parsed.matchedTaluk);
+          summary.push(parsed.matchedTaluk);
+        }
+        if (parsed.matchedVillage) {
+          setOriginVillage(parsed.matchedVillage);
+          summary.push(parsed.matchedVillage);
         }
         if (parsed.matchedCrop) {
           setSelectedCrop(parsed.matchedCrop);
@@ -150,6 +163,8 @@ lang = 'en',
 
         const speech = generateVoiceFeedback(parsed, lang, {
           originDistrict: parsed.matchedOrigin || originDistrict,
+          originTaluk: parsed.matchedTaluk || originTaluk,
+          originVillage: parsed.matchedVillage || originVillage,
           selectedCrop: parsed.matchedCrop || selectedCrop,
           quantity: parsed.matchedQuantity !== null ? parsed.matchedQuantity : quantity,
           vehicleType: parsed.matchedVehicle || vehicleType
@@ -398,7 +413,7 @@ lang = 'en',
             </label>
 
             <select
-              value={isCustomVillage ? '__CUSTOM__' : originVillage}
+              value={effectiveIsCustom ? '__CUSTOM__' : originVillage}
               onChange={(e) => {
                 if (e.target.value === '__CUSTOM__') {
                   setIsCustomVillage(true);

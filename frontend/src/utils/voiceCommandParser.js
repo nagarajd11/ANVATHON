@@ -494,6 +494,35 @@ export const ACTION_KEYWORDS = {
 };
 
 // 7. Kannada & Devanagari Digit Replacements
+
+// 6.5 Taluk and Village extraction patterns across EN, KN, HI
+export const TALUK_KEYWORD_PATTERNS = [
+  /(?:taluk|taluka|tehsil|ತಾಲೂಕು|ತಾಲೂಕಿನಿಂದ|ತಾಲೂಕಿನ|ತಾಲೂಕಿಗೆ|ತಾಲೂಕ|ತಾಲೂಕಲ್ಲಿ|तहसील|तालुका)\s+([a-zA-Z\u0C80-\u0CFF\s]+?)(?=\s+(?:village|gram|grama|halli|place|ಗ್ರಾಮ|ಹಳ್ಳಿ|ಊರು|crop|tomato|potato|onion|banana|mango|quintal|qtl|kg|ton|ಇವತ್ತು|ನಿನ್ನೆ|ಬೆಳೆ|ಕ್ವಿಂಟಾಲ್|\d|auto|bolero|tata|canter|reefer|calculate|ಲೆಕ್ಕ)|$)/i,
+  /([a-zA-Z\u0C80-\u0CFF\s]+?)\s+(?:taluk|taluka|tehsil|ತಾಲೂಕು|ತಾಲೂಕಿನಿಂದ|ತಾಲೂಕಿನ|ತಾಲೂಕಿಗೆ|ತಾಲೂಕ|ತಾಲೂಕಲ್ಲಿ|तहसील|तालुका)/i
+];
+
+export const VILLAGE_KEYWORD_PATTERNS = [
+  /(?:village\s+of|village|grama|gram|halli|place|ಗ್ರಾಮದ|ಹಳ್ಳಿಯ|ಗ್ರಾಮದಿಂದ|ಹಳ್ಳಿಯಿಂದ|ಊರಿನಿಂದ|ಗ್ರಾಮದಲ್ಲಿ|ಹಳ್ಳಿಯಲ್ಲಿ|ಗ್ರಾಮ|ಹಳ್ಳಿ|ಊರು|गांव\s+का|गांव|गाँव|ग्राम)\s+([a-zA-Z\u0C80-\u0CFF\s]+?)(?=\s+(?:crop|tomato|potato|onion|banana|mango|quintal|qtl|kg|ton|ಇವತ್ತು|ನಿನ್ನೆ|ಬೆಳೆ|ಕ್ವಿಂಟಾಲ್|\d|auto|bolero|tata|canter|reefer|calculate|ಲೆಕ್ಕ)|$)/i,
+  /([a-zA-Z\u0C80-\u0CFF\s]+?)\s+(?:village|grama|gram|halli|ಗ್ರಾಮದ|ಹಳ್ಳಿಯ|ಗ್ರಾಮದಿಂದ|ಹಳ್ಳಿಯಿಂದ|ಊರಿನಿಂದ|ಗ್ರಾಮದಲ್ಲಿ|ಹಳ್ಳಿಯಲ್ಲಿ|ಗ್ರಾಮ|ಹಳ್ಳಿ|ಊರು|गांव|गाँव|ग्राम)/i
+];
+
+const LOCATION_STOP_WORDS = new Set([
+  'is', 'in', 'at', 'from', 'to', 'of', 'and', 'with', 'my', 'the', 'district', 'dist',
+  'ನಮ್ಮ', 'ಇಂದ', 'ಗೆ', 'ದಲ್ಲಿ', 'ಮತ್ತು', 'ಇದೆ', 'ಜಿಲ್ಲೆ', 'ಜಿಲ್ಲೆಯ',
+  'से', 'में', 'का', 'के', 'की', 'और', 'जिला'
+]);
+
+function cleanLocationCandidate(str) {
+  if (!str) return '';
+  return str
+    .replace(/[^a-zA-Z0-9\s\u0C80-\u0CFF]/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(word => !LOCATION_STOP_WORDS.has(word.toLowerCase()))
+    .join(' ')
+    .trim();
+}
+
 const INDIC_DIGIT_MAP = {
   '೦': '0', '೧': '1', '೨': '2', '೩': '3', '೪': '4', '೫': '5', '೬': '6', '೭': '7', '೮': '8', '೯': '9',
   '०': '0', '१': '1', '२': '2', '३': '3', '४': '4', '५': '5', '६': '6', '७': '7', '८': '8', '९': '9'
@@ -593,8 +622,10 @@ function extractQuantity(text) {
  * @param {string|string[]} transcriptOrAlternatives - Spoken transcript or array of recognition alternatives
  * @returns {object} Extracted parameters, actions, and raw text
  */
-export function parseVoiceCommand(transcriptOrAlternatives) {
+export function parseVoiceCommand(transcriptOrAlternatives, context = {}) {
   if (!transcriptOrAlternatives) return null;
+
+  const { origins = [], currentDistrict = '', currentTaluk = '', currentVillage = '' } = context;
 
   const alternatives = Array.isArray(transcriptOrAlternatives) 
     ? transcriptOrAlternatives 
@@ -605,6 +636,9 @@ export function parseVoiceCommand(transcriptOrAlternatives) {
 
   const result = {
     matchedOrigin: null,
+    matchedTaluk: null,
+    matchedVillage: null,
+    isCustomVillage: false,
     matchedCrop: null,
     matchedQuantity: null,
     matchedVehicle: null,
@@ -629,6 +663,103 @@ export function parseVoiceCommand(transcriptOrAlternatives) {
       }
     }
     if (result.matchedOrigin) break;
+  }
+
+  // 1.5 Detect Taluk
+  const activeDistrictName = result.matchedOrigin || currentDistrict || 'Davanagere';
+  const activeDistrictObj = origins.find(o => o.district === activeDistrictName) || origins[0];
+  const districtTaluks = activeDistrictObj?.taluks || [];
+
+  // Step A: Direct scan against known taluks in current district
+  for (const tlk of districtTaluks) {
+    const tName = (tlk.name || '').toLowerCase();
+    const tBase = tName.replace(/\s+city$/i, '').trim();
+    const tKn = (tlk.kn || '').trim();
+    if (combinedText.includes(tName) || (tBase.length >= 3 && combinedText.includes(tBase)) || (tKn && combinedText.includes(tKn))) {
+      result.matchedTaluk = tlk.name;
+      break;
+    }
+  }
+
+  // Step B: Direct scan across all districts in Karnataka if not matched
+  if (!result.matchedTaluk && origins.length > 0) {
+    for (const d of origins) {
+      if (d.district === activeDistrictName) continue;
+      for (const tlk of (d.taluks || [])) {
+        const tName = (tlk.name || '').toLowerCase();
+        const tBase = tName.replace(/\s+city$/i, '').trim();
+        const tKn = (tlk.kn || '').trim();
+        if (combinedText.includes(tName) || (tBase.length >= 4 && combinedText.includes(tBase)) || (tKn && combinedText.includes(tKn))) {
+          result.matchedTaluk = tlk.name;
+          if (!result.matchedOrigin) result.matchedOrigin = d.district;
+          break;
+        }
+      }
+      if (result.matchedTaluk) break;
+    }
+  }
+
+  // 1.8 Detect Village / Farm Point
+  const targetDistrictObj = origins.find(o => o.district === (result.matchedOrigin || activeDistrictName)) || activeDistrictObj;
+  const targetTaluks = targetDistrictObj?.taluks || [];
+  const activeTalukObj = targetTaluks.find(t => t.name === (result.matchedTaluk || currentTaluk)) || targetTaluks[0];
+  const talukVillages = activeTalukObj?.villages || [];
+
+  // Step A: Direct scan known villages in the active taluk
+  for (const v of talukVillages) {
+    const vName = (v.name || '').toLowerCase();
+    const vKn = (v.kn || '').trim();
+    if (combinedText.includes(vName) || (vKn && combinedText.includes(vKn))) {
+      result.matchedVillage = v.name;
+      break;
+    }
+    const parts = vName.split(/[\(\)\/\-]/).map(p => p.trim()).filter(Boolean);
+    for (const p of parts) {
+      if (p.length >= 3 && combinedText.includes(p)) {
+        result.matchedVillage = v.name;
+        break;
+      }
+    }
+    if (result.matchedVillage) break;
+  }
+
+  // Step B: Scan other taluks in the district if not found
+  if (!result.matchedVillage) {
+    for (const tlk of targetTaluks) {
+      if (tlk.name === activeTalukObj?.name) continue;
+      for (const v of (tlk.villages || [])) {
+        const vName = (v.name || '').toLowerCase();
+        const vKn = (v.kn || '').trim();
+        if (combinedText.includes(vName) || (vKn && combinedText.includes(vKn))) {
+          result.matchedVillage = v.name;
+          if (!result.matchedTaluk) result.matchedTaluk = tlk.name;
+          break;
+        }
+      }
+      if (result.matchedVillage) break;
+    }
+  }
+
+  // Step C: Explicit regex capture for custom unlisted village name
+  if (!result.matchedVillage) {
+    const villageRegex1 = /(?:village\s+of|village|grama|gram|halli|place|ಗ್ರಾಮದ|ಹಳ್ಳಿಯ|ಗ್ರಾಮದಿಂದ|ಹಳ್ಳಿಯಿಂದ|ಊರಿನಿಂದ|ಗ್ರಾಮದಲ್ಲಿ|ಹಳ್ಳಿಯಲ್ಲಿ|ಗ್ರಾಮ|ಹಳ್ಳಿ|ಊರು|गांव\s+का|गांव|गाँव|ग्राम)\s+([a-zA-Z\u0C80-\u0CFF]{2,25})/i;
+    const villageRegex2 = /([a-zA-Z\u0C80-\u0CFF]{2,25})\s+(?:village|grama|gram|halli|place|ಗ್ರಾಮದ|ಹಳ್ಳಿಯ|ಗ್ರಾಮದಿಂದ|ಹಳ್ಳಿಯಿಂದ|ಊರಿನಿಂದ|ಗ್ರಾಮದಲ್ಲಿ|ಹಳ್ಳಿಯಲ್ಲಿ|ಗ್ರಾಮ|ಹಳ್ಳಿ|ಊರು|गांव|गाँव|ग्राम)/i;
+
+    const m1 = primaryTranscript.match(villageRegex1);
+    const m2 = primaryTranscript.match(villageRegex2);
+    const cand = m1 ? m1[1] : (m2 ? m2[1] : null);
+
+    const RESERVED = new Set([
+      'district', 'dist', 'taluk', 'crop', 'tomato', 'potato', 'onion', 'banana', 'mango', 
+      'quintal', 'quintals', 'qtl', 'kg', 'ton', 'bolero', 'tata', 'canter', 'reefer', 'auto',
+      'ದಾವಣಗೆರೆ', 'ಟೊಮೇಟೊ', 'ಆಲೂಗಡ್ಡೆ', 'ಕ್ವಿಂಟಾಲ್', 'ತಾಲೂಕು', 'ಜಿಲ್ಲೆ'
+    ]);
+
+    if (cand && !RESERVED.has(cand.toLowerCase().trim())) {
+      const cleanCand = cand.trim();
+      result.matchedVillage = cleanCand.charAt(0).toUpperCase() + cleanCand.slice(1);
+      result.isCustomVillage = true;
+    }
   }
 
   // 2. Detect Crop
@@ -706,7 +837,7 @@ export function parseVoiceCommand(transcriptOrAlternatives) {
     result.sensitivityUpdates.resetSensitivity = true;
   }
 
-  // 7. Detect Actions & Navigation Triggers (Specialized targets check first)
+  // 7. Detect Actions & Navigation Triggers
   if (ACTION_KEYWORDS.openMap.some(kw => combinedText.includes(kw.toLowerCase()))) {
     result.triggerOpenMap = true;
   }
@@ -720,13 +851,11 @@ export function parseVoiceCommand(transcriptOrAlternatives) {
     result.triggerResetForm = true;
   }
 
-  // Only trigger calculate if not an exclusive navigation target, or if explicitly requested
   if (!result.triggerOpenMap && !result.triggerOpenSlip && !result.triggerOpenPooling && !result.triggerResetForm) {
     if (ACTION_KEYWORDS.calculate.some(kw => combinedText.includes(kw.toLowerCase()))) {
       result.triggerCalculate = true;
     }
   } else {
-    // If user said both (e.g. "calculate and show map")
     if (combinedText.includes('calculate') || combinedText.includes('ಲೆಕ್ಕ') || combinedText.includes('गणना') || combinedText.includes('हिसाब')) {
       result.triggerCalculate = true;
     }
@@ -743,11 +872,12 @@ export function generateVoiceFeedback(parsed, lang = 'en', current = {}) {
   if (!parsed) return '';
 
   const originKey = parsed.matchedOrigin || current.originDistrict || 'Davanagere';
+  const displayTaluk = parsed.matchedTaluk || current.originTaluk || '';
+  const displayVillage = parsed.matchedVillage || current.originVillage || '';
   const cropKey = parsed.matchedCrop || current.selectedCrop || 'Tomato';
   const qty = parsed.matchedQuantity !== null ? parsed.matchedQuantity : current.quantity;
   const vehicleKey = parsed.matchedVehicle || current.vehicleType || 'BOLERO_PICKUP';
 
-  // Kannada Display Names
   const knVehicleNames = {
     'THREE_WHEELER': 'ಆಟೋ',
     'CHOTA_HATHI': 'ಟಾಟಾ ಏಸ್',
@@ -756,7 +886,6 @@ export function generateVoiceFeedback(parsed, lang = 'en', current = {}) {
     'COLD_CHAIN_REEFER': 'ಶೀತಲೀಕೃತ ಕೋಲ್ಡ್ ವ್ಯಾನ್'
   };
 
-  // Hindi Display Names
   const hiVehicleNames = {
     'THREE_WHEELER': 'ऑटो',
     'CHOTA_HATHI': 'टाटा ऐस',
@@ -765,7 +894,6 @@ export function generateVoiceFeedback(parsed, lang = 'en', current = {}) {
     'COLD_CHAIN_REEFER': 'कोल्ड-स्टोरेज वैन'
   };
 
-  // English Display Names
   const enVehicleNames = {
     'THREE_WHEELER': 'Auto',
     'CHOTA_HATHI': 'Tata Ace',
@@ -774,7 +902,6 @@ export function generateVoiceFeedback(parsed, lang = 'en', current = {}) {
     'COLD_CHAIN_REEFER': 'Cold-Chain Reefer'
   };
 
-  // Navigation / Action triggers
   if (parsed.triggerOpenMap) {
     if (lang === 'kn') return 'ಮಂಡಿ ಮಾರ್ಗ ಮತ್ತು ದೂರದ ನಕ್ಷೆ ತೆರೆಯಲಾಗುತ್ತಿದೆ.';
     if (lang === 'hi') return 'मंडी मार्ग और दूरी का नक्शा दिखाया जा रहा है।';
@@ -819,9 +946,10 @@ export function generateVoiceFeedback(parsed, lang = 'en', current = {}) {
     return isHigh ? 'High heat road spoilage applied.' : 'Low weather spoilage applied.';
   }
 
-  // Count changed core lot attributes
   const changedList = [];
   if (parsed.matchedOrigin) changedList.push('origin');
+  if (parsed.matchedTaluk) changedList.push('taluk');
+  if (parsed.matchedVillage) changedList.push('village');
   if (parsed.matchedCrop) changedList.push('crop');
   if (parsed.matchedQuantity) changedList.push('quantity');
   if (parsed.matchedVehicle) changedList.push('vehicle');
@@ -838,52 +966,79 @@ export function generateVoiceFeedback(parsed, lang = 'en', current = {}) {
   const enVehicle = enVehicleNames[vehicleKey] || vehicleKey;
 
   if (lang === 'kn') {
-    if (parsed.triggerCalculate) {
-      return `${knOrigin}, ${knCrop}, ${qty} ಕ್ವಿಂಟಾಲ್, ${knVehicle} ವಾಹನ ಹೊಂದಿಸಲಾಗಿದೆ. ಅತ್ಯುತ್ತಮ ಮಂಡಿ ಲೆಕ್ಕಹಾಕಲಾಗುತ್ತಿದೆ.`;
-    }
     if (changedList.length === 1) {
       if (parsed.matchedOrigin) return `ಮೂಲ ಸ್ಥಳ ${knOrigin} ಜಿಲ್ಲೆಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ.`;
+      if (parsed.matchedTaluk) return `ತಾಲೂಕು ${displayTaluk}ಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ.`;
+      if (parsed.matchedVillage) return `ಗ್ರಾಮ ${displayVillage}ಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ.`;
       if (parsed.matchedCrop) return `ಬೆಳೆ ${knCrop}ಗೆ ಹೊಂದಿಸಲಾಗಿದೆ.`;
       if (parsed.matchedQuantity) return `ಪ್ರಮಾಣ ${qty} ಕ್ವಿಂಟಾಲ್‌ಗೆ ಹೊಂದಿಸಲಾಗಿದೆ.`;
       if (parsed.matchedVehicle) return `ವಾಹನ ${knVehicle}ಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ.`;
       if (parsed.matchedFreshness) return `ಕಟಾವು ಸಮಯ ${parsed.matchedFreshness === 6 ? 'ಇಂದಿನ ತಾಜಾ' : parsed.matchedFreshness === 24 ? 'ನಿನ್ನೆಯ ಬೆಳೆ' : '2 ದಿನದ ಹಿಂದಿನದು'} ಎಂದು ಹೊಂದಿಸಲಾಗಿದೆ.`;
     }
+    if (changedList.length === 2 && changedList.includes('taluk') && changedList.includes('village')) {
+      return `ತಾಲೂಕು ${displayTaluk}, ಗ್ರಾಮ ${displayVillage} ಹೊಂದಿಸಲಾಗಿದೆ.`;
+    }
+    const locPartsKn = [knOrigin];
+    if (displayTaluk) locPartsKn.push(`ತಾಲೂಕು ${displayTaluk}`);
+    if (displayVillage) locPartsKn.push(`ಗ್ರಾಮ ${displayVillage}`);
+    const locStrKn = locPartsKn.join(', ');
+    if (parsed.triggerCalculate) {
+      return `${locStrKn}, ${knCrop}, ${qty} ಕ್ವಿಂಟಾಲ್, ${knVehicle} ವಾಹನ ಹೊಂದಿಸಲಾಗಿದೆ. ಅತ್ಯುತ್ತಮ ಮಂಡಿ ಲೆಕ್ಕಹಾಕಲಾಗುತ್ತಿದೆ.`;
+    }
     if (changedList.length > 0) {
-      return `${knOrigin}, ${knCrop}, ${qty} ಕ್ವಿಂಟಾಲ್, ${knVehicle} ವಾಹನ ವಿವರಗಳನ್ನು ಹೊಂದಿಸಲಾಗಿದೆ.`;
+      return `${locStrKn}, ${knCrop}, ${qty} ಕ್ವಿಂಟಾಲ್, ${knVehicle} ವಾಹನ ವಿವರಗಳನ್ನು ಹೊಂದಿಸಲಾಗಿದೆ.`;
     }
     return 'ವಿವರಗಳನ್ನು ನವೀಕರಿಸಲಾಗಿದೆ.';
   }
 
   if (lang === 'hi') {
-    if (parsed.triggerCalculate) {
-      return `${hiOrigin}, ${hiCrop}, ${qty} क्विंटल, ${hiVehicle} सेट किया गया। सर्वोत्तम मंडी का हिसाब लगाया जा रहा है।`;
-    }
     if (changedList.length === 1) {
       if (parsed.matchedOrigin) return `स्थान ${hiOrigin} जिला सेट किया गया।`;
+      if (parsed.matchedTaluk) return `तहसील ${displayTaluk} सेट की गई।`;
+      if (parsed.matchedVillage) return `गांव ${displayVillage} सेट किया गया।`;
       if (parsed.matchedCrop) return `फसल ${hiCrop} चुनी गई।`;
       if (parsed.matchedQuantity) return `मात्रा ${qty} क्विंटल सेट की गई।`;
       if (parsed.matchedVehicle) return `वाहन ${hiVehicle} चुना गया।`;
       if (parsed.matchedFreshness) return `कटाई का समय ${parsed.matchedFreshness === 6 ? 'आज की ताज़ा' : parsed.matchedFreshness === 24 ? 'कल की' : 'दो दिन पहले की'} सेट किया गया।`;
     }
+    if (changedList.length === 2 && changedList.includes('taluk') && changedList.includes('village')) {
+      return `तहसील ${displayTaluk}, गांव ${displayVillage} सेट किया गया।`;
+    }
+    const locPartsHi = [hiOrigin];
+    if (displayTaluk) locPartsHi.push(`तहसील ${displayTaluk}`);
+    if (displayVillage) locPartsHi.push(`गांव ${displayVillage}`);
+    const locStrHi = locPartsHi.join(', ');
+    if (parsed.triggerCalculate) {
+      return `${locStrHi}, ${hiCrop}, ${qty} क्विंटल, ${hiVehicle} सेट किया गया। सर्वोत्तम मंडी का हिसाब लगाया जा रहा है।`;
+    }
     if (changedList.length > 0) {
-      return `${hiOrigin}, ${hiCrop}, ${qty} क्विंटल, ${hiVehicle} वाहन सेट किया गया।`;
+      return `${locStrHi}, ${hiCrop}, ${qty} क्विंटल, ${hiVehicle} वाहन सेट किया गया।`;
     }
     return 'विवरण अपडेट कर दिया गया है।';
   }
 
   // English
-  if (parsed.triggerCalculate) {
-    return `Set ${originKey}, ${cropKey}, ${qty} quintals with ${enVehicle}. Calculating top take-home mandis.`;
-  }
   if (changedList.length === 1) {
     if (parsed.matchedOrigin) return `Origin updated to ${originKey} district.`;
+    if (parsed.matchedTaluk) return `Taluk updated to ${displayTaluk}.`;
+    if (parsed.matchedVillage) return `Village set to ${displayVillage}.`;
     if (parsed.matchedCrop) return `Crop set to ${cropKey}.`;
     if (parsed.matchedQuantity) return `Quantity set to ${qty} quintals.`;
     if (parsed.matchedVehicle) return `Vehicle updated to ${enVehicle}.`;
     if (parsed.matchedFreshness) return `Harvest timing set to ${parsed.matchedFreshness} hours.`;
   }
+  if (changedList.length === 2 && changedList.includes('taluk') && changedList.includes('village')) {
+    return `Taluk set to ${displayTaluk}, Village set to ${displayVillage}.`;
+  }
+  const locPartsEn = [originKey];
+  if (displayTaluk) locPartsEn.push(`Taluk ${displayTaluk}`);
+  if (displayVillage) locPartsEn.push(`Village ${displayVillage}`);
+  const locStrEn = locPartsEn.join(', ');
+  if (parsed.triggerCalculate) {
+    return `Set ${locStrEn}, ${cropKey}, ${qty} quintals with ${enVehicle}. Calculating top take-home mandis.`;
+  }
   if (changedList.length > 0) {
-    return `Updated: ${originKey}, ${cropKey}, ${qty} quintals, ${enVehicle}.`;
+    return `Updated: ${locStrEn}, ${cropKey}, ${qty} quintals, ${enVehicle}.`;
   }
   return 'Lot details updated.';
 }

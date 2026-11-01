@@ -103,6 +103,7 @@ export default function App() {
   }, []);
 
   // Auto-sync village when taluk changes (clears village if farmer is in city)
+  const prevTalukRef = useRef(originTaluk);
   useEffect(() => {
     const curDist = origins.find(o => o.district === originDistrict);
     const curTaluk = curDist?.taluks?.find(t => t.name === originTaluk);
@@ -111,11 +112,12 @@ export default function App() {
         setOriginVillage('');
       } else {
         const exists = curTaluk.villages.some(v => v.name === originVillage);
-        if (!exists) {
+        if (!exists && (!originVillage || prevTalukRef.current !== originTaluk)) {
           setOriginVillage(curTaluk.villages[0].name);
         }
       }
     }
+    prevTalukRef.current = originTaluk;
   }, [originTaluk, originDistrict, origins]);
 
   // Auto-sync taluk when district changes
@@ -239,7 +241,10 @@ export default function App() {
         showToast(t.listeningActive || '≡ƒÄÖ∩╕Å Listening... Speak origin, crop, quantity, vehicle');
       },
       onResult: (primaryTranscript, event, alternatives) => {
-        const parsed = parseVoiceCommand(alternatives && alternatives.length ? alternatives : primaryTranscript);
+        const parsed = parseVoiceCommand(
+          alternatives && alternatives.length ? alternatives : primaryTranscript,
+          { origins, currentDistrict: originDistrict, currentTaluk: originTaluk, currentVillage: originVillage }
+        );
         if (!parsed) return;
 
         const updatedParams = {};
@@ -249,6 +254,18 @@ export default function App() {
           setOriginDistrict(parsed.matchedOrigin);
           updatedParams.originDistrict = parsed.matchedOrigin;
           feedbackChanges.push(parsed.matchedOrigin);
+        }
+
+        if (parsed.matchedTaluk) {
+          setOriginTaluk(parsed.matchedTaluk);
+          updatedParams.originTaluk = parsed.matchedTaluk;
+          feedbackChanges.push(parsed.matchedTaluk);
+        }
+
+        if (parsed.matchedVillage) {
+          setOriginVillage(parsed.matchedVillage);
+          updatedParams.originVillage = parsed.matchedVillage;
+          feedbackChanges.push(parsed.matchedVillage);
         }
 
         if (parsed.matchedCrop) {
@@ -342,6 +359,8 @@ export default function App() {
         // Spoken audio feedback
         const speech = generateVoiceFeedback(parsed, lang, {
           originDistrict: parsed.matchedOrigin || originDistrict,
+          originTaluk: parsed.matchedTaluk || originTaluk,
+          originVillage: parsed.matchedVillage || originVillage,
           selectedCrop: parsed.matchedCrop || selectedCrop,
           quantity: parsed.matchedQuantity !== null ? parsed.matchedQuantity : quantity,
           vehicleType: parsed.matchedVehicle || vehicleType

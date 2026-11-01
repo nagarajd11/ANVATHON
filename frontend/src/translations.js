@@ -106,8 +106,8 @@ export const TRANSLATIONS = {
 
     // Voice Assistant
     voiceMicBtn: "Voice Command",
-    listeningState: "Listening... Speak district, crop, quantity, or 'calculate'",
-    voiceHint: "e.g., 'Davanagere tomato 20 quintals Bolero calculate'",
+    listeningState: "Listening... Speak district, taluk, village, crop, quantity, or 'calculate'",
+    voiceHint: "e.g., 'Davanagere Channagiri Basavapatna village tomato 20 qtl calculate'",
     speakTwist: "Play Audio",
     speakMandi: "Listen to Mandi Return",
     listeningActive: "Listening..."
@@ -220,8 +220,8 @@ export const TRANSLATIONS = {
 
     // Voice Assistant
     voiceMicBtn: "ಧ್ವನಿ ಆದೇಶ",
-    listeningState: "ಆಲಿಸುತ್ತಿದೆ... ಜಿಲ್ಲೆ, ಬೆಳೆ, ಕ್ವಿಂಟಾಲ್ ಹೇಳಿ",
-    voiceHint: "ಉದಾ: 'ದಾವಣಗೆರೆ ಟೊಮೇಟೊ 20 ಕ್ವಿಂಟಾಲ್ ಲೆಕ್ಕ ಮಾಡಿ'",
+    listeningState: "ಆಲಿಸುತ್ತಿದೆ... ಜಿಲ್ಲೆ, ತಾಲೂಕು, ಗ್ರಾಮ, ಬೆಳೆ, ಕ್ವಿಂಟಾಲ್ ಹೇಳಿ",
+    voiceHint: "ಉದಾ: 'ದಾವಣಗೆರೆ ಚೆನ್ನಗಿರಿ ಬಸವಪಟ್ಟಣ ಗ್ರಾಮ ಟೊಮೇಟೊ 20 ಕ್ವಿಂಟಾಲ್ ಲೆಕ್ಕ ಮಾಡಿ'",
     speakTwist: "ಆಡಿಯೋ ಕೇಳಿ",
     speakMandi: "ವಿವರ ಕೇಳಿ",
     listeningActive: "ಆಲಿಸಲಾಗುತ್ತಿದೆ..."
